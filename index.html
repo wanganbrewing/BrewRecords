@@ -264,6 +264,7 @@ input[type=text], input[type=date], input[type=number], textarea, select{
   width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
   border-radius:7px; padding:9px 10px; font-size:0.9rem; font-family:'IBM Plex Sans JP', sans-serif;
 }
+input::placeholder,textarea::placeholder{color:var(--text-muted);opacity:.72;}
 input:focus, textarea:focus, select:focus{outline:2px solid var(--copper); outline-offset:0; border-color:var(--copper);}
 select:disabled{opacity:0.75; cursor:not-allowed; background:var(--surface);}
 input[type=date]::-webkit-calendar-picker-indicator{
@@ -835,7 +836,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 数値長押し対応</div>
+    <div class="version-line">2026.08.26 数値入力統一</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -876,11 +877,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
         <div class="field"><label>実測 OG</label><input type="number" step="0.001" min="1.000" id="f_actualOG" placeholder="1.050"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label>糖化温度 (℃)</label><input type="number" step="0.1" min="0" id="f_mashTemp" class="prefill60" placeholder="60"></div>
-        <div class="field"><label>糖化時間 (分)</label><input type="number" min="0" id="f_mashTime" class="prefill60" placeholder="60"></div>
+        <div class="field"><label>糖化温度 (℃)</label><input type="number" step="0.1" min="0" id="f_mashTemp" placeholder="60"></div>
+        <div class="field"><label>糖化時間 (分)</label><input type="number" min="0" id="f_mashTime" placeholder="60"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label>煮沸時間 (分)</label><input type="number" min="60" id="f_boilTime"></div>
+        <div class="field"><label>煮沸時間 (分)</label><input type="number" step="1" min="0" id="f_boilTime" placeholder="60"></div>
         <div class="field"><label>仕込み水量 (L)</label><input type="number" step="0.1" min="0" id="f_waterVolume"></div>
       </div>
     </details>
@@ -952,7 +953,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <summary class="section-title">発酵</summary>
       <div class="grid2">
         <div class="field"><label>発酵開始日</label><input type="date" id="f_fermentStart"></div>
-        <div class="field"><label>発酵温度 (℃)</label><input type="number" step="0.1" min="0" id="f_fermentTemp" class="prefill10" placeholder="10"></div>
+        <div class="field"><label>発酵温度 (℃)</label><input type="number" step="0.1" min="0" id="f_fermentTemp" placeholder="10"></div>
       </div>
       <label style="font-size:0.76rem;color:var(--text-muted);display:block;margin-bottom:6px;">比重・pH測定ログ</label>
       <div id="gravityRows"></div>
@@ -3918,9 +3919,11 @@ function enhanceNumberInputs(root){
       let pointerHandled = false;
 
       const stepValue = ()=>{
-        if(input.value==='' && input.placeholder && !Number.isNaN(Number(input.placeholder))){
+        const placeholderValue = Number(input.placeholder);
+        if(input.value==='' && input.placeholder && Number.isFinite(placeholderValue)){
           input.value = input.placeholder;
-        } else if(direction>0){
+        }
+        if(direction>0){
           input.stepUp();
         } else {
           input.stepDown();
@@ -3992,18 +3995,6 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
 setInterval(syncAllDateDisplays, 300);
  
 loadBatches();
- 
-document.querySelectorAll('.prefill60').forEach(el=>{
-  el.addEventListener('focus', function(){
-    if(this.value==='') this.value = '60';
-  });
-});
- 
-document.querySelectorAll('.prefill10').forEach(el=>{
-  el.addEventListener('focus', function(){
-    if(this.value==='') this.value = '10';
-  });
-});
  
 function updateAbvDisplay(){
   const og = parseFloat($('f_actualOG').value || $('f_targetOG').value);
