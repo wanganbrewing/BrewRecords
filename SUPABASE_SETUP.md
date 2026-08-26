@@ -21,8 +21,8 @@ Supabase DashboardのSQL Editorを開き、`supabase-schema.sql` の内容を実
 
 AuthenticationのURL設定で以下を登録します。
 
-- Site URL: `https://moto1092.github.io/BrewRecords/`
-- Redirect URL: `https://moto1092.github.io/BrewRecords/`
+- Site URL: `https://wanganbrewing.github.io/BrewRecords/`
+- Redirect URL: `https://wanganbrewing.github.io/BrewRecords/`
 - 開発時のみ: `http://127.0.0.1:8774/claude-import-2026-08-26/wangan_brew_log_latest.html`
 
 ## 4. 公開用接続情報を設定
