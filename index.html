@@ -608,6 +608,14 @@ header .sub{margin-top:5px;letter-spacing:0.14em;}
 .data-menu-panel .footer-links{margin:0;padding:0;border:0;background:none;box-shadow:none;}
 .data-menu-panel .footer-title,.data-menu-panel .footer-subtitle{display:none;}
 .data-menu-panel .footer-actions{grid-template-columns:1fr;}
+.menu-guide-link{
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px;border:1px solid var(--copper);
+  border-radius:11px;background:rgba(193,120,23,.1);color:var(--text);text-decoration:none;
+}
+.menu-guide-link:hover{background:rgba(193,120,23,.18);}
+.menu-guide-icon{width:36px;height:36px;flex:none;border-radius:50%;background:var(--copper);color:var(--bg);font-weight:700;display:flex;align-items:center;justify-content:center;}
+.menu-guide-copy strong{display:block;font-size:.88rem;}
+.menu-guide-copy span{display:block;margin-top:2px;color:var(--text-muted);font-size:.7rem;}
 .help-button{
   width:30px;height:30px;min-height:30px;flex:none;margin-left:auto;border:1px solid var(--border);
   border-radius:50%;background:var(--surface-2);color:var(--copper-bright);font:700 .82rem/1 'IBM Plex Sans JP',sans-serif;
@@ -785,15 +793,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <h1>Fermenter's Ledger</h1>
       <div class="sub">FERMENTATION &amp; INVENTORY JOURNAL</div>
     </div>
-    <button type="button" class="menu-button" id="menuButton" aria-label="データ管理メニューを開く" aria-expanded="false" aria-controls="dataMenu" onclick="toggleDataMenu(true)">☰</button>
+    <button type="button" class="menu-button" id="menuButton" aria-label="メニューを開く" aria-expanded="false" aria-controls="dataMenu" onclick="toggleDataMenu(true)">☰</button>
   </header>
 
   <div class="menu-backdrop" id="menuBackdrop" hidden onclick="toggleDataMenu(false)"></div>
-  <aside class="data-menu-panel" id="dataMenu" aria-label="データ管理" hidden>
+  <aside class="data-menu-panel" id="dataMenu" aria-label="メニュー" hidden>
     <div class="data-menu-head">
-      <div class="data-menu-title">データ管理</div>
-      <button type="button" class="menu-close" aria-label="データ管理メニューを閉じる" onclick="toggleDataMenu(false)">×</button>
+      <div class="data-menu-title">メニュー</div>
+      <button type="button" class="menu-close" aria-label="メニューを閉じる" onclick="toggleDataMenu(false)">×</button>
     </div>
+    <a class="menu-guide-link" href="./help.html">
+      <span class="menu-guide-icon" aria-hidden="true">?</span>
+      <span class="menu-guide-copy"><strong>使い方</strong><span>基本操作と困ったときの確認方法</span></span>
+    </a>
     <div class="footer-links">
       <div class="footer-title">データ管理</div>
       <div class="footer-subtitle">書き出し・バックアップ・レシピ取り込み</div>
@@ -851,7 +863,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 開閉メニュー初期閉鎖</div>
+    <div class="version-line">2026.08.26 使い方ページ追加</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
