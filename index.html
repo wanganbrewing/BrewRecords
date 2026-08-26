@@ -871,7 +871,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 帳簿書き出し移動</div>
+    <div class="version-line">2026.08.26 クラウド同期有効</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -1379,7 +1379,7 @@ function openGuidePage(){
   const page = $('guidePage');
   const frame = $('guidePageFrame');
   if(!page || !frame) return;
-  if(frame.getAttribute('src') === 'about:blank') frame.setAttribute('src', './help.html?embedded=1&v=20');
+  if(frame.getAttribute('src') === 'about:blank') frame.setAttribute('src', './help.html?embedded=1&v=22');
   page.hidden = false;
   syncModalState();
   page.querySelector('.menu-close').focus();
