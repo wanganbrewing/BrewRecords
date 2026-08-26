@@ -1,0 +1,20 @@
+{
+  "name": "Japan Brewer's Record",
+  "short_name": "Brewer Record",
+  "description": "仕込み・発酵・原材料・課税移出をまとめて管理するブルワリー向け記録アプリ",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1b1815",
+  "theme_color": "#1b1815",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
