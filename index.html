@@ -504,8 +504,50 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 header{padding:10px 4px 18px;border-bottom:0;}
 .mark{width:50px;height:50px;}
 .header-copy{min-width:0;}
+.header-copy{flex:1;}
 h1{font-size:clamp(1.45rem,3.6vw,2rem);}
 header .sub{margin-top:5px;letter-spacing:0.14em;}
+.menu-button{
+  width:46px;height:46px;flex:none;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);font-size:1.45rem;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.menu-button:hover{border-color:var(--copper);color:var(--copper-bright);}
+.menu-backdrop,.help-backdrop{
+  position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.58);backdrop-filter:blur(3px);
+}
+.data-menu-panel{
+  position:fixed;z-index:190;right:0;top:0;width:min(410px,92vw);height:100dvh;overflow-y:auto;
+  padding:calc(20px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+  background:var(--bg);border-left:1px solid var(--border);box-shadow:-18px 0 46px rgba(0,0,0,.38);
+}
+.data-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.data-menu-title{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:600;}
+.menu-close,.help-close{
+  width:44px;height:44px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);
+  color:var(--text);font-size:1.3rem;cursor:pointer;
+}
+.data-menu-panel .footer-links{margin:0;padding:0;border:0;background:none;box-shadow:none;}
+.data-menu-panel .footer-title,.data-menu-panel .footer-subtitle{display:none;}
+.data-menu-panel .footer-actions{grid-template-columns:1fr;}
+.help-button{
+  width:30px;height:30px;min-height:30px;flex:none;margin-left:auto;border:1px solid var(--border);
+  border-radius:50%;background:var(--surface-2);color:var(--copper-bright);font:700 .82rem/1 'IBM Plex Sans JP',sans-serif;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.help-button:hover{border-color:var(--copper);background:var(--surface-hover);}
+summary.section-title .help-button{margin-top:-7px;margin-bottom:-7px;}
+.section-title.has-help{display:flex;align-items:center;gap:8px;}
+.help-dialog{
+  position:fixed;z-index:210;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(440px,calc(100vw - 28px));max-height:min(78dvh,620px);overflow-y:auto;
+  padding:20px;border:1px solid #554a38;border-radius:16px;background:var(--surface);
+  box-shadow:0 24px 70px rgba(0,0,0,.5);
+}
+.help-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.help-dialog-title{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:600;}
+.help-dialog-body{color:var(--text-muted);font-size:.86rem;line-height:1.8;white-space:pre-line;}
+body.modal-open{overflow:hidden;}
 .app-meta{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   margin:0 0 20px;padding:9px 12px;
@@ -615,6 +657,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   .wrap{padding:10px 12px calc(108px + env(safe-area-inset-bottom));}
   header{gap:11px;padding-top:4px;}
   .mark{width:44px;height:44px;}
+  .menu-button{width:44px;height:44px;border-radius:11px;}
   h1{font-size:1.28rem;}
   header .sub{font-size:0.62rem;letter-spacing:0.1em;}
   .app-meta{padding:8px 10px;margin-bottom:14px;}
@@ -660,11 +703,47 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <h1>Japan Brewer's Record</h1>
       <div class="sub">BREWING &amp; INVENTORY LEDGER</div>
     </div>
+    <button type="button" class="menu-button" id="menuButton" aria-label="データ管理メニューを開く" aria-expanded="false" aria-controls="dataMenu" onclick="toggleDataMenu(true)">☰</button>
   </header>
+
+  <div class="menu-backdrop" id="menuBackdrop" hidden onclick="toggleDataMenu(false)"></div>
+  <aside class="data-menu-panel" id="dataMenu" aria-label="データ管理" hidden>
+    <div class="data-menu-head">
+      <div class="data-menu-title">データ管理</div>
+      <button type="button" class="menu-close" aria-label="データ管理メニューを閉じる" onclick="toggleDataMenu(false)">×</button>
+    </div>
+    <div class="footer-links">
+      <div class="footer-title">データ管理</div>
+      <div class="footer-subtitle">書き出し・バックアップ・レシピ取り込み</div>
+      <div class="footer-actions">
+        <button type="button" class="footer-link" onclick="exportCSV()">CSV書き出し（Excel用）</button>
+        <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
+        <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
+        <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
+        <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
+        <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
+        <label class="footer-link">レシピを取り込む（BeerXML）<input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])"></label>
+      </div>
+      <div class="footer-note">
+        <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
+        レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、「レシピを取り込む」で選択してください。<br><br>
+        記録を保存するたびに、1日1回まで自動バックアップを作成します（直近7日分）。
+      </div>
+    </div>
+  </aside>
+
+  <div class="help-backdrop" id="helpBackdrop" hidden onclick="closeHelp()"></div>
+  <section class="help-dialog" id="helpDialog" role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle" hidden>
+    <div class="help-dialog-head">
+      <div class="help-dialog-title" id="helpDialogTitle">ヘルプ</div>
+      <button type="button" class="help-close" aria-label="ヘルプを閉じる" onclick="closeHelp()">×</button>
+    </div>
+    <div class="help-dialog-body" id="helpDialogBody"></div>
+  </section>
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 iPhone UI更新</div>
+    <div class="version-line">2026.08.26 ヘルプUI更新</div>
   </div>
 
   <div class="install-hint" id="installHint" role="note">
@@ -1083,31 +1162,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
     <option value="White Labs WLP800 Pilsner Lager">
   </datalist>
  
-  <div class="footer-links">
-    <div class="footer-title">データ管理</div>
-    <div class="footer-subtitle">書き出し・バックアップ・レシピ取り込み</div>
-    <div class="footer-actions">
-      <button type="button" class="footer-link" onclick="exportCSV()">CSV書き出し（Excel用）</button>
-      <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
-      <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
-      <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
-      <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
-      <label class="footer-link">
-        バックアップを読み込む
-        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])">
-      </label>
-      <label class="footer-link">
-        レシピを取り込む（BeerXML）
-        <input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])">
-      </label>
-    </div>
-    <div class="footer-note">
-      <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
-      レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、上の「レシピを取り込む」で選択してください。<br><br>
-      記録を保存するたびに、1日1回まで自動的にバックアップが作成されます（直近7日分を保持）。「自動バックアップから復元」でいつでも過去の状態に戻せます。
-    </div>
-  </div>
- 
 </div>
  
 <script>
@@ -1137,57 +1191,88 @@ if(!window.storage){
 }
 
 const $ = id => document.getElementById(id);
- 
-function sampleBatch(){
-  return {
-    id: 'sample-bass-pale-ale-clone',
-    batchName: 'Bass Pale Ale Clone（見本）',
-    style: 'Special/Best/Premium Bitter',
-    brewDate: '2026-07-20',
-    brewer: '湾岸太郎',
-    batchSize: '22.71',
-    targetOG: '1.054',
-    actualOG: '1.053',
-    mashTemp: '67',
-    mashTime: '60',
-    boilTime: '60',
-    waterVolume: '26.5',
-    waterSource: '水道水',
-    waterPh: '7.2',
-    mCa: '90', mMg: '5', mNa: '15', mCl: '75', mSO4: '150', mHCO3: '130',
-    fermentables: [
-      { name: 'Pale 2-Row', amount: '3.18' },
-      { name: 'Crystal 60L', amount: '0.45' },
-      { name: 'Honey Malt', amount: '0.11' },
-      { name: 'Roasted Barley', amount: '0.02' }
-    ],
-    hops: [
-      { name: 'Challenger', amount: '28', timingType: 'boil', timingValue: '60' },
-      { name: 'Northdown', amount: '28', timingType: 'boil', timingValue: '5' }
-    ],
-    adjuncts: [
-      { name: 'Flaked Corn', amount: '0.91', unit: 'kg', timing: '仕込み時' }
-    ],
-    minerals: [],
-    yeast: 'White Labs WLP007 Dry English Ale Yeast',
-    fermentStart: '2026-07-21',
-    fermentTemp: '19',
-    gravityLog: [
-      { date: '2026-07-21', gravity: '1.054', ph: '' },
-      { date: '2026-07-24', gravity: '1.028', ph: '4.4' },
-      { date: '2026-07-28', gravity: '1.015', ph: '4.2' },
-      { date: '2026-08-02', gravity: '1.013', ph: '4.1' }
-    ],
-    fg: '1.013',
-    packageDate: '2026-08-04',
-    co2vol: '2.45',
-    packages: [
-      { type: '瓶', unitVolume: '330', quantity: '52' },
-      { type: '瓶', unitVolume: '633', quantity: '8' }
-    ],
-    notes: 'これは操作方法を確認していただくための見本レコードです(BeerXMLのBass Pale Ale Cloneをもとに作成、実測値はサンプルです)。不要であれば削除して問題ありません。\n目標値: ABV 5.31% / IBU 33.47 / SRM 11.01 / Efficiency 83%'
-  };
+
+const HELP_CONTENT = {
+  '基本情報':'バッチ名・スタイル・仕込み予定日・担当者を入力します。酒税法上の品目区分は、帳簿や課税移出CSVにも使われます。',
+  '仕込み工程':'OGは発酵前の比重です。目標値と実測値を分けて記録できます。糖化・煮沸時間は仕込みスケジュールの自動計算にも反映されます。',
+  '水質調整':'水源、pH、目標ミネラル値と実際に加えた調整剤を記録します。必要な場合だけ入力してください。',
+  '原材料 — モルト':'使用するモルト名と量をkgで入力します。「在庫と連携」を選ぶと、保存後に原材料受渡簿から消費を記録できます。',
+  '原材料 — ホップ':'ホップ名・使用量・煮沸終了何分前か、またはドライホップの投入日数を入力します。スケジュールにも自動反映されます。',
+  '副原料（フルーツ・スパイス・加糖など）':'フルーツ、スパイス、糖類などを記録します。投入工程と単位を選び、必要に応じて在庫と連携してください。',
+  '酵母':'酵母名・量・単位を入力します。在庫品目を選ぶと、仕込み詳細から消費を記録できます。',
+  '発酵':'発酵開始日と温度を入力し、比重・pHの推移を測定日ごとに追加します。',
+  'パッケージング':'FG、充填日、容器ごとの容量と数量を記録します。合計容量と、欠減・課税移出後の残量は自動計算されます。',
+  'メモ':'工程中のトラブル、香味、改善点など、次回の仕込みで参照したい情報を自由に残せます。',
+  '対象バッチ':'スケジュールを確認・編集する仕込みを選択します。仕込み時間やホップ投入時刻は記録内容から自動計算されます。',
+  'リマインダー設定':'カレンダーへ書き出す通知タイミングを設定します。Googleカレンダーのクイック追加では、Google側の既定通知が使われます。',
+  'モルト在庫':'モルトの品目と入荷を登録します。仕込み側で在庫連携後に「在庫から消費を記録」を押すと差し引かれます。',
+  'ホップ在庫':'ホップの品目と入荷量をg単位で管理します。履歴から入荷・消費を確認できます。',
+  '酵母在庫':'酵母の品目、単位、入荷記録を管理します。仕込みで選択した単位と在庫単位を合わせてください。',
+  '副原料在庫':'フルーツ、スパイス、糖類などの在庫と入出庫履歴を管理します。',
+  '出荷管理（課税移出・欠減）':'容器ごとに保管中・課税移出済み・欠減を記録します。移出済みと欠減を除いた残量は自動計算されます。'
+};
+
+function syncModalState(){
+  const menuOpen = $('dataMenu') && !$('dataMenu').hidden;
+  const helpOpen = $('helpDialog') && !$('helpDialog').hidden;
+  document.body.classList.toggle('modal-open', menuOpen || helpOpen);
 }
+
+function toggleDataMenu(open){
+  const panel = $('dataMenu');
+  const backdrop = $('menuBackdrop');
+  const button = $('menuButton');
+  if(!panel || !backdrop || !button) return;
+  panel.hidden = !open;
+  backdrop.hidden = !open;
+  button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  syncModalState();
+  if(open) panel.querySelector('.menu-close').focus();
+  else button.focus();
+}
+
+function openHelp(title){
+  toggleDataMenu(false);
+  $('helpDialogTitle').textContent = title;
+  $('helpDialogBody').textContent = HELP_CONTENT[title] || '';
+  $('helpBackdrop').hidden = false;
+  $('helpDialog').hidden = false;
+  syncModalState();
+  $('helpDialog').querySelector('.help-close').focus();
+}
+
+function closeHelp(){
+  $('helpBackdrop').hidden = true;
+  $('helpDialog').hidden = true;
+  syncModalState();
+}
+
+function addHelpButtons(root){
+  (root || document).querySelectorAll('summary.section-title, .section > .section-title').forEach(titleEl=>{
+    if(titleEl.dataset.helpReady) return;
+    const title = titleEl.textContent.trim();
+    if(!HELP_CONTENT[title]) return;
+    titleEl.dataset.helpReady = '1';
+    titleEl.classList.add('has-help');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'help-button';
+    button.textContent = '?';
+    button.setAttribute('aria-label', `${title}のヘルプを開く`);
+    button.addEventListener('click', event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      openHelp(title);
+    });
+    titleEl.appendChild(button);
+  });
+}
+
+document.addEventListener('keydown', event=>{
+  if(event.key!=='Escape') return;
+  if($('helpDialog') && !$('helpDialog').hidden) closeHelp();
+  else if($('dataMenu') && !$('dataMenu').hidden) toggleDataMenu(false);
+});
  
 async function loadBatches(){
   try{
@@ -1200,19 +1285,30 @@ async function loadBatches(){
     inventory = r ? JSON.parse(r.value) : [];
   }catch(e){ inventory = []; }
  
-  let alreadySeeded = true;
+  let sampleRemovalCompleted = true;
   try{
-    await window.storage.get('wangan-seeded', false);
+    await window.storage.get('wangan-sample-removed-v1', false);
   }catch(e){
-    alreadySeeded = false;
+    sampleRemovalCompleted = false;
   }
- 
-  if(!alreadySeeded){
-    if(!batches.some(b=>b.id==='sample-bass-pale-ale-clone')){
-      batches.push(sampleBatch());
-      await persist();
+
+  if(!sampleRemovalCompleted){
+    const beforeCount = batches.length;
+    batches = batches.filter(b=>b.id!=='sample-bass-pale-ale-clone' && b.batchName!=='Bass Pale Ale Clone（見本）');
+    let inventoryChanged = false;
+    inventory.forEach(item=>{
+      const before = (item.consumptions||[]).length;
+      item.consumptions = (item.consumptions||[]).filter(c=>c.batchId!=='sample-bass-pale-ale-clone');
+      if(item.consumptions.length!==before) inventoryChanged = true;
+    });
+    if(batches.length!==beforeCount) await persist();
+    if(inventoryChanged) await persistInventory();
+    try{
+      await window.storage.set('wangan-sample-removed-v1', '1', false);
+      await window.storage.delete('wangan-seeded', false);
+    }catch(e){
+      console.error('sample cleanup marker error', e);
     }
-    try{ await window.storage.set('wangan-seeded', '1', false); }catch(e){}
   }
  
   renderGauge();
@@ -3664,11 +3760,13 @@ function ensureAccessibleLabels(root){
 
 wrapAllDateInputs(document);
 ensureAccessibleLabels(document);
+addHelpButtons(document);
 new MutationObserver((mutations)=>{
   for(const m of mutations){
     if(m.addedNodes && m.addedNodes.length){
       wrapAllDateInputs(document);
       ensureAccessibleLabels(document);
+      addHelpButtons(document);
       return;
     }
   }
