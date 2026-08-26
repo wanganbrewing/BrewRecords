@@ -414,6 +414,17 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .sched-cal-btn-disabled{opacity:0.3; cursor:default; pointer-events:none;}
 .sched-actual input{padding:7px 8px; font-size:0.85rem; color:var(--hop-bright); font-family:'IBM Plex Mono', monospace; font-weight:500;}
 .sched-empty{color:var(--text-muted); font-size:0.85rem; text-align:center; padding:30px 10px;}
+.schedule-empty-state{
+  margin:8px 0 24px;padding:34px 20px;text-align:center;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(145deg,var(--surface-raised),var(--surface));box-shadow:0 10px 24px rgba(0,0,0,.12);
+}
+.schedule-empty-icon{
+  width:54px;height:54px;margin:0 auto 14px;border:1px solid var(--copper);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--copper-bright);font-size:1.45rem;background:rgba(193,120,23,.08);
+}
+.schedule-empty-title{font-family:'Fraunces',serif;font-size:1.12rem;font-weight:600;color:var(--text);}
+.schedule-empty-desc{max-width:420px;margin:8px auto 18px;font-size:.8rem;line-height:1.7;color:var(--text-muted);}
+.schedule-empty-state .btn{display:inline-flex;align-items:center;justify-content:center;width:min(280px,100%);}
  
 .inv-intro{
   background:var(--surface); border:1px solid var(--copper); border-radius:8px;
@@ -823,7 +834,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 在庫階層整理</div>
+    <div class="version-line">2026.08.26 空画面改善</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -986,6 +997,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   <div id="viewDetail" hidden></div>
  
   <div id="viewSchedule" hidden>
+    <div class="schedule-empty-state" id="sch_empty" hidden>
+      <div class="schedule-empty-icon" aria-hidden="true">◷</div>
+      <div class="schedule-empty-title">仕込みスケジュールはまだありません</div>
+      <div class="schedule-empty-desc">スケジュールは仕込み記録をもとに自動作成されます。まずバッチ名や仕込み予定日を登録してください。</div>
+      <button type="button" class="btn btn-primary" onclick="openNewForm()">＋ 最初の仕込みを登録する</button>
+    </div>
+    <div id="sch_content">
     <div class="section">
       <div class="section-title">対象バッチ</div>
       <div class="field">
@@ -1039,6 +1057,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <div class="actions">
         <button class="btn btn-primary" onclick="saveScheduleView()">保存</button>
       </div>
+    </div>
     </div>
   </div>
  
@@ -3073,13 +3092,17 @@ function openScheduleView(){
   sel.innerHTML = sorted.map(b=>`<option value="${b.id}">${escapeHtml(b.batchName||'(名称未設定)')} ${b.brewDate?'・'+b.brewDate:''}</option>`).join('');
   loadReminderSetting();
   if(!sorted.length){
-    $('sch_timeline').innerHTML = '<div class="sched-empty">仕込み記録がまだありません。先に「新規仕込み」からバッチを作成してください。</div>';
+    $('sch_empty').hidden = false;
+    $('sch_content').hidden = true;
+    $('sch_timeline').innerHTML = '';
     $('sch_dryhops').innerHTML='';
     $('sch_startTime').value='';
     $('sch_completed').checked=false;
     showView('schedule', false);
     return;
   }
+  $('sch_empty').hidden = true;
+  $('sch_content').hidden = false;
   renderSchedule();
   showView('schedule', false);
 }
