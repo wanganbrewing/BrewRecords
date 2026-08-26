@@ -39,7 +39,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:720px;margin:0 auto;padding:20px 16px 80px;}
-
+ 
 /* ---------- Header ---------- */
 header{
   display:flex;align-items:center;gap:14px;
@@ -74,7 +74,7 @@ header .sub{
   letter-spacing:0.08em;
   margin-top:2px;
 }
-
+ 
 /* ---------- Gauge (signature element) ---------- */
 .gauge-card{
   background:var(--surface);
@@ -116,7 +116,7 @@ header .sub{
 .spark-label{font-size:0.68rem; color:var(--text-muted); letter-spacing:0.04em; margin-bottom:4px;}
 .spark-svg{width:100%; max-width:130px; height:40px; display:block;}
 .spark-range{display:flex; justify-content:space-between; font-size:0.65rem; color:var(--text-muted); font-family:'IBM Plex Mono', monospace; max-width:130px; margin-top:2px;}
-
+ 
 /* ---------- Tabs ---------- */
 .tabs{display:flex; gap:4px; margin-bottom:18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:4px;}
 .tab{
@@ -125,7 +125,7 @@ header .sub{
   transition:background .15s, color .15s;
 }
 .tab.active{background:var(--copper); color:#1b1815;}
-
+ 
 .footer-links{
   margin-top:36px; padding-top:16px; border-top:1px solid var(--border);
   text-align:center; font-size:0.72rem; color:var(--text-muted);
@@ -138,7 +138,7 @@ header .sub{
 }
 .footer-note a{color:var(--copper-bright); text-decoration:none;}
 .footer-note a:hover{text-decoration:underline;}
-
+ 
 #comboDropdown{
   position:absolute; z-index:200; display:none;
   background:var(--surface-2); border:1px solid var(--copper); border-radius:7px;
@@ -146,7 +146,7 @@ header .sub{
 }
 .combo-item{padding:9px 12px; font-size:0.85rem; cursor:pointer; color:var(--text);}
 .combo-item:hover, .combo-item.active{background:var(--copper); color:#1b1815;}
-
+ 
 /* ---------- List ---------- */
 .batch-card{
   background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
@@ -199,7 +199,7 @@ select.inv-select-unlinked{ color:var(--danger) !important; }
   text-align:center; padding:50px 20px; color:var(--text-muted);
 }
 .empty-state .big{font-family:'Fraunces', serif; font-size:1.1rem; color:var(--text); margin-bottom:6px;}
-
+ 
 /* ---------- Form ---------- */
 .section{margin-bottom:22px;}
 .section-title{
@@ -257,7 +257,7 @@ input[type=datetime-local]::-webkit-calendar-picker-indicator{
   opacity:0.85;
 }
 input[type=datetime-local]{color-scheme:dark;}
-
+ 
 /* Custom date/time display: the native input is made invisible but stays
    fully functional (tap opens the native picker); a styled div shows the
    value, fully left-aligned and full width, immune to WebKit's inconsistent
@@ -299,7 +299,7 @@ textarea{min-height:70px; resize:vertical;}
 .dyn-subrow select{flex:0 0 118px;}
 .dyn-subrow input{flex:0 0 64px;}
 .dyn-subrow .rh-unit{font-size:0.75rem; color:var(--text-muted);}
-
+ 
 .amount-wrap{
   display:flex; align-items:center; background:var(--surface-2); border:1px solid var(--border);
   border-radius:7px; overflow:hidden;
@@ -330,7 +330,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
   border-radius:7px; padding:7px 12px; font-size:0.8rem; cursor:pointer; width:100%;
 }
 .add-row-btn:hover{border-color:var(--copper);}
-
+ 
 .actions{display:flex; gap:10px; margin-top:26px; padding-bottom:20px; flex-wrap:wrap;}
 .actions .btn{flex:1 1 120px;}
 .btn{
@@ -344,7 +344,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .btn-ghost{background:var(--surface-2); color:var(--text); border:1px solid var(--border);}
 .btn-danger{background:none; color:var(--danger); border:1px solid var(--border);}
 .btn-danger:hover{border-color:var(--danger);}
-
+ 
 /* ---------- Detail view ---------- */
 .detail-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;}
 .back-link{color:var(--copper-bright); font-size:0.82rem; cursor:pointer; margin-bottom:14px; display:inline-block;}
@@ -356,7 +356,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .detail-list .row{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:0.85rem;}
 .detail-list .row:last-child{border-bottom:none;}
 .notes-box{white-space:pre-wrap; font-size:0.88rem; line-height:1.6; color:var(--text);}
-
+ 
 .sched-note{font-size:0.76rem; color:var(--text-muted); margin-top:8px; line-height:1.5;}
 .sched-complete-check{
   display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--surface);
@@ -386,7 +386,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .sched-cal-btn-disabled{opacity:0.3; cursor:default; pointer-events:none;}
 .sched-actual input{padding:7px 8px; font-size:0.85rem; color:var(--hop-bright); font-family:'IBM Plex Mono', monospace; font-weight:500;}
 .sched-empty{color:var(--text-muted); font-size:0.85rem; text-align:center; padding:30px 10px;}
-
+ 
 .inv-intro{
   background:var(--surface); border:1px solid var(--copper); border-radius:8px;
   padding:14px 16px; margin-bottom:18px;
@@ -476,7 +476,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .sched-col-header-planned{flex:0 0 76px; text-align:center; color:var(--copper-bright);}
 .sched-col-header-actual{flex:0 0 110px; text-align:center; color:var(--hop-bright);}
 .sched-col-header-cal{flex:0 0 30px;}
-
+ 
 .pkg-col-header{
   display:flex; align-items:center; gap:8px; margin-bottom:4px;
   font-size:0.64rem; color:var(--text-muted); letter-spacing:0.04em;
@@ -486,6 +486,107 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .pkg-col-header-qty{flex:0 0 62px; text-align:center;}
 .pkg-col-header-del{flex:0 0 32px;}
 
+/* ---------- 2026-08 UI refresh ---------- */
+:root{
+  --surface-raised:#2a251e;
+  --surface-hover:#332d24;
+  --focus:#f0ad4e;
+  --shadow:0 16px 40px rgba(0,0,0,0.22);
+}
+.wrap{max-width:860px;padding:24px 20px 96px;}
+header{padding:10px 4px 18px;border-bottom:0;}
+.mark{width:50px;height:50px;}
+.header-copy{min-width:0;}
+h1{font-size:clamp(1.45rem,3.6vw,2rem);}
+header .sub{margin-top:5px;letter-spacing:0.14em;}
+.app-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:0 0 20px;padding:9px 12px;
+  background:rgba(36,32,25,0.72);border:1px solid var(--border);border-radius:10px;
+}
+.mock-banner{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:0;margin:0;border:0;background:none;border-radius:0;
+  font-size:0.75rem;text-align:left;
+}
+.mock-banner::before{
+  content:"";width:7px;height:7px;border-radius:50%;background:var(--danger);
+  box-shadow:0 0 0 4px rgba(181,86,62,0.14);
+}
+.version-line{margin:0;font-size:0.7rem;white-space:nowrap;}
+.gauge-card{
+  padding:22px 24px 18px;margin-bottom:18px;
+  border-color:#4b4233;border-radius:14px;box-shadow:var(--shadow);
+}
+.gauge-title{font-size:1.3rem;}
+.tabs{
+  position:sticky;top:10px;z-index:60;
+  gap:6px;margin-bottom:20px;padding:5px;
+  border-color:#4b4233;border-radius:13px;
+  background:rgba(36,32,25,0.94);
+  box-shadow:0 12px 28px rgba(0,0,0,0.24);
+  backdrop-filter:blur(14px);
+}
+.tab{
+  min-height:44px;border:0;background:transparent;font:inherit;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 9px;border-radius:9px;
+  font-size:0.86rem;font-weight:600;line-height:1.25;
+}
+.tab:hover{background:var(--surface-hover);color:var(--text);}
+.tab.active{
+  background:linear-gradient(135deg,var(--copper),var(--copper-bright));
+  box-shadow:0 5px 14px rgba(193,120,23,0.24);
+}
+.batch-card{
+  padding:17px 18px;margin-bottom:12px;border-radius:12px;
+  background:linear-gradient(145deg,var(--surface-raised),var(--surface));
+  box-shadow:0 8px 20px rgba(0,0,0,0.13);
+  transition:border-color .16s,transform .16s,box-shadow .16s;
+}
+.batch-card:hover{transform:translateY(-1px);box-shadow:0 12px 25px rgba(0,0,0,0.2);}
+.batch-name{font-size:1.13rem;}
+details.section,details.section[open]{
+  padding:0 14px 14px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);box-shadow:0 8px 18px rgba(0,0,0,0.1);
+}
+details.section:not([open]){padding-bottom:0;}
+summary.section-title,
+details.section[open] > summary.section-title{
+  margin:0 -14px 14px;padding:14px 16px;border:0;border-bottom:1px solid var(--border);
+  border-radius:12px 12px 0 0;background:var(--surface-raised);font-size:0.74rem;
+}
+details.section:not([open]) > summary.section-title{margin-bottom:0;border-bottom:0;border-radius:12px;}
+input[type=text],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{
+  min-height:44px;border-radius:9px;padding:10px 12px;border-color:#504738;background:#302a22;
+}
+textarea{min-height:96px;}
+.btn,.add-row-btn{min-height:44px;border-radius:9px;font-weight:600;}
+.btn-primary{box-shadow:0 7px 16px rgba(193,120,23,0.2);}
+.footer-links{
+  margin-top:38px;padding:20px;border:1px solid var(--border);border-radius:14px;
+  background:var(--surface);text-align:left;box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
+.footer-title{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--text);}
+.footer-subtitle{margin-top:3px;font-size:0.73rem;color:var(--text-muted);}
+.footer-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px;}
+.footer-link{
+  min-height:42px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text);font:inherit;font-size:0.75rem;
+  display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s;
+}
+.footer-link:hover{background:var(--surface-hover);border-color:var(--copper);color:var(--copper-bright);}
+.footer-sep{display:none;}
+.footer-note{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.72rem;}
+button:focus-visible,.tab:focus-visible,.footer-link:focus-visible,summary:focus-visible,
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(240,173,78,0.55);outline-offset:2px;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto !important;transition:none !important;}
+}
+ 
 @media (max-width:420px){
   .grid2{grid-template-columns:1fr;}
   .detail-grid{grid-template-columns:1fr 1fr;}
@@ -496,13 +597,26 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
   .rg-ph{flex:0 0 58px !important;}
   .dyn-subrow .rh-timingtype{flex:0 0 98px;}
   .dyn-subrow .rh-timingvalue{flex:0 0 52px;}
+  .wrap{padding:14px 12px 76px;}
+  header{gap:11px;padding-top:4px;}
+  .mark{width:44px;height:44px;}
+  header .sub{font-size:0.62rem;letter-spacing:0.1em;}
+  .app-meta{padding:8px 10px;margin-bottom:14px;}
+  .mock-banner{font-size:0.7rem;}
+  .version-line{font-size:0.63rem;}
+  .gauge-card{padding:18px 14px 14px;border-radius:12px;}
+  .tabs{top:6px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+  .tab{min-height:42px;font-size:0.82rem;}
+  .batch-card{padding:15px 14px;}
+  .footer-links{padding:16px 13px;}
+  .footer-actions{grid-template-columns:1fr;}
 }
 [hidden]{display:none !important;}
 </style>
 </head>
 <body>
 <div class="wrap">
-
+ 
   <header>
     <svg class="mark" viewBox="0 0 44 44" fill="none">
       <rect x="1" y="1" width="42" height="42" rx="8" stroke="#c17817" stroke-width="1.4"/>
@@ -512,27 +626,29 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       <line x1="12.5" y1="20" x2="24.5" y2="20" stroke="#1b1815" stroke-width="1.1" opacity="0.35"/>
       <line x1="12.5" y1="26" x2="24.5" y2="26" stroke="#1b1815" stroke-width="1.1" opacity="0.35"/>
     </svg>
-    <div>
+    <div class="header-copy">
       <h1>Japan Brewer's Record</h1>
       <div class="sub">BREWING &amp; INVENTORY LEDGER</div>
     </div>
   </header>
-
-  <div class="mock-banner">※これは試作版です</div>
-  <div class="version-line">(20260808 更新)</div>
-
+ 
+  <div class="app-meta">
+    <div class="mock-banner">試作版</div>
+    <div class="version-line">2026.08.26 UI更新</div>
+  </div>
+ 
   <!-- Gauge: featured latest batch -->
   <div class="gauge-card" id="gaugeCard"></div>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="list">記録一覧</div>
-    <div class="tab" data-tab="new">新規仕込み</div>
-    <div class="tab" data-tab="schedule">仕込みスケジュール</div>
-    <div class="tab" data-tab="inventory">原材料受渡簿</div>
+ 
+  <div class="tabs" role="tablist" aria-label="画面切り替え">
+    <button type="button" class="tab active" data-tab="list" role="tab" aria-selected="true" aria-controls="viewList">記録一覧</button>
+    <button type="button" class="tab" data-tab="new" role="tab" aria-selected="false" aria-controls="viewForm">新規仕込み</button>
+    <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込みスケジュール</button>
+    <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料受渡簿</button>
   </div>
-
+ 
   <div id="viewList"></div>
-
+ 
   <div id="viewForm" hidden>
     <details class="section" open>
       <summary class="section-title">基本情報</summary>
@@ -551,7 +667,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
         <div class="sched-note" style="margin-top:4px;">※令和8年10月よりビール・発泡酒等の税率区分が一本化されます。それ以降の仕込みは「ビール・発泡酒等（発泡性酒類）」を選択してください（9月以前の記録は従来区分のままでかまいません）。</div>
       </div>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">仕込み工程</summary>
       <div class="grid2">
@@ -567,7 +683,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
         <div class="field"><label>仕込み水量 (L)</label><input type="number" step="0.1" min="0" id="f_waterVolume"></div>
       </div>
     </details>
-
+ 
     <details class="section">
       <summary class="section-title">水質調整</summary>
       <div class="grid2">
@@ -587,26 +703,26 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       <div id="mineralRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('mineralRows','mineral')">＋ 添加剤を追加</button>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">原材料 — モルト</summary>
       <div id="fermentableRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('fermentableRows','fermentable')">＋ モルトを追加</button>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">原材料 — ホップ</summary>
       <div id="hopRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('hopRows','hop')">＋ ホップを追加</button>
     </details>
-
+ 
     <details class="section">
       <summary class="section-title">副原料（フルーツ・スパイス・加糖など）</summary>
       <div id="adjunctRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('adjunctRows','adjunct')">＋ 副原料を追加</button>
       <div class="sched-note">※在庫と連携しても、ここで保存しただけでは受渡簿から差し引かれません。保存後、バッチ詳細画面の「在庫から消費を記録」を押した時点で反映されます。</div>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">酵母</summary>
       <div class="hop-entry" id="yeastEntry">
@@ -630,7 +746,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
         </div>
       </div>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">発酵</summary>
       <div class="grid2">
@@ -641,7 +757,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       <div id="gravityRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('gravityRows','gravity')">＋ 測定を追加</button>
     </details>
-
+ 
     <details class="section" open>
       <summary class="section-title">パッケージング</summary>
       <div class="grid2">
@@ -664,22 +780,22 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       <div class="field" style="margin-top:10px;"><label>合計容量（自動計算）</label><div id="f_totalVolDisplay" class="abv-display">—</div></div>
       <div class="field" style="margin-top:10px;"><label>欠減・移出を除いた量（自動計算）</label><div id="f_netVolDisplay" class="abv-display">—</div></div>
     </details>
-
+ 
     <div id="formInvDeductArea"></div>
-
+ 
     <details class="section">
       <summary class="section-title">メモ</summary>
       <textarea id="f_notes" placeholder="工程中の気づき、トラブル、フレーバーメモなど"></textarea>
     </details>
-
+ 
     <div class="actions">
       <button class="btn btn-ghost" onclick="cancelForm()">キャンセル</button>
       <button class="btn btn-primary" onclick="saveBatch()">保存する</button>
     </div>
   </div>
-
+ 
   <div id="viewDetail" hidden></div>
-
+ 
   <div id="viewSchedule" hidden>
     <div class="section">
       <div class="section-title">対象バッチ</div>
@@ -721,7 +837,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       </div>
       <div class="sched-note">.icsファイル書き出し時の通知タイミングです。Googleカレンダーの📅ワンタップ登録（クイック追加）は、この設定に関わらずアカウントの既定の通知設定が使われます。</div>
     </div>
-
+ 
     <div class="section">
       <button type="button" class="add-row-btn" onclick="exportAllSchedulesICS()">📅 全バッチの予定をまとめて書き出す (.ics)</button>
       <div class="sched-note">書き出したファイルをGoogleカレンダーの「設定 → インポート/エクスポート → インポート」で取り込むと、各工程が予定として登録されます。Apple/Outlookカレンダーでも同じファイルが使えます。</div>
@@ -736,7 +852,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       </div>
     </div>
   </div>
-
+ 
   <div id="viewInventory" hidden>
     <div class="inv-intro">
       <div class="inv-intro-title">ここで入力する内容は3つです</div>
@@ -772,7 +888,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
       <button type="button" class="add-row-btn" onclick="exportInventoryCSV()">📄 原材料受渡簿をCSV書き出し</button>
     </div>
   </div>
-
+ 
   <datalist id="taxCategoryList">
     <option value="ビール・発泡酒等（発泡性酒類）">
     <option value="ビール">
@@ -782,7 +898,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="果実酒">
     <option value="リキュール">
   </datalist>
-
+ 
   <datalist id="styleList">
     <option value="Pale Ale">
     <option value="American Pale Ale (APA)">
@@ -807,11 +923,11 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="Fruit Beer">
     <option value="Barleywine">
   </datalist>
-
+ 
   <datalist id="brewerList">
     <option value="湾岸太郎">
   </datalist>
-
+ 
   <datalist id="maltList">
     <option value="Pale Ale Malt (2条)">
     <option value="Pilsner Malt">
@@ -832,7 +948,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="Flaked Wheat">
     <option value="Rice Hulls">
   </datalist>
-
+ 
   <datalist id="hopList">
     <option value="Cascade">
     <option value="Centennial">
@@ -855,7 +971,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="IBUKI">
     <option value="MURAKAMI SEVEN">
   </datalist>
-
+ 
   <datalist id="supplierList">
     <option value="大西商事">
     <option value="片岡物産">
@@ -864,7 +980,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="セティ">
     <option value="ホクセイプロダクツ">
   </datalist>
-
+ 
   <datalist id="waterSourceList">
     <option value="水道水">
     <option value="RO水">
@@ -872,7 +988,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="井戸水">
     <option value="ボトルドウォーター">
   </datalist>
-
+ 
   <datalist id="mineralList">
     <option value="石膏 (CaSO4・硫酸カルシウム)">
     <option value="塩化カルシウム (CaCl2)">
@@ -884,7 +1000,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="リン酸 (Phosphoric Acid)">
     <option value="塩化マグネシウム (MgCl2)">
   </datalist>
-
+ 
   <datalist id="adjunctList">
     <option value="オレンジピール">
     <option value="コリアンダーシード">
@@ -905,7 +1021,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="ラズベリー">
     <option value="桃">
   </datalist>
-
+ 
   <datalist id="packageTypeList">
     <option value="瓶">
     <option value="缶">
@@ -915,7 +1031,7 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="クラウラー缶">
     <option value="欠減（試飲・こぼれ・破損など）">
   </datalist>
-
+ 
   <datalist id="yeastList">
     <option value="Fermentis US-05">
     <option value="Fermentis S-04">
@@ -931,36 +1047,34 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
     <option value="White Labs WLP300 Hefeweizen">
     <option value="White Labs WLP800 Pilsner Lager">
   </datalist>
-
+ 
   <div class="footer-links">
-    <span class="footer-link" onclick="exportCSV()">CSV書き出し (Excel用)</span>
-    <span class="footer-sep">・</span>
-    <span class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV書き出し（課税移出）</span>
-    <span class="footer-sep">・</span>
-    <span class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV書き出し</span>
-    <span class="footer-sep">・</span>
-    <span class="footer-link" onclick="exportJSON()">バックアップを書き出す</span>
-    <span class="footer-sep">・</span>
-    <span class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</span>
-    <span class="footer-sep">・</span>
-    <label class="footer-link">
-      バックアップを読み込む
-      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])">
-    </label>
-    <span class="footer-sep">・</span>
-    <label class="footer-link">
-      レシピを取り込む (BeerXML)
-      <input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])">
-    </label>
+    <div class="footer-title">データ管理</div>
+    <div class="footer-subtitle">書き出し・バックアップ・レシピ取り込み</div>
+    <div class="footer-actions">
+      <button type="button" class="footer-link" onclick="exportCSV()">CSV書き出し（Excel用）</button>
+      <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
+      <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
+      <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
+      <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
+      <label class="footer-link">
+        バックアップを読み込む
+        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])">
+      </label>
+      <label class="footer-link">
+        レシピを取り込む（BeerXML）
+        <input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])">
+      </label>
+    </div>
     <div class="footer-note">
       <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
       レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、上の「レシピを取り込む」で選択してください。<br><br>
       記録を保存するたびに、1日1回まで自動的にバックアップが作成されます（直近7日分を保持）。「自動バックアップから復元」でいつでも過去の状態に戻せます。
     </div>
   </div>
-
+ 
 </div>
-
+ 
 <script>
 let batches = [];
 let inventory = [];
@@ -968,8 +1082,27 @@ let editingId = null;
 let currentTab = 'list';
 let formIsOpen = false; // true whenever a new/existing batch form has unsaved work in progress
 
-const $ = id => document.getElementById(id);
+// Claude Artifacts以外（ローカルHTML / GitHub Pages）ではlocalStorageを使う。
+if(!window.storage){
+  window.storage = {
+    async get(key){
+      const value = localStorage.getItem(key);
+      if(value === null) throw new Error('Storage key not found: ' + key);
+      return {value};
+    },
+    async set(key, value){
+      localStorage.setItem(key, String(value));
+      return {key, value};
+    },
+    async delete(key){
+      localStorage.removeItem(key);
+      return {key};
+    }
+  };
+}
 
+const $ = id => document.getElementById(id);
+ 
 function sampleBatch(){
   return {
     id: 'sample-bass-pale-ale-clone',
@@ -1020,25 +1153,25 @@ function sampleBatch(){
     notes: 'これは操作方法を確認していただくための見本レコードです(BeerXMLのBass Pale Ale Cloneをもとに作成、実測値はサンプルです)。不要であれば削除して問題ありません。\n目標値: ABV 5.31% / IBU 33.47 / SRM 11.01 / Efficiency 83%'
   };
 }
-
+ 
 async function loadBatches(){
   try{
     const r = await window.storage.get('wangan-batches', false);
     batches = r ? JSON.parse(r.value) : [];
   }catch(e){ batches = []; }
-
+ 
   try{
     const r = await window.storage.get('wangan-inventory', false);
     inventory = r ? JSON.parse(r.value) : [];
   }catch(e){ inventory = []; }
-
+ 
   let alreadySeeded = true;
   try{
     await window.storage.get('wangan-seeded', false);
   }catch(e){
     alreadySeeded = false;
   }
-
+ 
   if(!alreadySeeded){
     if(!batches.some(b=>b.id==='sample-bass-pale-ale-clone')){
       batches.push(sampleBatch());
@@ -1046,27 +1179,27 @@ async function loadBatches(){
     }
     try{ await window.storage.set('wangan-seeded', '1', false); }catch(e){}
   }
-
+ 
   renderGauge();
   renderList();
 }
-
+ 
 async function persistInventory(){
   try{
     await window.storage.set('wangan-inventory', JSON.stringify(inventory), false);
   }catch(e){ console.error('inventory storage error', e); }
   maybeAutoBackup();
 }
-
+ 
 async function persist(){
   try{
     await window.storage.set('wangan-batches', JSON.stringify(batches), false);
   }catch(e){ console.error('storage error', e); }
   maybeAutoBackup();
 }
-
+ 
 const AUTO_BACKUP_MAX = 7;
-
+ 
 async function maybeAutoBackup(){
   try{
     const today = todayDateValue();
@@ -1076,13 +1209,13 @@ async function maybeAutoBackup(){
       lastDate = r ? r.value : '';
     }catch(e){ lastDate = ''; }
     if(lastDate === today) return; // already backed up today
-
+ 
     let index = [];
     try{
       const r = await window.storage.get('wangan-backupIndex', false);
       index = r ? JSON.parse(r.value) : [];
     }catch(e){ index = []; }
-
+ 
     await window.storage.set(`wangan-backup-${today}`, JSON.stringify({batches, inventory}), false);
     index = index.filter(d=>d!==today);
     index.push(today);
@@ -1094,14 +1227,14 @@ async function maybeAutoBackup(){
     await window.storage.set('wangan-lastBackupDate', today, false);
   }catch(e){ console.error('auto backup error', e); }
 }
-
+ 
 async function listAutoBackups(){
   try{
     const r = await window.storage.get('wangan-backupIndex', false);
     return r ? JSON.parse(r.value) : [];
   }catch(e){ return []; }
 }
-
+ 
 async function restoreFromAutoBackup(){
   const index = await listAutoBackups();
   if(!index.length){ alert('自動バックアップはまだありません（1日1回、記録を保存したタイミングで自動的に作成されます）。'); return; }
@@ -1131,29 +1264,29 @@ async function restoreFromAutoBackup(){
     alert('復元に失敗しました。');
   }
 }
-
+ 
 function uid(){ return 'b' + Date.now() + Math.random().toString(36).slice(2,7); }
-
+ 
 function getPackages(b){
   if(b.packages && b.packages.length) return b.packages;
   if(b.packageType||b.unitVolume||b.quantity) return [{type:b.packageType, unitVolume:b.unitVolume, quantity:b.quantity}];
   return [];
 }
-
+ 
 function totalPackageVolume(b){
   return getPackages(b).reduce((sum,p)=>{
     const qty = parseFloat(p.quantity), unitMl = parseFloat(p.unitVolume);
     return sum + (qty && unitMl ? qty*unitMl/1000 : 0);
   }, 0);
 }
-
+ 
 /* ---------------- Shipment / 課税移出 tracking ---------------- */
 let openShipmentFormKey = null; // `${batchId}::${pkgIndex}` or `${batchId}::${pkgIndex}::${lotId}` when editing
-
+ 
 function shipmentLotsFor(pkg){
   return pkg.shipments || [];
 }
-
+ 
 function shipmentSummary(pkg){
   const total = parseFloat(pkg.quantity)||0;
   const lots = shipmentLotsFor(pkg);
@@ -1166,13 +1299,13 @@ function shipmentSummary(pkg){
   const remainingL = remaining * unitL;
   return {total, shipped, stored, loss, unrecorded, remaining, remainingL};
 }
-
+ 
 function openShipmentForm(batchId, pkgIndex, lotId){
   const key = lotId ? `${batchId}::${pkgIndex}::${lotId}` : `${batchId}::${pkgIndex}`;
   openShipmentFormKey = (openShipmentFormKey===key) ? null : key;
   openDetail(batchId);
 }
-
+ 
 async function submitShipmentLot(batchId, pkgIndex, lotId){
   const b = batches.find(x=>x.id===batchId);
   if(!b) return;
@@ -1183,21 +1316,21 @@ async function submitShipmentLot(batchId, pkgIndex, lotId){
   const pkg = b.packages[pkgIndex];
   if(!pkg) return;
   if(!pkg.shipments) pkg.shipments = [];
-
+ 
   const formId = lotId ? `${batchId}-${pkgIndex}-${lotId}` : `${batchId}-${pkgIndex}-new`;
   const qtyEl = document.getElementById(`ship-qty-${formId}`);
   const statusEl = document.getElementById(`ship-status-${formId}`);
   const dateEl = document.getElementById(`ship-date-${formId}`);
   const destEl = document.getElementById(`ship-dest-${formId}`);
   const noteEl = document.getElementById(`ship-note-${formId}`);
-
+ 
   const quantity = parseFloat(qtyEl.value);
   if(!quantity || quantity<=0){ alert('数量を入力してください。'); return; }
   const status = statusEl.value;
   if(status==='shipped' && !dateEl.value){ alert('課税移出済みにする場合は移出日を入力してください。'); return; }
   if(status==='loss' && !dateEl.value){ alert('欠減にする場合は発生日を入力してください。'); return; }
   if(status==='loss' && !destEl.value){ alert('欠減にする場合は理由（試飲・こぼれ・破損など）を入力してください。'); return; }
-
+ 
   const packagedTotal = parseFloat(pkg.quantity)||0;
   const otherLotsTotal = pkg.shipments.filter(l=>l.id!==lotId).reduce((s,l)=>s+(parseFloat(l.quantity)||0),0);
   if(otherLotsTotal + quantity > packagedTotal){
@@ -1205,7 +1338,7 @@ async function submitShipmentLot(batchId, pkgIndex, lotId){
     alert(`パッケージした本数（${packagedTotal}本/個）を超えています。\nこの容器であと登録できるのは ${remaining}本/個 までです。`);
     return;
   }
-
+ 
   const lot = {
     id: lotId || uid(),
     quantity,
@@ -1214,20 +1347,20 @@ async function submitShipmentLot(batchId, pkgIndex, lotId){
     destination: (status==='shipped'||status==='loss') ? (destEl.value||'') : '',
     note: noteEl.value||''
   };
-
+ 
   if(lotId){
     const idx = pkg.shipments.findIndex(l=>l.id===lotId);
     if(idx>=0) pkg.shipments[idx] = lot;
   } else {
     pkg.shipments.push(lot);
   }
-
+ 
   openShipmentFormKey = null;
   await persist();
   renderList();
   openDetail(batchId);
 }
-
+ 
 async function deleteShipmentLot(batchId, pkgIndex, lotId){
   const b = batches.find(x=>x.id===batchId);
   if(!b) return;
@@ -1239,7 +1372,7 @@ async function deleteShipmentLot(batchId, pkgIndex, lotId){
   renderList();
   openDetail(batchId);
 }
-
+ 
 function batchVolumeSummary(b){
   const packages = getPackages(b);
   let total = 0, lossVol = 0, shippedVol = 0;
@@ -1259,7 +1392,7 @@ function batchVolumeSummary(b){
   const remaining = Math.max(0, total - lossVol - shippedVol);
   return {total, lossVol, shippedVol, remaining};
 }
-
+ 
 function renderPackageShipments(b){
   const packages = getPackages(b);
   if(!packages.length) return '';
@@ -1274,7 +1407,7 @@ function renderPackageShipments(b){
     const sum = shipmentSummary(pkg);
     const lots = shipmentLotsFor(pkg);
     const pkgLabel = `${pkg.type||'(形態未設定)'}${pkg.unitVolume?' '+pkg.unitVolume+'ml':''}`;
-
+ 
     const lotsHtml = lots.map(l=>{
       const statusLabel = l.status==='shipped' ? '✓ 課税移出済み' : l.status==='loss' ? '⚠ 欠減' : '保管中（未移出）';
       const statusClass = l.status==='shipped' ? 'shipped' : l.status==='loss' ? 'loss' : 'stored';
@@ -1299,10 +1432,10 @@ function renderPackageShipments(b){
         ${editFormHtml}
       </div>`;
     }).join('');
-
+ 
     const newFormKey = `${b.id}::${pkgIndex}`;
     const newFormHtml = openShipmentFormKey===newFormKey ? renderShipmentForm(b.id, pkgIndex, null, pkg) : '';
-
+ 
     return `<div class="ship-pkg-card">
       <div class="ship-pkg-title">${escapeHtml(pkgLabel)}<span class="ship-pkg-total">全${sum.total}${pkg.unitVolume?'本/個':''}</span></div>
       <div class="ship-summary">
@@ -1317,10 +1450,10 @@ function renderPackageShipments(b){
       <button type="button" class="add-row-btn" onclick="openShipmentForm('${b.id}','${pkgIndex}')">＋ 移出処理を実施</button>
     </div>`;
   }).join('');
-
+ 
   return `<div class="section"><div class="section-title">出荷管理（課税移出・欠減）</div>${batchSummaryHtml}${cards}</div>`;
 }
-
+ 
 function renderShipmentForm(batchId, pkgIndex, lot, pkg){
   const formId = lot ? `${batchId}-${pkgIndex}-${lot.id}` : `${batchId}-${pkgIndex}-new`;
   const status = lot ? lot.status : 'stored';
@@ -1355,7 +1488,7 @@ function renderShipmentForm(batchId, pkgIndex, lot, pkg){
       </div>
     </div>`;
 }
-
+ 
 function toggleShipmentFormFields(formId){
   const statusEl = document.getElementById(`ship-status-${formId}`);
   const fieldsEl = document.getElementById(`ship-shipped-fields-${formId}`);
@@ -1373,13 +1506,13 @@ function toggleShipmentFormFields(formId){
     else{ destInputEl.setAttribute('data-list','supplierList'); }
   }
 }
-
+ 
 function shipmentStatusLabel(status){
   if(status==='shipped') return '課税移出済み';
   if(status==='loss') return '欠減';
   return '保管中（未移出）';
 }
-
+ 
 function exportShipmentsCSV(){
   const rows = [];
   exportableBatches().forEach(b=>{
@@ -1403,7 +1536,7 @@ function exportShipmentsCSV(){
   rows.forEach(r=>lines.push(r.map(csvEscape).join(',')));
   downloadBlob('\uFEFF'+lines.join('\r\n'), '出荷記録_課税移出_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8');
 }
-
+ 
 function exportShipmentsMonthlySummaryCSV(){
   const summary = {}; // key: `${yyyymm}::${taxCategory}` -> {shipped, loss, stored}
   exportableBatches().forEach(b=>{
@@ -1430,28 +1563,28 @@ function exportShipmentsMonthlySummaryCSV(){
   rows.forEach(r=>lines.push([r.ym, r.cat, round2(r.shipped), round2(r.loss)].map(csvEscape).join(',')));
   downloadBlob('\uFEFF'+lines.join('\r\n'), '課税移出_月次集計_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8');
 }
-
+ 
 /* ---------------- Inventory (原材料受渡簿) ---------------- */
 const INV_CATEGORY_LABEL = {fermentable:'モルト', hop:'ホップ', adjunct:'副原料', yeast:'酵母'};
 const INV_DEFAULT_UNIT = {fermentable:'kg', hop:'g'};
-
+ 
 function invStock(item){
   const received = (item.receipts||[]).reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
   const used = (item.consumptions||[]).reduce((s,c)=>s+(parseFloat(c.amount)||0),0);
   return Math.round((received-used)*1000)/1000;
 }
-
+ 
 function invItemsByCategory(cat){
   return inventory.filter(i=>i.category===cat).sort((a,b)=>(a.name||'').localeCompare(b.name||'', 'ja'));
 }
-
+ 
 let openAddItemFormCategory = null;
-
+ 
 function openAddItemForm(category){
   openAddItemFormCategory = (openAddItemFormCategory===category) ? null : category;
   renderInventory();
 }
-
+ 
 async function submitInventoryItem(category){
   const nameEl = document.getElementById('newitem-name-'+category);
   const name = nameEl.value.trim();
@@ -1466,13 +1599,13 @@ async function submitInventoryItem(category){
   await persistInventory();
   renderInventory();
 }
-
+ 
 async function deleteInventoryItem(id){
   const item = inventory.find(i=>i.id===id);
   if(!item) return;
   if(!confirm(`「${item.name}」を削除しますか？入荷・消費の履歴も削除されます。連携していた仕込みの原材料は「在庫と未連携」に戻ります。`)) return;
   inventory = inventory.filter(i=>i.id!==id);
-
+ 
   // Unlink any batch rows that referenced the deleted item so the display
   // (and unlinked-material warnings) stay consistent, instead of leaving a
   // stale invId that no longer resolves to anything.
@@ -1484,21 +1617,21 @@ async function deleteInventoryItem(id){
     (b.adjuncts||[]).forEach(clearRow);
     if(b.yeastInvId===id){ b.yeastInvId = undefined; touchedAnyBatch = true; }
   });
-
+ 
   await persistInventory();
   if(touchedAnyBatch) await persist();
   renderList();
   if(editingId) renderFormInvDeductArea(editingId);
   renderInventory();
 }
-
+ 
 let openReceiptFormItemId = null;
-
+ 
 function openReceiptForm(itemId){
   openReceiptFormItemId = (openReceiptFormItemId===itemId) ? null : itemId;
   renderInventory();
 }
-
+ 
 async function submitInventoryReceipt(itemId){
   const item = inventory.find(i=>i.id===itemId);
   if(!item) return;
@@ -1519,7 +1652,7 @@ async function submitInventoryReceipt(itemId){
   await persistInventory();
   renderInventory();
 }
-
+ 
 async function deleteInventoryReceipt(itemId, receiptId){
   const item = inventory.find(i=>i.id===itemId);
   if(!item) return;
@@ -1528,7 +1661,7 @@ async function deleteInventoryReceipt(itemId, receiptId){
   await persistInventory();
   renderInventory();
 }
-
+ 
 async function deleteInventoryConsumption(itemId, consumptionId){
   const item = inventory.find(i=>i.id===itemId);
   if(!item) return;
@@ -1538,7 +1671,7 @@ async function deleteInventoryConsumption(itemId, consumptionId){
   const batchId = target.batchId;
   item.consumptions = (item.consumptions||[]).filter(c=>c.id!==consumptionId);
   await persistInventory();
-
+ 
   if(batchId){
     const b = batches.find(x=>x.id===batchId);
     if(b){
@@ -1551,14 +1684,14 @@ async function deleteInventoryConsumption(itemId, consumptionId){
       (b.hops||[]).forEach(unlinkRow);
       (b.adjuncts||[]).forEach(unlinkRow);
       if(b.yeastInvId===itemId){ b.yeastInvId = undefined; rowUnlinked = true; }
-
+ 
       // If no consumption records remain for this batch across any
       // inventory item, also clear its overall "在庫と連携済" status.
       const stillHasConsumptions = inventory.some(it=>(it.consumptions||[]).some(c=>c.batchId===batchId));
       if(!stillHasConsumptions && b.inventoryDeducted){
         b.inventoryDeducted = false;
       }
-
+ 
       if(rowUnlinked || !stillHasConsumptions){
         await persist();
         renderList();
@@ -1568,19 +1701,19 @@ async function deleteInventoryConsumption(itemId, consumptionId){
   }
   renderInventory();
 }
-
+ 
 function toggleInvHistory(itemId){
   const el = document.getElementById('inv-history-'+itemId);
   if(el) el.hidden = !el.hidden;
 }
-
+ 
 function invSelectOptions(category, selectedId){
   const items = invItemsByCategory(category);
   let html = `<option value="" class="inv-opt-unlinked">在庫と未連携</option>`;
   html += items.map(i=>`<option value="${i.id}" ${selectedId===i.id?'selected':''}>${escapeHtml(i.name)}（在庫 ${invStock(i)}${escapeHtml(i.unit)}）</option>`).join('');
   return html;
 }
-
+ 
 function invLinkedMaxAttr(invId){
   if(!invId) return '';
   const item = inventory.find(i=>i.id===invId);
@@ -1588,7 +1721,7 @@ function invLinkedMaxAttr(invId){
   const stock = invStock(item);
   return ` max="${stock>0?stock:0}"`;
 }
-
+ 
 function onInvLinkChange(selectEl, entrySelector, nameSelector, amountSelector, unitSelector){
   selectEl.classList.toggle('inv-select-unlinked', selectEl.value==='');
   const entry = selectEl.closest(entrySelector);
@@ -1616,7 +1749,7 @@ function onInvLinkChange(selectEl, entrySelector, nameSelector, amountSelector, 
   if(amountInput) updateInvAmountWarning(amountInput);
   if(editingId) renderFormInvDeductArea(editingId);
 }
-
+ 
 function lockUnitSelectToItem(unitInput, unit){
   if(![...unitInput.options].some(o=>o.value===unit)){
     const opt = document.createElement('option');
@@ -1626,13 +1759,13 @@ function lockUnitSelectToItem(unitInput, unit){
   unitInput.value = unit;
   unitInput.disabled = true;
 }
-
+ 
 function refreshAllInvSelectColors(){
   document.querySelectorAll('.rf-inv, .rh-inv, .ra-inv, #f_yeastInv').forEach(sel=>{
     sel.classList.toggle('inv-select-unlinked', sel.value==='');
   });
 }
-
+ 
 function invRowUnit(el){
   if(el.classList.contains('rf-amount')) return 'kg';
   if(el.classList.contains('rh-amount')) return 'g';
@@ -1647,7 +1780,7 @@ function invRowUnit(el){
   }
   return '';
 }
-
+ 
 function updateInvAmountWarning(el){
   if(!el) return;
   const hasMax = el.hasAttribute('max');
@@ -1657,7 +1790,7 @@ function updateInvAmountWarning(el){
   const wrap = el.closest('.amount-wrap');
   const target = wrap || el;
   target.classList.toggle('inv-amount-over', over);
-
+ 
   const entry = el.closest('.ferm-entry, .hop-entry, .adjunct-entry');
   if(entry){
     let warnEl = entry.querySelector('.inv-warning-text');
@@ -1678,25 +1811,25 @@ function updateInvAmountWarning(el){
     }
   }
 }
-
+ 
 document.addEventListener('input', (e)=>{
   const el = e.target;
   if(el.matches && el.matches('.rf-amount, .rh-amount, .ra-amount, #f_yeastAmount')){
     updateInvAmountWarning(el);
   }
 });
-
+ 
 function refreshAllInvAmountWarnings(){
   document.querySelectorAll('.rf-amount, .rh-amount, .ra-amount, #f_yeastAmount').forEach(updateInvAmountWarning);
 }
-
+ 
 function openInventoryView(){
   renderInventory();
   showView('inventory', false);
 }
-
+ 
 const INV_NAME_DATALIST = {fermentable:'maltList', hop:'hopList', adjunct:'adjunctList', yeast:'yeastList'};
-
+ 
 function renderInventory(){
   ['fermentable','hop','adjunct','yeast'].forEach(cat=>{
     const container = $('inv_'+cat);
@@ -1745,7 +1878,7 @@ function renderInventory(){
         </div>`;
       }).join('');
     }
-
+ 
     const addFormContainer = $('inv_addform_'+cat);
     if(openAddItemFormCategory===cat){
       const yeastUnitOptions = `<option value="g">g</option><option value="包">包</option><option value="パック">パック</option><option value="ml">ml</option><option value="個">個</option>`;
@@ -1772,12 +1905,12 @@ function renderInventory(){
     }
   });
 }
-
+ 
 async function deductInventoryForBatch(batchId, context){
   const b = batches.find(x=>x.id===batchId);
   if(!b) return;
   if(b.inventoryDeducted){ alert('この仕込みはすでに在庫から消費済みです。'); return; }
-
+ 
   const yeastRow = b.yeastInvId ? {invId:b.yeastInvId, amount:b.yeastAmount} : null;
   const linkedRows = [
     ...(b.fermentables||[]),
@@ -1785,7 +1918,7 @@ async function deductInventoryForBatch(batchId, context){
     ...(b.adjuncts||[]),
     ...(yeastRow ? [yeastRow] : [])
   ].filter(r=>r.invId);
-
+ 
   const errors = [];
   linkedRows.forEach(row=>{
     const item = inventory.find(i=>i.id===row.invId);
@@ -1801,7 +1934,7 @@ async function deductInventoryForBatch(batchId, context){
     alert('在庫が不足しているため、消費を記録できませんでした。\n\n' + errors.join('\n') + '\n\n原材料受渡簿で入荷を追加するか、使用量を見直してください。');
     return;
   }
-
+ 
   const today = todayDateValue();
   let count = 0;
   const applyRow = (row, amountFn)=>{
@@ -1830,7 +1963,7 @@ async function deductInventoryForBatch(batchId, context){
   else { openDetail(batchId); }
   alert(`${count}件の原材料を在庫から差し引きました。`);
 }
-
+ 
 async function undoInventoryDeduction(batchId, context){
   const b = batches.find(x=>x.id===batchId);
   if(!b) return;
@@ -1846,36 +1979,36 @@ async function undoInventoryDeduction(batchId, context){
   else if(context==='list'){ /* already re-rendered via renderList() above */ }
   else { openDetail(batchId); }
 }
-
+ 
 async function syncInventoryForBatch(batchId, context){
   const b = batches.find(x=>x.id===batchId);
   if(!b) return;
   if(!b.inventoryDeducted){ alert('この仕込みはまだ在庫から消費記録されていません。'); return; }
-
+ 
   const yeastRow = b.yeastInvId ? {invId:b.yeastInvId, amount:b.yeastAmount} : null;
   const linkedRows = [
     ...(b.fermentables||[]), ...(b.hops||[]), ...(b.adjuncts||[]),
     ...(yeastRow ? [yeastRow] : [])
   ].filter(r=>r.invId);
-
+ 
   const desired = {};
   linkedRows.forEach(r=>{
     const amt = parseFloat(r.amount)||0;
     desired[r.invId] = (desired[r.invId]||0) + amt;
   });
-
+ 
   const existingByItem = {};
   inventory.forEach(item=>{
     const recs = (item.consumptions||[]).filter(c=>c.batchId===batchId);
     if(recs.length) existingByItem[item.id] = recs.reduce((s,c)=>s+(parseFloat(c.amount)||0), 0);
   });
-
+ 
   const allItemIds = new Set([...Object.keys(desired), ...Object.keys(existingByItem)]);
   if(!allItemIds.size){
     alert('在庫と連携している原材料がありません。');
     return;
   }
-
+ 
   const errors = [];
   allItemIds.forEach(id=>{
     const item = inventory.find(i=>i.id===id);
@@ -1894,7 +2027,7 @@ async function syncInventoryForBatch(batchId, context){
     alert('在庫が不足しているため更新できませんでした。\n\n' + errors.join('\n') + '\n\n原材料受渡簿で入荷を追加するか、使用量を見直してください。');
     return;
   }
-
+ 
   const today = todayDateValue();
   let changed = 0;
   allItemIds.forEach(id=>{
@@ -1909,7 +2042,7 @@ async function syncInventoryForBatch(batchId, context){
       item.consumptions.push({id:uid(), date:today, amount:newAmt, batchId:b.id, batchName:b.batchName});
     }
   });
-
+ 
   if(!changed){
     alert('受渡簿の消費記録はすでに現在の内容と一致しています。');
     return;
@@ -1921,7 +2054,7 @@ async function syncInventoryForBatch(batchId, context){
   else { openDetail(batchId); }
   alert(`${changed}件の原材料について、受渡簿の消費記録を現在の仕込み内容に更新しました。`);
 }
-
+ 
 function getUnlinkedMaterials(b){
   const list = [];
   (b.fermentables||[]).forEach(r=>{ if(r.name && !r.invId) list.push(r.name); });
@@ -1930,7 +2063,7 @@ function getUnlinkedMaterials(b){
   if(b.yeast && !b.yeastInvId) list.push(b.yeast);
   return list;
 }
-
+ 
 function renderFormInvDeductArea(id){
   const area = $('formInvDeductArea');
   if(!area) return;
@@ -1960,7 +2093,7 @@ function renderFormInvDeductArea(id){
     area.innerHTML = `<div class="sched-note">※モルト・ホップ・副原料の各行で「在庫と連携」を選ぶと、ここに消費記録ボタンが表示されます。</div>${unlinkedNote}`;
   }
 }
-
+ 
 function statusOf(b){
   if(b.completed===true) return '完了';
   if(b.completed===false) return b.fermentStart ? '発酵中' : '仕込み中';
@@ -1968,18 +2101,18 @@ function statusOf(b){
   if(b.fermentStart) return '発酵中';
   return '仕込み中';
 }
-
+ 
 function abv(og, fg){
   if(!og || !fg) return null;
   return ((og - fg) * 131.25).toFixed(1);
 }
-
+ 
 function attenuation(og, current){
   if(!og || !current || og<=1) return 0;
   const pct = ((og - current) / (og - 1)) * 100;
   return Math.max(0, Math.min(100, pct));
 }
-
+ 
 function latestGravity(b){
   if(b.fg) return b.fg;
   if(b.gravityLog && b.gravityLog.length){
@@ -1987,7 +2120,7 @@ function latestGravity(b){
   }
   return b.actualOG || b.targetOG || null;
 }
-
+ 
 /* ---------------- Gauge ---------------- */
 function renderGravitySparkline(active, og){
   const points = [];
@@ -2002,7 +2135,7 @@ function renderGravitySparkline(active, og){
   points.forEach(p=>{ byDate[p.date]=p.value; });
   const pts = Object.keys(byDate).sort().map(d=>byDate[d]);
   if(pts.length<2) return '';
-
+ 
   const w=130, h=34, padX=4, padY=4;
   const min = Math.min(...pts), max = Math.max(...pts);
   const range = (max-min) || 0.001;
@@ -2011,7 +2144,7 @@ function renderGravitySparkline(active, og){
   const coords = pts.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
   const areaCoords = `${x(0).toFixed(1)},${h-padY} ${coords} ${x(pts.length-1).toFixed(1)},${h-padY}`;
   const lastX = x(pts.length-1), lastY = y(pts[pts.length-1]);
-
+ 
   return `
     <div class="spark-wrap">
       <div class="spark-label">比重の推移</div>
@@ -2023,7 +2156,7 @@ function renderGravitySparkline(active, og){
       <div class="spark-range"><span>${max.toFixed(3)}</span><span>${min.toFixed(3)}</span></div>
     </div>`;
 }
-
+ 
 function renderGauge(){
   const el = $('gaugeCard');
   if(!batches.length){
@@ -2033,7 +2166,7 @@ function renderGauge(){
   }
   const active = [...batches].filter(b=>statusOf(b)!=='完了').sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''))[0]
     || [...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''))[0];
-
+ 
   const og = parseFloat(active.actualOG || active.targetOG || 0);
   const cur = parseFloat(latestGravity(active) || og);
   const pct = attenuation(og, cur);
@@ -2042,7 +2175,7 @@ function renderGauge(){
   const cx=75, cy=80, r=58;
   const nx = cx + r*Math.sin(rad);
   const ny = cy - r*Math.cos(rad);
-
+ 
   // Typical apparent attenuation zones: <65% still fermenting / stuck risk,
   // 65–85% normal finished range for most ale/lager yeasts, >85% unusually
   // high (very attenuative yeast, or worth double-checking the reading).
@@ -2059,7 +2192,7 @@ function renderGauge(){
     return `<path d="M 17 80 A 58 58 0 0 1 133 80" fill="none" stroke="${z.color}" stroke-width="10"
       stroke-dasharray="${segLen} ${ARC_LEN-segLen}" stroke-dashoffset="${-start}" opacity="0.45"/>`;
   }).join('');
-
+ 
   el.innerHTML = `
     <div class="gauge-eyebrow">CURRENT BATCH — ${statusOf(active)}</div>
     <div class="gauge-title">${escapeHtml(active.batchName||'(名称未設定)')}</div>
@@ -2084,7 +2217,7 @@ function renderGauge(){
     </div>
   `;
 }
-
+ 
 /* ---------------- List ---------------- */
 function renderList(){
   const el = $('viewList');
@@ -2124,13 +2257,13 @@ function renderList(){
     </div>`;
   }).join('');
 }
-
+ 
 /* ---------------- Dynamic rows ---------------- */
 function hopLabel(h){
   if(h.timingType==='dryhop') return h.timingValue ? `発酵${h.timingValue}日目 ドライホップ` : 'ドライホップ';
   return h.timingValue ? `煮沸終了${h.timingValue}分前` : '煮沸投入';
 }
-
+ 
 function updateHopUnit(sel){
   const entry = sel.closest('.hop-entry');
   const valInput = entry.querySelector('.rh-timingvalue');
@@ -2143,7 +2276,7 @@ function updateHopUnit(sel){
     unitSpan.textContent = '煮沸終了前';
   }
 }
-
+ 
 function addRow(containerId, type, data){
   const c = $(containerId);
   const row = document.createElement('div');
@@ -2240,7 +2373,7 @@ function addRow(containerId, type, data){
   c.appendChild(row);
   refreshAllInvSelectColors();
 }
-
+ 
 function collectRows(containerId, type){
   const rows = [...$(containerId).children];
   if(type==='fermentable'){
@@ -2276,7 +2409,7 @@ function collectRows(containerId, type){
       .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   }
 }
-
+ 
 /* ---------------- Form ---------------- */
 function resetForm(){
   ['batchName','style','taxCategory','brewDate','brewer','batchSize','targetOG','actualOG','mashTemp','mashTime',
@@ -2298,7 +2431,7 @@ function resetForm(){
   addRow('hopRows','hop');
   addRow('packageRows','package');
 }
-
+ 
 function openNewForm(){
   editingId = null;
   formIsOpen = true;
@@ -2310,7 +2443,7 @@ function openNewForm(){
   refreshAllInvSelectColors();
   showView('form', false);
 }
-
+ 
 function populateFormFields(b){
   $('fermentableRows').innerHTML=''; $('hopRows').innerHTML=''; $('adjunctRows').innerHTML=''; $('mineralRows').innerHTML=''; $('packageRows').innerHTML=''; $('gravityRows').innerHTML='';
   $('f_batchName').value=b.batchName||'';
@@ -2369,7 +2502,7 @@ function populateFormFields(b){
   refreshAllInvAmountWarnings();
   refreshAllInvSelectColors();
 }
-
+ 
 function openEditForm(id){
   const b = batches.find(x=>x.id===id);
   if(!b) return;
@@ -2380,7 +2513,7 @@ function openEditForm(id){
   renderFormInvDeductArea(id);
   showView('form');
 }
-
+ 
 function duplicateBatch(id){
   const src = batches.find(x=>x.id===id);
   if(!src) return;
@@ -2404,7 +2537,7 @@ function duplicateBatch(id){
   renderFormInvDeductArea(null);
   showView('form');
 }
-
+ 
 function scaleFreeAmount(amountStr, ratio){
   if(!amountStr) return amountStr;
   const m = String(amountStr).match(/^([\d.]+)\s*(.*)$/);
@@ -2413,7 +2546,7 @@ function scaleFreeAmount(amountStr, ratio){
   if(isNaN(num)) return amountStr;
   return round2(num*ratio) + (m[2] ? (' '+m[2]) : '');
 }
-
+ 
 function scaleDuplicateBatch(id){
   const src = batches.find(x=>x.id===id);
   if(!src) return;
@@ -2427,7 +2560,7 @@ function scaleDuplicateBatch(id){
   const newSize = parseFloat(input);
   if(!newSize || newSize<=0){ alert('正しい数値を入力してください。'); return; }
   const ratio = newSize/oldSize;
-
+ 
   editingId = null;
   formIsOpen = true;
   resetForm();
@@ -2453,13 +2586,13 @@ function scaleDuplicateBatch(id){
   showView('form');
   alert(`原材料の量を${round2(ratio)}倍にスケーリングしました。保存前に内容を確認してください。`);
 }
-
+ 
 function cancelForm(){
   formIsOpen = false;
   showView(editingId ? 'detail' : 'list');
   if(editingId){ openDetail(editingId); }
 }
-
+ 
 function buildBatchFromForm(id){
   return {
     id: id || uid(),
@@ -2501,7 +2634,7 @@ function buildBatchFromForm(id){
     notes: $('f_notes').value,
   };
 }
-
+ 
 function preservePackageShipments(newPackages, oldPackages){
   if(!oldPackages || !oldPackages.length) return newPackages;
   (newPackages||[]).forEach((pkg, i)=>{
@@ -2511,7 +2644,7 @@ function preservePackageShipments(newPackages, oldPackages){
   });
   return newPackages;
 }
-
+ 
 async function saveBatch(){
   const b = buildBatchFromForm(editingId);
   if(!b.batchName){ alert('バッチ名を入力してください'); return; }
@@ -2533,7 +2666,7 @@ async function saveBatch(){
   renderList();
   showView('list');
 }
-
+ 
 // Silently writes the current form's values into the in-memory batch object
 // (without navigating away), so actions like "消費記録を更新" always compare
 // against what's actually on screen rather than stale saved data.
@@ -2554,23 +2687,23 @@ async function saveFormInPlace(id){
   renderList();
   return b;
 }
-
+ 
 async function deductInventoryFromFormBtn(id){
   const saved = await saveFormInPlace(id);
   if(!saved) return;
   await deductInventoryForBatch(id, 'form');
 }
-
+ 
 async function syncInventoryFromFormBtn(id){
   const saved = await saveFormInPlace(id);
   if(!saved) return;
   await syncInventoryForBatch(id, 'form');
 }
-
+ 
 async function undoInventoryFromFormBtn(id){
   await undoInventoryDeduction(id, 'form');
 }
-
+ 
 /* ---------------- Detail ---------------- */
 function openDetail(id){
   const b = batches.find(x=>x.id===id);
@@ -2643,7 +2776,7 @@ function openDetail(id){
   `;
   showView('detail', !alreadyOnDetail);
 }
-
+ 
 async function deleteBatch(id){
   if(!confirm('この記録を削除しますか？元に戻せません。')) return;
   batches = batches.filter(x=>x.id!==id);
@@ -2651,7 +2784,7 @@ async function deleteBatch(id){
   renderGauge(); renderList();
   showView('list');
 }
-
+ 
 async function markCompleted(id){
   const b = batches.find(x=>x.id===id);
   if(!b) return;
@@ -2660,7 +2793,7 @@ async function markCompleted(id){
   renderGauge(); renderList();
   openDetail(id);
 }
-
+ 
 async function unmarkCompleted(id){
   const b = batches.find(x=>x.id===id);
   if(!b) return;
@@ -2669,7 +2802,7 @@ async function unmarkCompleted(id){
   renderGauge(); renderList();
   openDetail(id);
 }
-
+ 
 /* ---------------- View switching ---------------- */
 function showView(name, scrollTop){
   if(scrollTop===undefined) scrollTop = true;
@@ -2678,14 +2811,22 @@ function showView(name, scrollTop){
   $('viewDetail').hidden = name!=='detail';
   $('viewSchedule').hidden = name!=='schedule';
   $('viewInventory').hidden = name!=='inventory';
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  if(name==='list') document.querySelector('.tab[data-tab="list"]').classList.add('active');
-  if(name==='form') document.querySelector('.tab[data-tab="new"]').classList.add('active');
-  if(name==='schedule') document.querySelector('.tab[data-tab="schedule"]').classList.add('active');
-  if(name==='inventory') document.querySelector('.tab[data-tab="inventory"]').classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
+  let activeTab = null;
+  if(name==='list') activeTab = document.querySelector('.tab[data-tab="list"]');
+  if(name==='form') activeTab = document.querySelector('.tab[data-tab="new"]');
+  if(name==='schedule') activeTab = document.querySelector('.tab[data-tab="schedule"]');
+  if(name==='inventory') activeTab = document.querySelector('.tab[data-tab="inventory"]');
+  if(activeTab){
+    activeTab.classList.add('active');
+    activeTab.setAttribute('aria-selected','true');
+  }
   if(scrollTop) window.scrollTo(0,0);
 }
-
+ 
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     if(t.dataset.tab==='new'){
@@ -2700,43 +2841,43 @@ document.querySelectorAll('.tab').forEach(t=>{
     else{ showView('list', false); }
   });
 });
-
+ 
 /* ---------------- Schedule ---------------- */
 function pad2(n){ return String(n).padStart(2,'0'); }
-
+ 
 function parseStartDateTime(dt){
   if(!dt) return null;
   const d = new Date(dt);
   return isNaN(d.getTime()) ? null : d;
 }
-
+ 
 function addMinutes(date, min){
   return new Date(date.getTime() + min*60000);
 }
-
+ 
 function formatStepDisplay(date, startDate){
   if(!date) return '—';
   const sameDay = startDate && date.getFullYear()===startDate.getFullYear() && date.getMonth()===startDate.getMonth() && date.getDate()===startDate.getDate();
   const hh = pad2(date.getHours()), mm = pad2(date.getMinutes());
   return sameDay ? `${hh}:${mm}` : `${date.getMonth()+1}/${date.getDate()} ${hh}:${mm}`;
 }
-
+ 
 function timeOfDayValue(date){
   if(!date) return '';
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
-
+ 
 function todayDateValue(){
   const d = new Date();
   return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 }
-
+ 
 function dateStrToInputValue(dateStr){
   // dateStr like "2026/08/04" -> "2026-08-04"
   if(!dateStr) return '';
   return dateStr.replace(/\//g,'-');
 }
-
+ 
 function openScheduleView(){
   const sel = $('sch_batchSelect');
   const sorted = [...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''));
@@ -2753,7 +2894,7 @@ function openScheduleView(){
   renderSchedule();
   showView('schedule', false);
 }
-
+ 
 async function loadReminderSetting(){
   try{
     const r = await window.storage.get('wangan-reminder-settings', false);
@@ -2764,7 +2905,7 @@ async function loadReminderSetting(){
     }
   }catch(e){ /* keep defaults */ }
 }
-
+ 
 async function saveReminderSetting(){
   try{
     await window.storage.set('wangan-reminder-settings', JSON.stringify({
@@ -2773,12 +2914,12 @@ async function saveReminderSetting(){
     }), false);
   }catch(e){ /* ignore, not critical */ }
 }
-
+ 
 function currentScheduleBatch(){
   const id = $('sch_batchSelect').value;
   return batches.find(b=>b.id===id);
 }
-
+ 
 function onScheduleStartChange(){
   const b = currentScheduleBatch();
   if(!b) return;
@@ -2791,7 +2932,7 @@ function onScheduleStartChange(){
   renderList();
   renderGauge();
 }
-
+ 
 function saveScheduleActual(key, value){
   const b = currentScheduleBatch();
   if(!b) return;
@@ -2800,7 +2941,7 @@ function saveScheduleActual(key, value){
   persist();
   renderList();
 }
-
+ 
 async function renderSchedule(){
   const b = currentScheduleBatch();
   if(!b) return;
@@ -2824,7 +2965,7 @@ async function renderSchedule(){
     renderList();
   }
 }
-
+ 
 async function saveScheduleView(){
   const b = currentScheduleBatch();
   if(!b) return;
@@ -2835,7 +2976,7 @@ async function saveScheduleView(){
   renderSchedule();
   alert('保存しました。');
 }
-
+ 
 function computeScheduleSteps(b){
   const startDate = parseStartDateTime(b.brewStartTime);
   if(!startDate) return [];
@@ -2844,7 +2985,7 @@ function computeScheduleSteps(b){
   const mashOutOffset = mashTime;
   const boilStartOffset = mashOutOffset;
   const boilEndOffset = boilStartOffset + boilTime;
-
+ 
   let steps = [
     {key:'mashIn', label:'仕込み開始（マッシュイン）', sub:'', offset:0},
     {key:'mashOut', label:'糖化終了', sub:mashTime?`糖化 ${mashTime}分`:'', offset:mashOutOffset},
@@ -2860,7 +3001,7 @@ function computeScheduleSteps(b){
   steps.forEach(s=>{ s.date = addMinutes(startDate, s.offset); });
   return steps;
 }
-
+ 
 function computeDryHopSchedule(b){
   const dryhops = (b.hops||[]).filter(h=>h.timingType==='dryhop');
   if(!dryhops.length) return [];
@@ -2875,14 +3016,14 @@ function computeDryHopSchedule(b){
     return {key:`dryhop_${i}`, label:`ドライホップ：${h.name||'(名称未設定)'}`, sub:`発酵${days}日目 ・ ${h.amount||''}g`, dateStr, hasDate: !!fStart};
   });
 }
-
+ 
 function renderTimeline(b){
   const timeline = $('sch_timeline');
   const dryhopEl = $('sch_dryhops');
   const actuals = b.scheduleActuals || {};
   const steps = computeScheduleSteps(b);
   const startDate = parseStartDateTime(b.brewStartTime);
-
+ 
   if(!steps.length){
     timeline.innerHTML = '<div class="sched-empty">仕込み開始日時を入力すると、工程スケジュールが自動計算されます。</div>';
   } else {
@@ -2902,7 +3043,7 @@ function renderTimeline(b){
       </div>`;
     }).join('');
   }
-
+ 
   // Dry hop schedule (date-based, separate from time-of-day timeline)
   const dryhops = computeDryHopSchedule(b);
   if(dryhops.length){
@@ -2926,7 +3067,7 @@ function renderTimeline(b){
     dryhopEl.innerHTML = '';
   }
 }
-
+ 
 /* ---------------- Calendar integration ---------------- */
 function icsDateUTC(d){
   return d.getUTCFullYear() + pad2(d.getUTCMonth()+1) + pad2(d.getUTCDate()) + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + '00Z';
@@ -2943,7 +3084,7 @@ function icsAddDaysToDateOnly(yyyymmdd){
 function icsEscape(s){
   return String(s||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');
 }
-
+ 
 function gcalQuickAddLink(title, startDate, endDate, details){
   const params = new URLSearchParams({
     action:'TEMPLATE',
@@ -2964,13 +3105,13 @@ function gcalQuickAddAllDayLink(title, dateStr, details){
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
-
+ 
 function hourOffsetToTrigger(h){
   h = parseInt(h)||0;
   if(h===0) return 'PT0M';
   return h>0 ? `PT${h}H` : `-PT${Math.abs(h)}H`;
 }
-
+ 
 function buildBatchICSEvents(b, now){
   const steps = computeScheduleSteps(b);
   const dryhops = computeDryHopSchedule(b).filter(s=>s.hasDate);
@@ -3009,8 +3150,8 @@ function buildBatchICSEvents(b, now){
   });
   return {ics, count: steps.length + dryhops.length};
 }
-
-
+ 
+ 
 function exportAllSchedulesICS(){
   const target = batches;
   const now = icsDateUTC(new Date());
@@ -3028,7 +3169,7 @@ function exportAllSchedulesICS(){
   downloadBlob(full, '仕込みスケジュール_全バッチ_' + new Date().toISOString().slice(0,10) + '.ics', 'text/calendar;charset=utf-8');
   alert(`${batchCount}バッチ・計${eventCount}件の予定を書き出しました。`);
 }
-
+ 
 /* ---------------- Export / Import ---------------- */
 function downloadBlob(content, filename, mime){
   const blob = new Blob([content], {type:mime});
@@ -3038,17 +3179,17 @@ function downloadBlob(content, filename, mime){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-
+ 
 function csvEscape(v){
   if(v===undefined||v===null) return '';
   const s = String(v).replace(/"/g,'""');
   return /[",\n]/.test(s) ? `"${s}"` : s;
 }
-
+ 
 function exportableBatches(){
   return batches.filter(b=>b.id!=='sample-bass-pale-ale-clone');
 }
-
+ 
 function exportInventoryCSV(){
   const rows = [];
   inventory.forEach(item=>{
@@ -3070,7 +3211,7 @@ function exportInventoryCSV(){
   });
   if(!rows.length){ alert('入荷・消費の記録がありません。'); return; }
   rows.sort((a,b)=> String(a.date).localeCompare(String(b.date)) || String(a.name).localeCompare(String(b.name),'ja'));
-
+ 
   // running balance per item, in date order
   const balances = {};
   rows.forEach(r=>{
@@ -3078,7 +3219,7 @@ function exportInventoryCSV(){
     balances[key] = (balances[key]||0) + r.amount;
     r.balance = Math.round(balances[key]*1000)/1000;
   });
-
+ 
   const headers = ['日付','分類','品目名','区分','数量','単位','残高','仕入れ先／消費先','金額(円)'];
   const lines = [headers.map(csvEscape).join(',')];
   rows.forEach(r=>{
@@ -3086,7 +3227,7 @@ function exportInventoryCSV(){
   });
   downloadBlob('\uFEFF'+lines.join('\r\n'), '原材料受渡簿_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8');
 }
-
+ 
 function exportCSV(){
   const target = exportableBatches();
   if(!target.length){ alert('記録がありません'); return; }
@@ -3119,14 +3260,14 @@ function exportCSV(){
   // BOM for Excel (Japanese text)
   downloadBlob('\uFEFF'+lines.join('\r\n'), '仕込み記録_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8');
 }
-
+ 
 function exportJSON(){
   const targetBatches = exportableBatches();
   if(!targetBatches.length && !inventory.length){ alert('記録がありません'); return; }
   const payload = { batches: targetBatches, inventory: inventory };
   downloadBlob(JSON.stringify(payload, null, 2), '仕込み記録バックアップ_' + new Date().toISOString().slice(0,10) + '.json', 'application/json');
 }
-
+ 
 function importJSON(file){
   if(!file) return;
   const reader = new FileReader();
@@ -3186,7 +3327,7 @@ function importJSON(file){
   };
   reader.readAsText(file);
 }
-
+ 
 /* ---------------- BeerXML recipe import ---------------- */
 function xmlChildText(parent, tagNames){
   if(!parent) return '';
@@ -3210,7 +3351,7 @@ function xmlChildren(parent, tagNames){
   return [...parent.children].filter(c=>wanted.includes(c.tagName.toUpperCase()));
 }
 function round2(n){ return Math.round(n*100)/100; }
-
+ 
 function parseBeerXML(xmlString){
   const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
   if(doc.querySelector('parsererror')) throw new Error('XML parse error');
@@ -3218,7 +3359,7 @@ function parseBeerXML(xmlString){
   let recipeNodes = [...doc.getElementsByTagName('RECIPE')];
   if(!recipeNodes.length) recipeNodes = [...doc.getElementsByTagName('recipe')];
   if(!recipeNodes.length) throw new Error('レシピが見つかりません');
-
+ 
   return recipeNodes.map(r=>{
     const name = xmlChildText(r, ['NAME']) || '(名称未設定)';
     const styleNode = xmlChild(r, ['STYLE']);
@@ -3233,7 +3374,7 @@ function parseBeerXML(xmlString){
     const abv = xmlChildText(r, ['EST_ABV','ABV']);
     const color = xmlChildText(r, ['EST_COLOR','COLOR']);
     const carbonation = xmlChildText(r, ['CARBONATION']);
-
+ 
     // Fermentables -> malt vs adjunct
     const fermentables = [];
     const adjuncts = [];
@@ -3248,7 +3389,7 @@ function parseBeerXML(xmlString){
         adjuncts.push({name: fname, amount: String(round2(amountKg)), unit: 'kg', timing: '仕込み時'});
       }
     });
-
+ 
     // Hops
     const hops = [];
     const hopsWrap = xmlChild(r, ['HOPS']);
@@ -3263,7 +3404,7 @@ function parseBeerXML(xmlString){
         hops.push({name: hname, amount: String(Math.round(amountG)), timingType:'boil', timingValue: String(Math.round(parseFloat(time)||0))});
       }
     });
-
+ 
     // Yeast (first only)
     const yeastsWrap = xmlChild(r, ['YEASTS']);
     const yeastNode = xmlChildren(yeastsWrap, ['YEAST'])[0];
@@ -3274,7 +3415,7 @@ function parseBeerXML(xmlString){
       const yname = xmlChildText(yeastNode, ['NAME']);
       yeast = [lab, pid, yname].filter(Boolean).join(' ');
     }
-
+ 
     // Mash steps
     const mashWrap = xmlChild(r, ['MASH']);
     const stepsWrap = xmlChild(mashWrap, ['MASH_STEPS']);
@@ -3293,7 +3434,7 @@ function parseBeerXML(xmlString){
         mashNote = 'マッシュステップ: ' + steps.map(s=>`${s.name||''} ${round2(s.temp)}°C ${round2(s.time)}分`).join(' → ');
       }
     }
-
+ 
     const notesParts = [];
     notesParts.push(`BeerXMLから取り込み${brewer?'（原レシピ作者: '+brewer+'）':''}`);
     const targets = [];
@@ -3304,7 +3445,7 @@ function parseBeerXML(xmlString){
     if(targets.length) notesParts.push(targets.join(' / '));
     if(mashNote) notesParts.push(mashNote);
     if(adjuncts.length) notesParts.push('※Grain以外の原材料（砂糖・エキス等）は副原料として取り込みました。');
-
+ 
     return {
       id: uid(),
       batchName: name,
@@ -3330,7 +3471,7 @@ function parseBeerXML(xmlString){
     };
   });
 }
-
+ 
 function importBeerXML(file){
   if(!file) return;
   const reader = new FileReader();
@@ -3349,15 +3490,15 @@ function importBeerXML(file){
   };
   reader.readAsText(file);
 }
-
+ 
 function escapeHtml(s){
   if(s===undefined||s===null) return '';
   return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
+ 
 /* ---------------- Custom combobox (Safari doesn't reliably support <datalist>) ---------------- */
 let comboCurrentInput = null;
-
+ 
 function getComboEl(){
   let dd = document.getElementById('comboDropdown');
   if(!dd){
@@ -3367,13 +3508,13 @@ function getComboEl(){
   }
   return dd;
 }
-
+ 
 function hideCombo(){
   const dd = document.getElementById('comboDropdown');
   if(dd) dd.style.display = 'none';
   comboCurrentInput = null;
 }
-
+ 
 function showComboFor(input){
   const listId = input.getAttribute('data-list');
   if(!listId) return;
@@ -3383,17 +3524,17 @@ function showComboFor(input){
   const allOpts = [...datalist.options].map(o=>o.value);
   const opts = query ? allOpts.filter(v=>v.toLowerCase().includes(query)) : allOpts;
   if(!opts.length){ hideCombo(); return; }
-
+ 
   const dd = getComboEl();
   dd.innerHTML = opts.slice(0,50).map(v=>`<div class="combo-item">${escapeHtml(v)}</div>`).join('');
-
+ 
   const rect = input.getBoundingClientRect();
   dd.style.left = (rect.left + window.scrollX) + 'px';
   dd.style.top = (rect.bottom + window.scrollY + 3) + 'px';
   dd.style.width = rect.width + 'px';
   dd.style.display = 'block';
   comboCurrentInput = input;
-
+ 
   [...dd.children].forEach((el,i)=>{
     // mousedown fires before the input's blur, so selection registers reliably (incl. touch)
     el.addEventListener('mousedown', (e)=>{
@@ -3405,32 +3546,32 @@ function showComboFor(input){
     });
   });
 }
-
+ 
 document.addEventListener('focus', (e)=>{
   if(e.target && e.target.matches && e.target.matches('input[data-list]')){
     showComboFor(e.target);
   }
 }, true);
-
+ 
 document.addEventListener('input', (e)=>{
   if(e.target && e.target.matches && e.target.matches('input[data-list]')){
     showComboFor(e.target);
   }
 });
-
+ 
 document.addEventListener('click', (e)=>{
   if(e.target.closest && e.target.closest('#comboDropdown')) return;
   if(e.target.matches && e.target.matches('input[data-list]')) return;
   hideCombo();
 });
-
+ 
 window.addEventListener('scroll', ()=>{
   if(comboCurrentInput) showComboFor(comboCurrentInput);
 }, true);
 window.addEventListener('resize', ()=>{
   if(comboCurrentInput) showComboFor(comboCurrentInput);
 });
-
+ 
 /* ---------------- Custom date/time input display ---------------- */
 function formatDateDisplayValue(type, value){
   if(!value) return '';
@@ -3441,21 +3582,21 @@ function formatDateDisplayValue(type, value){
   }
   return value; // time: HH:MM as-is
 }
-
+ 
 function wrapDateInput(input){
   if(input.dataset.dateWrapped) return;
   input.dataset.dateWrapped = '1';
   const type = input.type;
   const placeholderText = input.getAttribute('placeholder') || (type==='date' ? '日付を選択' : type==='time' ? '時刻を選択' : '日時を選択');
-
+ 
   const wrap = document.createElement('div');
   wrap.className = 'date-field-wrap' + (input.className ? ' '+input.className : '');
   const inlineStyle = input.getAttribute('style');
   if(inlineStyle){ wrap.setAttribute('style', inlineStyle); input.removeAttribute('style'); }
-
+ 
   input.parentNode.insertBefore(wrap, input);
   wrap.appendChild(input);
-
+ 
   const display = document.createElement('div');
   display.className = 'date-display';
   const textSpan = document.createElement('span');
@@ -3466,7 +3607,7 @@ function wrapDateInput(input){
   display.appendChild(textSpan);
   display.appendChild(iconSpan);
   wrap.appendChild(display);
-
+ 
   function sync(){
     const formatted = formatDateDisplayValue(type, input.value);
     if(formatted){
@@ -3483,44 +3624,44 @@ function wrapDateInput(input){
   input.addEventListener('input', sync);
   input.addEventListener('change', sync);
 }
-
+ 
 function refreshScheduleDefaultStyling(input){
   if(input && input._dateSync) input._dateSync();
 }
-
+ 
 function wrapAllDateInputs(root){
   (root || document).querySelectorAll('input[type=date], input[type=time], input[type=datetime-local]').forEach(wrapDateInput);
 }
-
+ 
 function syncAllDateDisplays(){
   document.querySelectorAll('.date-field-wrap input').forEach(inp=>{ if(inp._dateSync) inp._dateSync(); });
 }
-
+ 
 wrapAllDateInputs(document);
 new MutationObserver((mutations)=>{
   for(const m of mutations){
     if(m.addedNodes && m.addedNodes.length){ wrapAllDateInputs(document); return; }
   }
 }).observe(document.body, {childList:true, subtree:true});
-
+ 
 // Safety net: catches display updates for values set programmatically via
 // JS (e.g. populateFormFields), which don't fire native input/change events.
 setInterval(syncAllDateDisplays, 300);
-
+ 
 loadBatches();
-
+ 
 document.querySelectorAll('.prefill60').forEach(el=>{
   el.addEventListener('focus', function(){
     if(this.value==='') this.value = '60';
   });
 });
-
+ 
 document.querySelectorAll('.prefill10').forEach(el=>{
   el.addEventListener('focus', function(){
     if(this.value==='') this.value = '10';
   });
 });
-
+ 
 function updateAbvDisplay(){
   const og = parseFloat($('f_actualOG').value || $('f_targetOG').value);
   const fg = parseFloat($('f_fg').value);
@@ -3534,7 +3675,7 @@ function updateAbvDisplay(){
 ['f_actualOG','f_targetOG','f_fg'].forEach(id=>{
   $(id).addEventListener('input', updateAbvDisplay);
 });
-
+ 
 function updateTotalVolDisplay(){
   const rows = [...document.querySelectorAll('#packageRows > *')];
   let total = 0;
@@ -3551,7 +3692,7 @@ function updateTotalVolDisplay(){
   });
   const disp = $('f_totalVolDisplay');
   disp.textContent = total>0 ? total.toFixed(2)+' L' : '—';
-
+ 
   const netDisp = $('f_netVolDisplay');
   if(netDisp){
     let shippedVol = 0;
@@ -3579,3 +3720,5 @@ document.addEventListener('click', (e)=>{
 </script>
 </body>
 </html>
+ 
+
