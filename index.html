@@ -601,11 +601,17 @@ header .sub{margin-top:5px;letter-spacing:0.14em;}
   width:44px;height:44px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);
   color:var(--text);font-size:1.3rem;cursor:pointer;
 }
-.data-menu-panel .footer-links{margin:0;padding:0;border:0;background:none;box-shadow:none;}
-.data-menu-panel .footer-title,.data-menu-panel .footer-subtitle{display:none;}
-.data-menu-panel .footer-actions{grid-template-columns:1fr;}
+.menu-sections{display:grid;gap:0;}
+.menu-section{padding:17px 0;}
+.menu-section:first-child{padding-top:0;}
+.menu-section + .menu-section{border-top:1px solid var(--border);}
+.menu-section-title{margin-bottom:9px;color:var(--copper-bright);font-size:.7rem;font-weight:600;letter-spacing:.08em;}
+.menu-section-desc{margin:-4px 0 10px;color:var(--text-muted);font-size:.68rem;line-height:1.55;}
+.menu-section .footer-actions{grid-template-columns:1fr;margin-top:0;}
+.menu-section .cloud-sync-summary{margin-bottom:9px;}
+.menu-section .footer-note{margin-top:11px;padding-top:11px;}
 .menu-guide-link{
-  width:100%;display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px;border:1px solid var(--copper);
+  width:100%;display:flex;align-items:center;gap:12px;margin:0;padding:14px;border:1px solid var(--copper);
   border-radius:11px;background:rgba(193,120,23,.1);color:var(--text);text-decoration:none;
   font:inherit;text-align:left;cursor:pointer;
 }
@@ -810,33 +816,49 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <div class="data-menu-title">メニュー</div>
       <button type="button" class="menu-close" aria-label="メニューを閉じる" onclick="toggleDataMenu(false)">×</button>
     </div>
-    <button type="button" class="menu-guide-link" onclick="openGuidePage()">
-      <span class="menu-guide-icon" aria-hidden="true">?</span>
-      <span class="menu-guide-copy"><strong>使い方</strong><span>基本操作と困ったときの確認方法</span></span>
-    </button>
-    <div class="footer-links">
-      <div class="footer-title">データ管理</div>
-      <div class="footer-subtitle">書き出し・バックアップ・レシピ取り込み</div>
-      <div class="cloud-sync-summary">
-        <div><strong>クラウド同期</strong><span id="cloudSyncSummary">端末内へ保存しています</span></div>
-        <div class="sync-status-badge" id="cloudSyncBadge">未設定</div>
-      </div>
-      <div class="footer-actions">
-        <button type="button" class="footer-link" onclick="openCloudSyncDialog()">クラウド同期を設定</button>
-        <button type="button" class="footer-link" onclick="exportCSV()">CSV書き出し（Excel用）</button>
-        <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
-        <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
-        <button type="button" class="footer-link" onclick="exportInventoryCSV()">帳簿データを書き出す（原材料受渡簿CSV）</button>
-        <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
-        <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
-        <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
-        <label class="footer-link">レシピを取り込む（BeerXML）<input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])"></label>
-      </div>
-      <div class="footer-note">
-        <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
-        レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、「レシピを取り込む」で選択してください。<br><br>
-        記録を保存するたびに、1日1回まで自動バックアップを作成します（直近7日分）。
-      </div>
+    <div class="menu-sections">
+      <section class="menu-section" aria-labelledby="menuHelpTitle">
+        <div class="menu-section-title" id="menuHelpTitle">ヘルプ</div>
+        <button type="button" class="menu-guide-link" onclick="openGuidePage()">
+          <span class="menu-guide-icon" aria-hidden="true">?</span>
+          <span class="menu-guide-copy"><strong>使い方</strong><span>基本操作と困ったときの確認方法</span></span>
+        </button>
+      </section>
+      <section class="menu-section" aria-labelledby="menuCloudTitle">
+        <div class="menu-section-title" id="menuCloudTitle">アカウント・同期</div>
+        <div class="cloud-sync-summary">
+          <div><strong>クラウド同期</strong><span id="cloudSyncSummary">端末内へ保存しています</span></div>
+          <div class="sync-status-badge" id="cloudSyncBadge">未設定</div>
+        </div>
+        <div class="footer-actions">
+          <button type="button" class="footer-link" onclick="openCloudSyncDialog()">クラウド同期の設定・状態確認</button>
+        </div>
+      </section>
+      <section class="menu-section" aria-labelledby="menuExportTitle">
+        <div class="menu-section-title" id="menuExportTitle">データの書き出し</div>
+        <div class="menu-section-desc">帳簿・仕込み・出荷のCSVファイル</div>
+        <div class="footer-actions">
+          <button type="button" class="footer-link" onclick="exportCSV()">仕込み記録CSV（Excel用）</button>
+          <button type="button" class="footer-link" onclick="exportInventoryCSV()">帳簿データ（原材料受渡簿CSV）</button>
+          <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
+          <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
+        </div>
+      </section>
+      <section class="menu-section" aria-labelledby="menuBackupTitle">
+        <div class="menu-section-title" id="menuBackupTitle">バックアップ・取り込み</div>
+        <div class="menu-section-desc">データ保全と外部レシピの読み込み</div>
+        <div class="footer-actions">
+          <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
+          <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
+          <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
+          <label class="footer-link">レシピを取り込む（BeerXML）<input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])"></label>
+        </div>
+        <div class="footer-note">
+          <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
+          レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、「レシピを取り込む」で選択してください。<br><br>
+          記録を保存するたびに、1日1回まで自動バックアップを作成します（直近7日分）。
+        </div>
+      </section>
     </div>
   </aside>
 
@@ -880,7 +902,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 ログインフォーム改善</div>
+    <div class="version-line">2026.08.26 メニュー整理</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
