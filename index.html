@@ -162,10 +162,18 @@ header .sub{
 .sync-status-badge.connected{border-color:var(--hop); color:var(--hop-bright);}
 .sync-status-badge.syncing{border-color:var(--copper); color:var(--copper-bright);}
 .sync-status-badge.error{border-color:var(--danger); color:#df8069;}
-.cloud-dialog-actions{display:grid; gap:8px; margin-top:14px;}
+.cloud-dialog-actions{display:grid; gap:8px; margin-top:16px;}
 .cloud-dialog-note{font-size:0.72rem; color:var(--text-muted); line-height:1.7; margin-top:12px;}
 .cloud-dialog-status{padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); font-size:0.78rem; line-height:1.6;}
-.cloud-dialog-email{margin-top:14px;}
+.cloud-dialog-email{width:100%;margin:20px 0 4px;}
+.cloud-dialog-email label{margin-bottom:8px;font-size:.82rem;}
+.cloud-dialog-email input[type=email]{
+  display:block;width:100%;min-height:54px;padding:13px 14px;border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text);font:400 16px 'IBM Plex Sans JP',sans-serif;
+}
+.cloud-dialog-email input[type=email]::placeholder{color:var(--text-muted);opacity:.72;}
+.cloud-dialog-email input[type=email]:focus{outline:2px solid var(--copper);border-color:var(--copper);}
+.cloud-dialog-actions .btn{min-height:52px;font-size:.88rem;}
  
 #comboDropdown{
   position:absolute; z-index:200; display:none;
@@ -260,7 +268,7 @@ details[open] > summary.section-title::after{ content:'閉じる ▾'; }
 @media (max-width:420px){ .mineral-grid{grid-template-columns:repeat(2,1fr);} }
 .field{margin-bottom:10px;}
 .field label{display:block; font-size:0.76rem; color:var(--text-muted); margin-bottom:4px;}
-input[type=text], input[type=date], input[type=number], textarea, select{
+input[type=text], input[type=email], input[type=date], input[type=number], textarea, select{
   width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
   border-radius:7px; padding:9px 10px; font-size:0.9rem; font-family:'IBM Plex Sans JP', sans-serif;
 }
@@ -622,6 +630,7 @@ summary.section-title .help-button{margin-top:-7px;margin-bottom:-7px;}
 .help-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
 .help-dialog-title{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:600;}
 .help-dialog-body{color:var(--text-muted);font-size:.86rem;line-height:1.8;white-space:pre-line;}
+#cloudSyncDialog .help-dialog-body{white-space:normal;}
 .guide-page{
   position:fixed;inset:0;z-index:230;background:var(--bg);display:grid;grid-template-rows:auto 1fr;
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
@@ -691,7 +700,7 @@ details.section[open] > summary.section-title{
   border-radius:12px 12px 0 0;background:var(--surface-raised);font-size:0.74rem;
 }
 details.section:not([open]) > summary.section-title{margin-bottom:0;border-bottom:0;border-radius:12px;}
-input[type=text],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{
+input[type=text],input[type=email],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{
   min-height:44px;border-radius:9px;padding:10px 12px;border-color:#504738;background:#302a22;
 }
 .number-control{
@@ -767,7 +776,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   .tab[data-tab="new"]::before{content:"＋";}
   .tab[data-tab="schedule"]::before{content:"◷";}
   .tab[data-tab="inventory"]::before{content:"▦";}
-  input[type=text],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;}
+  input[type=text],input[type=email],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;}
   button,.btn,.add-row-btn,.footer-link{min-height:44px;}
   .batch-card{padding:15px 14px;}
   .footer-links{padding:16px 13px;}
@@ -871,7 +880,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 クラウド同期有効</div>
+    <div class="version-line">2026.08.26 ログインフォーム改善</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
