@@ -609,6 +609,17 @@ details.section:not([open]) > summary.section-title{margin-bottom:0;border-botto
 input[type=text],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{
   min-height:44px;border-radius:9px;padding:10px 12px;border-color:#504738;background:#302a22;
 }
+.number-control{
+  display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:stretch;gap:6px;width:100%;
+}
+.number-control input[type=number]{width:100%;text-align:center;padding-left:6px;padding-right:6px;font-family:'IBM Plex Mono',monospace;}
+.number-step-button{
+  min-width:44px;min-height:44px;padding:0;border:1px solid #504738;border-radius:9px;
+  background:var(--surface-2);color:var(--text);font:600 1.25rem/1 'IBM Plex Sans JP',sans-serif;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;
+}
+.number-step-button:hover{border-color:var(--copper);color:var(--copper-bright);background:var(--surface-hover);}
+.number-step-button:active{transform:scale(.96);}
 textarea{min-height:96px;}
 .btn,.add-row-btn{min-height:44px;border-radius:9px;font-weight:600;}
 .btn-primary{box-shadow:0 7px 16px rgba(193,120,23,0.2);}
@@ -735,7 +746,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 ヘルプUI更新</div>
+    <div class="version-line">2026.08.26 GUI入力更新</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -3744,14 +3755,53 @@ function ensureAccessibleLabels(root){
   });
 }
 
+function enhanceNumberInputs(root){
+  const scope = root || document;
+  scope.querySelectorAll('.field input[type=number]:not([data-number-enhanced])').forEach(input=>{
+    input.dataset.numberEnhanced = '1';
+    const wrap = document.createElement('div');
+    wrap.className = 'number-control';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+
+    const labelText = input.getAttribute('aria-label')
+      || (input.labels && input.labels[0] ? input.labels[0].textContent.trim() : '')
+      || input.placeholder || '数値';
+    const makeButton = (direction, symbol)=>{
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'number-step-button';
+      button.textContent = symbol;
+      button.setAttribute('aria-label', `${labelText}を${direction>0?'増やす':'減らす'}`);
+      button.addEventListener('click', ()=>{
+        if(input.value==='' && input.placeholder && !Number.isNaN(Number(input.placeholder))){
+          input.value = input.placeholder;
+        } else if(direction>0){
+          input.stepUp();
+        } else {
+          input.stepDown();
+        }
+        input.dispatchEvent(new Event('input', {bubbles:true}));
+        input.dispatchEvent(new Event('change', {bubbles:true}));
+      });
+      return button;
+    };
+
+    wrap.insertBefore(makeButton(-1, '−'), input);
+    wrap.appendChild(makeButton(1, '＋'));
+  });
+}
+
 wrapAllDateInputs(document);
 ensureAccessibleLabels(document);
+enhanceNumberInputs(document);
 addHelpButtons(document);
 new MutationObserver((mutations)=>{
   for(const m of mutations){
     if(m.addedNodes && m.addedNodes.length){
       wrapAllDateInputs(document);
       ensureAccessibleLabels(document);
+      enhanceNumberInputs(document);
       addHelpButtons(document);
       return;
     }
