@@ -712,8 +712,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
         <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
         <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
         <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
-        <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
         <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
+        <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
         <label class="footer-link">レシピを取り込む（BeerXML）<input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])"></label>
       </div>
       <div class="footer-note">
@@ -742,10 +742,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   <div class="gauge-card" id="gaugeCard"></div>
  
   <div class="tabs" role="tablist" aria-label="画面切り替え">
-    <button type="button" class="tab active" data-tab="list" role="tab" aria-selected="true" aria-controls="viewList">記録一覧</button>
     <button type="button" class="tab" data-tab="new" role="tab" aria-selected="false" aria-controls="viewForm">新規仕込み</button>
     <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込みスケジュール</button>
     <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料受渡簿</button>
+    <button type="button" class="tab active" data-tab="list" role="tab" aria-selected="true" aria-controls="viewList">記録一覧</button>
   </div>
  
   <div id="viewList"></div>
