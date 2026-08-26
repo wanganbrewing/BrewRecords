@@ -772,16 +772,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   .gauge-title{font-size:1.12rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .tabs{
     position:fixed;left:0;right:0;bottom:0;top:auto;z-index:100;
-    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;
     margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));
     border-width:1px 0 0;border-radius:0;background:rgba(27,24,21,.96);
   }
-  .tab{min-height:52px;padding:5px 2px 4px;font-size:.64rem;line-height:1.1;flex-direction:column;gap:3px;}
+  .tab{min-height:52px;padding:5px 1px 4px;font-size:.58rem;line-height:1.1;flex-direction:column;gap:3px;}
   .tab::before{font-size:1.15rem;line-height:1;}
   .tab[data-tab="list"]::before{content:"▤";}
   .tab[data-tab="new"]::before{content:"＋";}
   .tab[data-tab="schedule"]::before{content:"◷";}
   .tab[data-tab="inventory"]::before{content:"▦";}
+  .tab[data-tab="fermentation"]::before{content:"◉";}
   input[type=text],input[type=email],input[type=date],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;}
   button,.btn,.add-row-btn,.footer-link{min-height:44px;}
   .batch-card{padding:15px 14px;}
@@ -902,7 +903,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 下部メニュー更新</div>
+    <div class="version-line">2026.08.26 発酵管理を分離</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -910,8 +911,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="tabs" role="tablist" aria-label="画面切り替え">
     <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料管理</button>
-    <button type="button" class="tab active" data-tab="new" role="tab" aria-selected="true" aria-controls="viewForm">仕込み・発酵管理</button>
-    <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込みスケジュール</button>
+    <button type="button" class="tab active" data-tab="new" role="tab" aria-selected="true" aria-controls="viewForm">仕込み</button>
+    <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込み時間割</button>
+    <button type="button" class="tab" data-tab="fermentation" role="tab" aria-selected="false" aria-controls="viewFermentation">発酵管理</button>
     <button type="button" class="tab" data-tab="list" role="tab" aria-selected="false" aria-controls="viewList">記録一覧</button>
   </div>
  
@@ -1015,7 +1017,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       </div>
     </details>
  
-    <details class="section">
+    <details class="section" hidden>
       <summary class="section-title">発酵</summary>
       <div class="grid2">
         <div class="field"><label>発酵開始日</label><input type="date" id="f_fermentStart"></div>
@@ -1063,11 +1065,46 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   </div>
  
   <div id="viewDetail" hidden></div>
- 
+
+  <div id="viewFermentation" hidden>
+    <div class="schedule-empty-state" id="ferm_empty" hidden>
+      <div class="schedule-empty-icon" aria-hidden="true">◉</div>
+      <div class="schedule-empty-title">発酵を記録する仕込みがありません</div>
+      <div class="schedule-empty-desc">先に「仕込み」で基本情報を保存すると、発酵管理で選択できるようになります。</div>
+      <button type="button" class="btn btn-primary" onclick="openNewForm()">＋ 最初の仕込みを登録する</button>
+    </div>
+    <div id="ferm_content">
+      <div class="section">
+        <div class="section-title">記録する仕込み</div>
+        <div class="field">
+          <label for="ferm_batchSelect">対象バッチ</label>
+          <select id="ferm_batchSelect" onchange="loadFermentationBatch()"></select>
+        </div>
+        <div class="sched-note">仕込みを選び、発酵開始日と日々の比重・pHを記録します。</div>
+      </div>
+      <div class="section">
+        <div class="section-title">発酵情報</div>
+        <div class="grid2">
+          <div class="field"><label for="fm_fermentStart">発酵開始日</label><input type="date" id="fm_fermentStart"></div>
+          <div class="field"><label for="fm_fermentTemp">発酵温度 (℃)</label><input type="number" step="0.1" min="0" id="fm_fermentTemp" placeholder="10"></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">日々の比重・pH</div>
+        <div class="sched-note" style="margin-bottom:10px;">測定日ごとに比重とpHを追加してください。入力した行は日付順で保存されます。</div>
+        <div id="fm_gravityRows"></div>
+        <button type="button" class="add-row-btn" onclick="addRow('fm_gravityRows','gravity')">＋ 測定を追加</button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" onclick="saveFermentationView()">発酵記録を保存する</button>
+      </div>
+    </div>
+  </div>
+
   <div id="viewSchedule" hidden>
     <div class="schedule-empty-state" id="sch_empty" hidden>
       <div class="schedule-empty-icon" aria-hidden="true">◷</div>
-      <div class="schedule-empty-title">仕込みスケジュールはまだありません</div>
+      <div class="schedule-empty-title">仕込み時間割はまだありません</div>
       <div class="schedule-empty-desc">スケジュールは仕込み記録をもとに自動作成されます。まずバッチ名や仕込み予定日を登録してください。</div>
       <button type="button" class="btn btn-primary" onclick="openNewForm()">＋ 最初の仕込みを登録する</button>
     </div>
@@ -1347,7 +1384,7 @@ const $ = id => document.getElementById(id);
 
 const HELP_CONTENT = {
   '基本情報':'バッチ名・スタイル・仕込み予定日・担当者を入力します。酒税法上の品目区分は、帳簿や課税移出CSVにも使われます。',
-  '仕込み工程':'OGは発酵前の比重です。目標値と実測値を分けて記録できます。糖化・煮沸時間は仕込みスケジュールの自動計算にも反映されます。',
+  '仕込み工程':'OGは発酵前の比重です。目標値と実測値を分けて記録できます。糖化・煮沸時間は仕込み時間割の自動計算にも反映されます。',
   '水質調整':'水源、pH、目標ミネラル値と実際に加えた調整剤を記録します。必要な場合だけ入力してください。',
   '原材料 — モルト':'使用するモルト名と量をkgで入力します。「在庫と連携」を選ぶと、保存後に原材料受渡簿から消費を記録できます。',
   '原材料 — ホップ':'ホップ名・使用量・煮沸終了何分前か、またはドライホップの投入日数を入力します。スケジュールにも自動反映されます。',
@@ -2517,7 +2554,7 @@ function renderGauge(){
 function renderList(){
   const el = $('viewList');
   if(!batches.length){
-    el.innerHTML = `<div class="empty-state"><div class="big">記録はまだありません</div>仕込みを行ったら「仕込み・発酵管理」タブから記録しましょう。</div>`;
+    el.innerHTML = `<div class="empty-state"><div class="big">記録はまだありません</div>最初に「仕込み」タブから基本情報を登録しましょう。</div>`;
     return;
   }
   const sorted = [...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''));
@@ -2699,7 +2736,7 @@ function collectRows(containerId, type){
       .filter(x=>x.type||x.unitVolume||x.quantity);
   }
   if(type==='gravity'){
-    return rows.map(r=>({date:r.querySelector('.rg-date').value, gravity:r.querySelector('.rg-val').value, ph:r.querySelector('.rg-ph').value}))
+    return rows.map(r=>({date:r.querySelector('input.rg-date').value, gravity:r.querySelector('.rg-val').value, ph:r.querySelector('.rg-ph').value}))
       .filter(x=>x.date||x.gravity||x.ph)
       .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   }
@@ -2889,6 +2926,7 @@ function cancelForm(){
 }
  
 function buildBatchFromForm(id){
+  const savedBatch = id ? batches.find(x=>x.id===id) : null;
   return {
     id: id || uid(),
     batchName: $('f_batchName').value,
@@ -2919,9 +2957,11 @@ function buildBatchFromForm(id){
     yeastAmount: $('f_yeastAmount').value,
     yeastUnit: $('f_yeastUnit').value,
     yeastInvId: $('f_yeastInv').value || undefined,
-    fermentStart: $('f_fermentStart').value,
-    fermentTemp: $('f_fermentTemp').value,
-    gravityLog: collectRows('gravityRows','gravity'),
+    // 発酵記録は独立した「発酵管理」で更新する。仕込み情報を後から
+    // 修正したときも、保存済みの発酵記録を上書きしない。
+    fermentStart: savedBatch ? (savedBatch.fermentStart||'') : '',
+    fermentTemp: savedBatch ? (savedBatch.fermentTemp||'') : '',
+    gravityLog: savedBatch ? (savedBatch.gravityLog||[]) : [],
     fg: $('f_fg').value,
     packageDate: $('f_packageDate').value,
     co2vol: $('f_co2vol').value,
@@ -3050,7 +3090,7 @@ function openDetail(id){
       ${b.co2vol?`<div class="row"><span>CO2ボリューム</span><span>${escapeHtml(b.co2vol)} vol</span></div>`:''}
     </div>` : ''}
     ${renderPackageShipments(b)}
-    ${(schedSteps.length||schedDryhops.length) ? `<div class="section"><div class="section-title">仕込みスケジュール</div>
+    ${(schedSteps.length||schedDryhops.length) ? `<div class="section"><div class="section-title">仕込み時間割</div>
       ${b.brewStartTime?`<div class="detail-list"><div class="row"><span>仕込み開始日時</span><span>${escapeHtml(b.brewStartTime.replace('T',' '))}</span></div></div>`:''}
       ${schedSteps.length?`<div class="detail-list">${schedSteps.map(s=>`<div class="row"><span>${escapeHtml(s.label)}</span><span>予定 ${formatStepDisplay(s.date, schedStartDate)}${schedActuals[s.key]?' ／ 実績 '+escapeHtml(schedActuals[s.key]):''}</span></div>`).join('')}</div>`:''}
       ${schedDryhops.length?`<div class="detail-list">${schedDryhops.map(s=>`<div class="row"><span>${escapeHtml(s.label)}</span><span>予定 ${s.dateStr}${schedActuals[s.key]?' ／ 実績 '+escapeHtml(schedActuals[s.key]):''}</span></div>`).join('')}</div>`:''}
@@ -3104,6 +3144,7 @@ function showView(name, scrollTop){
   $('viewList').hidden = name!=='list';
   $('viewForm').hidden = name!=='form';
   $('viewDetail').hidden = name!=='detail';
+  $('viewFermentation').hidden = name!=='fermentation';
   $('viewSchedule').hidden = name!=='schedule';
   $('viewInventory').hidden = name!=='inventory';
   document.querySelectorAll('.tab').forEach(t=>{
@@ -3115,6 +3156,7 @@ function showView(name, scrollTop){
   if(name==='detail') activeTab = document.querySelector('.tab[data-tab="list"]');
   if(name==='form') activeTab = document.querySelector('.tab[data-tab="new"]');
   if(name==='schedule') activeTab = document.querySelector('.tab[data-tab="schedule"]');
+  if(name==='fermentation') activeTab = document.querySelector('.tab[data-tab="fermentation"]');
   if(name==='inventory') activeTab = document.querySelector('.tab[data-tab="inventory"]');
   if(activeTab){
     activeTab.classList.add('active');
@@ -3133,11 +3175,62 @@ document.querySelectorAll('.tab').forEach(t=>{
       else{ openNewForm(); }
     }
     else if(t.dataset.tab==='schedule'){ openScheduleView(); }
+    else if(t.dataset.tab==='fermentation'){ openFermentationView(); }
     else if(t.dataset.tab==='inventory'){ openInventoryView(); }
     else{ showView('list', false); }
   });
 });
- 
+
+/* ---------------- Fermentation management ---------------- */
+function currentFermentationBatch(){
+  const sel = $('ferm_batchSelect');
+  return sel ? batches.find(b=>b.id===sel.value) : null;
+}
+
+function openFermentationView(selectedId){
+  const sel = $('ferm_batchSelect');
+  const sorted = [...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''));
+  sel.innerHTML = sorted.map(b=>`<option value="${b.id}">${escapeHtml(b.batchName||'(名称未設定)')} ${b.brewDate?'・'+b.brewDate:''}</option>`).join('');
+  if(!sorted.length){
+    $('ferm_empty').hidden = false;
+    $('ferm_content').hidden = true;
+    $('fm_gravityRows').innerHTML = '';
+    showView('fermentation', false);
+    return;
+  }
+  $('ferm_empty').hidden = true;
+  $('ferm_content').hidden = false;
+  if(selectedId && sorted.some(b=>b.id===selectedId)) sel.value = selectedId;
+  loadFermentationBatch();
+  showView('fermentation', false);
+}
+
+function loadFermentationBatch(){
+  const b = currentFermentationBatch();
+  if(!b) return;
+  $('fm_fermentStart').value = b.fermentStart || '';
+  $('fm_fermentTemp').value = b.fermentTemp || '';
+  $('fm_gravityRows').innerHTML = '';
+  (b.gravityLog||[]).forEach(x=>addRow('fm_gravityRows','gravity',x));
+  if(!(b.gravityLog||[]).length) addRow('fm_gravityRows','gravity',{date:todayDateValue(),gravity:'',ph:''});
+  wrapAllDateInputs($('viewFermentation'));
+  syncAllDateDisplays();
+}
+
+async function saveFermentationView(){
+  const b = currentFermentationBatch();
+  if(!b) return;
+  b.fermentStart = $('fm_fermentStart').value;
+  b.fermentTemp = $('fm_fermentTemp').value;
+  b.gravityLog = collectRows('fm_gravityRows','gravity');
+  await persist();
+  renderGauge();
+  renderList();
+  renderSchedule();
+  loadFermentationBatch();
+  alert('発酵記録を保存しました。');
+}
+
 /* ---------------- Schedule ---------------- */
 function pad2(n){ return String(n).padStart(2,'0'); }
  
@@ -3462,7 +3555,7 @@ function exportAllSchedulesICS(){
     if(count){ allEvents += ics; batchCount++; eventCount += count; }
   });
   if(!eventCount){
-    alert('仕込み開始日時が入力されているバッチがありません。仕込みスケジュールタブで仕込み開始日時を設定してから書き出してください。');
+    alert('仕込み開始日時が入力されているバッチがありません。仕込み時間割タブで仕込み開始日時を設定してから書き出してください。');
     return;
   }
   const full = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Brew Log//Schedule All//JA\r\nCALSCALE:GREGORIAN\r\n' + allEvents + 'END:VCALENDAR\r\n';

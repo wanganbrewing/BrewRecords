@@ -43,29 +43,35 @@ a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);out
   <section class="hero">
     <div class="eyebrow">USER GUIDE</div>
     <h1>使い方</h1>
-    <p>仕込みの登録から原材料の管理、帳簿の書き出しまで、基本操作をまとめています。</p>
+    <p>原材料の登録から仕込み、発酵の記録まで、迷わず進められる順番で基本操作をまとめています。</p>
   </section>
 
   <section class="quick" aria-labelledby="quick-title">
-    <h2 id="quick-title">最初の仕込みを記録する</h2>
+    <h2 id="quick-title">基本の入力順</h2>
     <div class="steps">
-      <div class="step"><span class="step-num">1</span><div><strong>「仕込み・発酵管理」を開く</strong><span>必要な見出しを押して、入力欄を開きます。</span></div></div>
-      <div class="step"><span class="step-num">2</span><div><strong>基本情報と工程を入力する</strong><span>数値は直接入力するか、＋／−ボタンで調整できます。</span></div></div>
-      <div class="step"><span class="step-num">3</span><div><strong>画面下の「保存する」を押す</strong><span>記録一覧と仕込みスケジュールへ反映されます。</span></div></div>
+      <div class="step"><span class="step-num">1</span><div><strong>原材料を入力</strong><span>「原材料管理」でモルト、ホップ、酵母、副原料の品目と入荷を登録します。</span></div></div>
+      <div class="step"><span class="step-num">2</span><div><strong>仕込み情報を入力</strong><span>「仕込み」でバッチの基本情報、工程、使用する原材料を入力して保存します。</span></div></div>
+      <div class="step"><span class="step-num">3</span><div><strong>仕込み時間割を入力</strong><span>「仕込み時間割」で開始日時を設定し、各工程の予定と実績を記録します。</span></div></div>
+      <div class="step"><span class="step-num">4</span><div><strong>日々の比重・pHを記録</strong><span>「発酵管理」で対象の仕込みを選び、発酵開始日、温度、測定値を保存します。</span></div></div>
     </div>
+    <div class="note">過去と同じ内容を仕込む場合は、「記録一覧」で過去の記録を開き、<strong>「コピーして新規仕込み」</strong>を使うと入力の手間を減らせます。</div>
   </section>
 
   <div class="section-label">画面ごとの使い方</div>
   <details>
-    <summary>仕込み・発酵管理</summary>
+    <summary>仕込み</summary>
     <div class="content">
       <ol><li>「基本情報」でバッチ名、スタイル、日付、担当者を入力します。</li><li>必要な工程だけ見出しを押して開き、目標値や使用原材料を入力します。</li><li>入力後、最下部の「保存する」を押します。</li></ol>
       <div class="note">灰色の数値は入力例です。＋／−を押すと、その数値を起点に増減します。直接入力すると入力例は消えます。</div>
     </div>
   </details>
   <details>
-    <summary>仕込みスケジュール</summary>
-    <div class="content"><p>保存した仕込み記録の日付をもとに、予定と実績を工程別に確認できます。記録がない場合は、まず「仕込み・発酵管理」から登録してください。</p></div>
+    <summary>仕込み時間割</summary>
+    <div class="content"><p>保存した仕込み記録の日付をもとに、予定と実績を工程別に確認できます。記録がない場合は、まず「仕込み」から登録してください。</p></div>
+  </details>
+  <details>
+    <summary>発酵管理</summary>
+    <div class="content"><p>保存済みの仕込みを選び、発酵開始日、発酵温度、日々の比重・pHを記録します。測定値は日付順で保存され、記録一覧の詳細にも反映されます。</p><div class="note">比重・pHは測定するたびに「＋ 測定を追加」で行を増やし、最後に「発酵記録を保存する」を押してください。</div></div>
   </details>
   <details>
     <summary>原材料管理</summary>
@@ -76,8 +82,8 @@ a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);out
     </div>
   </details>
   <details>
-    <summary>記録一覧・記録の修正</summary>
-    <div class="content"><p>保存済みの仕込みが一覧表示されます。対象の記録を開くと、内容の確認・修正、在庫からの消費記録、出荷記録を行えます。修正後は必ず保存してください。</p></div>
+    <summary>記録一覧・コピー・記録の修正</summary>
+    <div class="content"><p>保存済みの仕込みが一覧表示されます。対象の記録を開くと、内容の確認・修正、在庫からの消費記録、出荷記録を行えます。</p><p>過去と同じものを仕込む場合は、対象の記録にある<strong>「コピーして新規仕込み」</strong>を押します。過去のレシピや工程を引き継ぎ、日付や実測値だけを変更して新しい仕込みとして保存できます。</p></div>
   </details>
 
   <div class="section-label">データ管理</div>
