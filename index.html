@@ -723,6 +723,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
         <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
         <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
         <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
+        <button type="button" class="footer-link" onclick="shareBackupToDrive()">Google Driveへ保存</button>
         <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
         <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
         <label class="footer-link">レシピを取り込む（BeerXML）<input type="file" id="importBeerXML" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBeerXML(this.files[0])"></label>
@@ -730,6 +731,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <div class="footer-note">
         <a href="https://www.brewersfriend.com/" target="_blank" rel="noopener">Brewer's Friendでレシピを探す ↗</a><br>
         レシピページ右上の「Export」→「BeerXML」からダウンロードしたファイルを、「レシピを取り込む」で選択してください。<br><br>
+        「Google Driveへ保存」は共有画面を開きます。保存先にGoogle Driveを選択してください。<br><br>
         記録を保存するたびに、1日1回まで自動バックアップを作成します（直近7日分）。
       </div>
     </div>
@@ -3344,11 +3346,44 @@ function exportCSV(){
   downloadBlob('\uFEFF'+lines.join('\r\n'), '仕込み記録_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8');
 }
  
-function exportJSON(){
+function buildBackupFileData(){
   const targetBatches = exportableBatches();
-  if(!targetBatches.length && !inventory.length){ alert('記録がありません'); return; }
+  if(!targetBatches.length && !inventory.length) return null;
   const payload = { batches: targetBatches, inventory: inventory };
-  downloadBlob(JSON.stringify(payload, null, 2), '仕込み記録バックアップ_' + new Date().toISOString().slice(0,10) + '.json', 'application/json');
+  return {
+    text: JSON.stringify(payload, null, 2),
+    filename: '仕込み記録バックアップ_' + new Date().toISOString().slice(0,10) + '.json',
+    type: 'application/json'
+  };
+}
+
+function exportJSON(){
+  const backup = buildBackupFileData();
+  if(!backup){ alert('記録がありません'); return; }
+  downloadBlob(backup.text, backup.filename, backup.type);
+}
+
+async function shareBackupToDrive(){
+  const backup = buildBackupFileData();
+  if(!backup){ alert('記録がありません'); return; }
+  const file = new File([backup.text], backup.filename, {type:backup.type});
+  const shareData = {
+    title: 'Fermenter\'s Ledger バックアップ',
+    text: '保存先にGoogle Driveを選択してください。',
+    files: [file]
+  };
+
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+    try{
+      await navigator.share(shareData);
+      return;
+    }catch(error){
+      if(error && error.name==='AbortError') return;
+    }
+  }
+
+  downloadBlob(backup.text, backup.filename, backup.type);
+  alert('この環境では共有画面を開けないため、バックアップファイルを書き出しました。Google Driveへアップロードしてください。');
 }
  
 function importJSON(file){
