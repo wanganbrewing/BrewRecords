@@ -902,16 +902,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 メニュー整理</div>
+    <div class="version-line">2026.08.26 下部メニュー更新</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
   <div class="gauge-card" id="gaugeCard"></div>
  
   <div class="tabs" role="tablist" aria-label="画面切り替え">
-    <button type="button" class="tab active" data-tab="new" role="tab" aria-selected="true" aria-controls="viewForm">新規仕込み</button>
+    <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料管理</button>
+    <button type="button" class="tab active" data-tab="new" role="tab" aria-selected="true" aria-controls="viewForm">仕込み・発酵管理</button>
     <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込みスケジュール</button>
-    <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料受渡簿</button>
     <button type="button" class="tab" data-tab="list" role="tab" aria-selected="false" aria-controls="viewList">記録一覧</button>
   </div>
  
@@ -1410,7 +1410,7 @@ function openGuidePage(){
   const page = $('guidePage');
   const frame = $('guidePageFrame');
   if(!page || !frame) return;
-  if(frame.getAttribute('src') === 'about:blank') frame.setAttribute('src', './help.html?embedded=1&v=22');
+  if(frame.getAttribute('src') === 'about:blank') frame.setAttribute('src', './help.html?embedded=1&v=25');
   page.hidden = false;
   syncModalState();
   page.querySelector('.menu-close').focus();
@@ -2517,7 +2517,7 @@ function renderGauge(){
 function renderList(){
   const el = $('viewList');
   if(!batches.length){
-    el.innerHTML = `<div class="empty-state"><div class="big">記録はまだありません</div>仕込みを行ったら「新規仕込み」タブから記録しましょう。</div>`;
+    el.innerHTML = `<div class="empty-state"><div class="big">記録はまだありません</div>仕込みを行ったら「仕込み・発酵管理」タブから記録しましょう。</div>`;
     return;
   }
   const sorted = [...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''));
