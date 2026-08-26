@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#1b1815;--surface:#242019;--surface-2:#2d2820;--border:#413a2d;--copper:#c17817;--copper-bright:#e0972e;--hop:#7a9b5f;--text:#ece4d5;--muted:#9a9080;}
-*{box-sizing:border-box}html{scroll-behavior:smooth}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans JP',sans-serif;-webkit-font-smoothing:antialiased}body{background:radial-gradient(ellipse 900px 500px at 50% -10%,rgba(193,120,23,.1),transparent),var(--bg)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;color-scheme:dark}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans JP',sans-serif;-webkit-font-smoothing:antialiased}body{background:radial-gradient(ellipse 900px 500px at 50% -10%,rgba(193,120,23,.1),transparent),var(--bg)}
 .wrap{max-width:720px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(56px + env(safe-area-inset-bottom))}
 .topbar{display:flex;align-items:center;gap:12px;padding:4px 0 18px;border-bottom:1px solid var(--border)}
 .back{width:44px;height:44px;flex:none;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--text);text-decoration:none;font-size:1.35rem;display:flex;align-items:center;justify-content:center}.back:hover{border-color:var(--copper);color:var(--copper-bright)}
@@ -26,6 +26,10 @@ details{margin-bottom:10px;border:1px solid var(--border);border-radius:12px;bac
 .content{padding:16px;color:var(--muted);font-size:.79rem;line-height:1.85}.content p{margin:0 0 12px}.content p:last-child{margin-bottom:0}.content ol,.content ul{margin:0;padding-left:1.35rem}.content li+li{margin-top:7px}.content strong{color:var(--text);font-weight:500}.note{margin-top:14px;padding:11px 12px;border-left:3px solid var(--hop);border-radius:0 8px 8px 0;background:rgba(122,155,95,.08)}
 .faq-q{color:var(--text);font-weight:500}.home{margin-top:24px;min-height:50px;border-radius:11px;background:var(--copper);color:var(--bg);font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center}.home:hover{background:var(--copper-bright)}
 .footer{margin-top:20px;text-align:center;color:var(--muted);font:.64rem 'IBM Plex Mono',monospace}
+body.embedded .topbar,body.embedded .home,body.embedded .footer{display:none}
+body.embedded .wrap{padding-top:18px}
+html.embedded{scrollbar-width:none}
+html.embedded::-webkit-scrollbar{display:none}
 a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);outline-offset:2px}@media(max-width:480px){.wrap{padding-left:13px;padding-right:13px}.hero{padding-top:23px}.content{font-size:.78rem}}
 </style>
 </head>
@@ -115,5 +119,11 @@ a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);out
   <a class="home" href="./">アプリへ戻る</a>
   <div class="footer">FERMENTER'S LEDGER · USER GUIDE</div>
 </main>
+<script>
+if(new URLSearchParams(location.search).get('embedded') === '1'){
+  document.documentElement.classList.add('embedded');
+  document.body.classList.add('embedded');
+}
+</script>
 </body>
 </html>
