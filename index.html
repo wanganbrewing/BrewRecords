@@ -480,18 +480,6 @@ input.inv-amount-over{ border-color:var(--danger) !important; background:rgba(18
 .inventory-group-body{padding:12px;}
 .inventory-group-title .help-button{margin-left:0;width:30px;min-width:30px;}
 .inventory-group .sched-empty{padding:20px 8px;}
-.inventory-export-panel{
-  margin:26px 0 30px;padding:16px;border:1px solid var(--border);border-radius:12px;
-  background:linear-gradient(145deg,var(--surface-raised),var(--surface));box-shadow:0 8px 18px rgba(0,0,0,.1);
-}
-.inventory-export-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
-.inventory-export-icon{
-  flex:none;width:40px;height:40px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);
-  display:flex;align-items:center;justify-content:center;color:var(--copper-bright);font:600 .72rem 'IBM Plex Mono',monospace;
-}
-.inventory-export-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--text);}
-.inventory-export-desc{margin-top:3px;font-size:.72rem;line-height:1.6;color:var(--text-muted);}
-.inventory-export-panel .add-row-btn{background:rgba(193,120,23,.05);}
 .inv-card-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
 .inv-card-name{font-family:'Fraunces', serif; font-weight:600; font-size:1rem;}
 .inv-card-stock{font-family:'IBM Plex Mono', monospace; font-size:0.95rem; color:var(--hop-bright); white-space:nowrap;}
@@ -829,6 +817,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
         <button type="button" class="footer-link" onclick="exportCSV()">CSV書き出し（Excel用）</button>
         <button type="button" class="footer-link" onclick="exportShipmentsCSV()">出荷記録CSV（課税移出）</button>
         <button type="button" class="footer-link" onclick="exportShipmentsMonthlySummaryCSV()">課税移出 月次集計CSV</button>
+        <button type="button" class="footer-link" onclick="exportInventoryCSV()">帳簿データを書き出す（原材料受渡簿CSV）</button>
         <button type="button" class="footer-link" onclick="exportJSON()">バックアップを書き出す</button>
         <label class="footer-link">バックアップを読み込む<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"></label>
         <button type="button" class="footer-link" onclick="restoreFromAutoBackup()">自動バックアップから復元</button>
@@ -882,7 +871,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 アプリ内ヘルプ</div>
+    <div class="version-line">2026.08.26 帳簿書き出し移動</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -1133,13 +1122,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
         <summary class="inventory-group-title"><span class="inventory-group-name">副原料在庫</span><span class="inventory-count" id="inv_count_adjunct">0品目</span><button type="button" class="help-button" aria-label="副原料在庫のヘルプを開く" onclick="event.preventDefault();event.stopPropagation();openHelp('副原料在庫')">?</button><span class="inventory-chevron" aria-hidden="true">›</span></summary>
         <div class="inventory-group-body"><div id="inv_adjunct"></div><div id="inv_addform_adjunct"></div><button type="button" class="add-row-btn" onclick="openAddItemForm('adjunct')">＋ 副原料の品目を追加</button></div>
       </details>
-    </div>
-    <div class="inventory-export-panel">
-      <div class="inventory-export-head">
-        <div class="inventory-export-icon" aria-hidden="true">CSV</div>
-        <div><div class="inventory-export-title">帳簿データの書き出し</div><div class="inventory-export-desc">4分類すべての品目・入荷・消費履歴を、原材料受渡簿としてまとめて出力します。</div></div>
-      </div>
-      <button type="button" class="add-row-btn" onclick="exportInventoryCSV()">原材料受渡簿CSVを書き出す</button>
     </div>
   </div>
  
