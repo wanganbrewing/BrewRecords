@@ -679,6 +679,7 @@ input[type=text],input[type=date],input[type=number],input[type=time],input[type
   min-width:44px;min-height:44px;padding:0;border:1px solid #504738;border-radius:9px;
   background:var(--surface-2);color:var(--text);font:600 1.25rem/1 'IBM Plex Sans JP',sans-serif;
   display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
 }
 .number-step-button:hover{border-color:var(--copper);color:var(--copper-bright);background:var(--surface-hover);}
 .number-step-button:active{transform:scale(.96);}
@@ -834,7 +835,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 空画面改善</div>
+    <div class="version-line">2026.08.26 数値長押し対応</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -3912,7 +3913,11 @@ function enhanceNumberInputs(root){
       button.className = 'number-step-button';
       button.textContent = symbol;
       button.setAttribute('aria-label', `${labelText}を${direction>0?'増やす':'減らす'}`);
-      button.addEventListener('click', ()=>{
+      let holdDelay = null;
+      let holdRepeat = null;
+      let pointerHandled = false;
+
+      const stepValue = ()=>{
         if(input.value==='' && input.placeholder && !Number.isNaN(Number(input.placeholder))){
           input.value = input.placeholder;
         } else if(direction>0){
@@ -3922,6 +3927,37 @@ function enhanceNumberInputs(root){
         }
         input.dispatchEvent(new Event('input', {bubbles:true}));
         input.dispatchEvent(new Event('change', {bubbles:true}));
+      };
+
+      const stopRepeating = ()=>{
+        clearTimeout(holdDelay);
+        clearInterval(holdRepeat);
+        holdDelay = null;
+        holdRepeat = null;
+        setTimeout(()=>{ pointerHandled = false; }, 0);
+      };
+
+      button.addEventListener('pointerdown', event=>{
+        if(event.button!==undefined && event.button!==0) return;
+        event.preventDefault();
+        pointerHandled = true;
+        stepValue();
+        if(button.setPointerCapture){
+          try{ button.setPointerCapture(event.pointerId); }catch(e){}
+        }
+        holdDelay = setTimeout(()=>{
+          holdRepeat = setInterval(stepValue, 90);
+        }, 420);
+      });
+      ['pointerup','pointercancel','lostpointercapture'].forEach(name=>{
+        button.addEventListener(name, stopRepeating);
+      });
+      button.addEventListener('click', event=>{
+        if(pointerHandled){
+          event.preventDefault();
+          return;
+        }
+        stepValue();
       });
       return button;
     };
