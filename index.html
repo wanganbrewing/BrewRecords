@@ -742,15 +742,15 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   <div class="gauge-card" id="gaugeCard"></div>
  
   <div class="tabs" role="tablist" aria-label="画面切り替え">
-    <button type="button" class="tab" data-tab="new" role="tab" aria-selected="false" aria-controls="viewForm">新規仕込み</button>
+    <button type="button" class="tab active" data-tab="new" role="tab" aria-selected="true" aria-controls="viewForm">新規仕込み</button>
     <button type="button" class="tab" data-tab="schedule" role="tab" aria-selected="false" aria-controls="viewSchedule">仕込みスケジュール</button>
     <button type="button" class="tab" data-tab="inventory" role="tab" aria-selected="false" aria-controls="viewInventory">原材料受渡簿</button>
-    <button type="button" class="tab active" data-tab="list" role="tab" aria-selected="true" aria-controls="viewList">記録一覧</button>
+    <button type="button" class="tab" data-tab="list" role="tab" aria-selected="false" aria-controls="viewList">記録一覧</button>
   </div>
  
-  <div id="viewList"></div>
+  <div id="viewList" hidden></div>
  
-  <div id="viewForm" hidden>
+  <div id="viewForm">
     <details class="section" open>
       <summary class="section-title">基本情報</summary>
       <div class="field"><label>バッチ名</label><input type="text" id="f_batchName" placeholder="例）第12仕込み・APA"></div>
@@ -1298,6 +1298,7 @@ async function loadBatches(){
  
   renderGauge();
   renderList();
+  openNewForm();
 }
  
 async function persistInventory(){

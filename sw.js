@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fermenters-ledger-v7';
+const CACHE_NAME = 'fermenters-ledger-v8';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './app-icon.svg'];
 
 self.addEventListener('install', event => {
