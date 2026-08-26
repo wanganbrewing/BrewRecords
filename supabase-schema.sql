@@ -193,3 +193,21 @@ $$;
 
 revoke all on function public.save_app_snapshot(uuid, jsonb, bigint, text) from public;
 grant execute on function public.save_app_snapshot(uuid, jsonb, bigint, text) to authenticated;
+
+-- 無料プランの低アクティビティ停止を避けるためのデータ非参照ヘルスチェック。
+-- GitHub Actionsの supabase-keepalive.yml から1日3回呼び出します。
+create or replace function public.keep_project_active()
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  select jsonb_build_object('ok', true, 'checked_at', now());
+$$;
+
+revoke all on function public.keep_project_active() from public;
+grant execute on function public.keep_project_active() to anon, authenticated;
+
+comment on function public.keep_project_active() is
+  'Data-free health check used by the scheduled GitHub Actions keepalive.';

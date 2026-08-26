@@ -64,6 +64,11 @@
   }
 
   function configureUnavailableUi(){
+    if(new URLSearchParams(location.search).get('demo') === '1'){
+      setStatus('', 'デモ用', 'デモ版ではクラウド同期しません', 'サンプルデータは通常版の記録・クラウドとは分離されています。');
+      refreshControls();
+      return;
+    }
     setStatus('', '準備中', '端末内へ保存しています', 'クラウド同期の接続先はまだ設定されていません。現在も端末内への保存は通常どおり利用できます。');
     refreshControls();
   }

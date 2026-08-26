@@ -1,0 +1,46 @@
+name: Supabase keepalive
+
+on:
+  schedule:
+    # 1日3回（UTC 00:17 / 08:17 / 16:17）に実行します。
+    # 毎時0分を避け、GitHub Actionsの混雑による遅延を減らします。
+    - cron: '17 0,8,16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep Supabase project active
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          (async () => {
+            const config = fs.readFileSync('supabase-config.js', 'utf8');
+            const url = config.match(/supabaseUrl:\s*'([^']+)'/)?.[1];
+            const key = config.match(/supabasePublishableKey:\s*'([^']+)'/)?.[1];
+            if (!url || !key) throw new Error('Supabase publishable configuration is missing.');
+            const response = await fetch(`${url}/rest/v1/rpc/keep_project_active`, {
+              method: 'POST',
+              headers: { apikey: key, 'Content-Type': 'application/json' },
+              body: '{}'
+            });
+            if (!response.ok) throw new Error(`Keepalive failed with HTTP ${response.status}.`);
+            const body = await response.json();
+            if (body.ok !== true) throw new Error('Unexpected keepalive response.');
+            console.log('Supabase keepalive succeeded.');
+          })().catch(error => {
+            console.error(error.message);
+            process.exit(1);
+          });
+          NODE
