@@ -126,7 +126,7 @@
     }catch(error){
       const conflict = String(error && (error.message || error.details || error)).includes('sync_conflict');
       if(conflict){
-        setStatus('error', '競合あり', '別の端末で新しい変更があります', '安全のため自動上書きを止めました。「今すぐ同期」を押して最新版を確認してください。');
+        setStatus('error', '選択が必要', 'PC・スマホの両方で変更されています', '自動同期を一時停止しています。「今すぐ同期」を押し、クラウド版とこの端末版のどちらを残すか確認してください。');
         if(manual) await resolveConflict();
       }else{
         console.error('cloud save error', error);
@@ -139,7 +139,7 @@
 
   async function resolveConflict(){
     const remote = await fetchRemote();
-    const useRemote = confirm('別の端末に新しい変更があります。\n\nOK：クラウドの最新版をこの端末へ取り込む\nキャンセル：この端末のデータを残す');
+    const useRemote = confirm('PC・スマホの両方で同じデータが変更されています。\n\nOK：クラウドに保存されている最新版をこの端末へ取り込む\nキャンセル：この端末の内容を残す（クラウドへの保存は保留）');
     if(useRemote){
       await applyRemote(remote);
       setStatus('connected', '同期済み', 'クラウドの最新版を取り込みました', `クラウド同期は正常です。更新番号 ${state.revision}`);
@@ -164,7 +164,7 @@
       }
       if(Number(remote.revision) > localRevision){
         if(localRevision === 0 && hasLocal && hasRemote){
-          setStatus('error', '確認必要', '端末とクラウドの両方にデータがあります', '「今すぐ同期」を押し、どちらを使用するか確認してください。');
+          setStatus('error', '選択が必要', 'この端末とクラウドの両方にデータがあります', '「今すぐ同期」を押し、クラウド版とこの端末版のどちらを残すか確認してください。');
           return;
         }
         await applyRemote(remote);

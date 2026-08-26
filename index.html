@@ -721,6 +721,17 @@ input[type=text],input[type=email],input[type=date],input[type=number],input[typ
 }
 .number-step-button:hover{border-color:var(--copper);color:var(--copper-bright);background:var(--surface-hover);}
 .number-step-button:active{transform:scale(.96);}
+.fermentation-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;}
+.fermentation-summary-item{padding:11px 8px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);text-align:center;}
+.fermentation-summary-label{display:block;color:var(--text-muted);font-size:.65rem;}
+.fermentation-summary-value{display:block;margin-top:4px;color:var(--copper-bright);font:600 1rem 'IBM Plex Mono',monospace;}
+.gravity-entry{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);}
+.gravity-entry .gravity-date-field{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:end;}
+.gravity-entry .gravity-metric{min-width:0;}
+.gravity-entry-label{display:block;margin-bottom:5px;color:var(--text-muted);font-size:.68rem;}
+.gravity-entry .number-control{grid-template-columns:40px minmax(0,1fr) 40px;gap:4px;}
+.gravity-entry .number-step-button{min-width:40px;}
+.gravity-entry .icon-btn{width:44px;height:44px;align-self:end;}
 textarea{min-height:96px;}
 .btn,.add-row-btn{min-height:44px;border-radius:9px;font-weight:600;}
 .btn-primary{box-shadow:0 7px 16px rgba(193,120,23,0.2);}
@@ -903,7 +914,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 発酵管理を分離</div>
+    <div class="version-line">2026.08.26 発酵管理GUI更新</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -1081,11 +1092,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
           <select id="ferm_batchSelect" onchange="loadFermentationBatch()"></select>
         </div>
         <div class="sched-note">仕込みを選び、発酵開始日と日々の比重・pHを記録します。</div>
+        <div class="fermentation-summary" id="fm_statusSummary" aria-live="polite"></div>
       </div>
       <div class="section">
         <div class="section-title">発酵情報</div>
         <div class="grid2">
-          <div class="field"><label for="fm_fermentStart">発酵開始日</label><input type="date" id="fm_fermentStart"></div>
+          <div class="field"><label for="fm_fermentStart">発酵開始日</label><input type="date" id="fm_fermentStart" onchange="updateFermentationSummary()"></div>
           <div class="field"><label for="fm_fermentTemp">発酵温度 (℃)</label><input type="number" step="0.1" min="0" id="fm_fermentTemp" placeholder="10"></div>
         </div>
       </div>
@@ -2561,11 +2573,19 @@ function renderList(){
   el.innerHTML = sorted.map(b=>{
     const st = statusOf(b);
     const a = abv(b.actualOG||b.targetOG, b.fg);
-    const invActionHtml = b.inventoryDeducted
-      ? `<span class="inv-list-status">✓ 在庫と連携済</span><button type="button" class="inv-list-btn" onclick="event.stopPropagation(); undoInventoryDeduction('${b.id}','list')">在庫と連携を外す</button>`
-      : `<button type="button" class="inv-list-btn" onclick="event.stopPropagation(); deductInventoryForBatch('${b.id}','list')">在庫と連携</button>`;
+    const linkedCount = [...(b.fermentables||[]), ...(b.hops||[]), ...(b.adjuncts||[])].filter(r=>r.invId).length + (b.yeastInvId?1:0);
     const unlinkedCount = getUnlinkedMaterials(b).length;
-    const unlinkedBadge = (unlinkedCount>0) ? `<span class="inv-list-unlinked-badge">⚠ 在庫と未連携${unlinkedCount}件</span>` : '';
+    let invActionHtml = '';
+    if(b.inventoryDeducted){
+      invActionHtml = `<span class="inv-list-status">✓ 在庫から消費済み</span><button type="button" class="inv-list-btn" onclick="event.stopPropagation(); undoInventoryDeduction('${b.id}','list')">消費記録を取り消す</button>`;
+    } else if(linkedCount>0){
+      invActionHtml = `<button type="button" class="inv-list-btn" onclick="event.stopPropagation(); deductInventoryForBatch('${b.id}','list')">在庫から消費を記録</button>`;
+    } else if(unlinkedCount>0){
+      invActionHtml = `<span class="inv-list-unlinked-badge">⚠ 在庫と未連携${unlinkedCount}件</span>`;
+    } else {
+      invActionHtml = `<span class="inv-list-unlinked-badge">原材料未登録</span>`;
+    }
+    const unlinkedBadge = (linkedCount>0 && unlinkedCount>0) ? `<span class="inv-list-unlinked-badge">⚠ 未連携${unlinkedCount}件</span>` : '';
     return `<div class="batch-card" onclick="openDetail('${b.id}')">
       <div class="batch-top">
         <div>
@@ -2697,13 +2717,17 @@ function addRow(containerId, type, data){
       <input type="number" step="1" min="0" placeholder="数量" class="rp-qty" style="flex:0 0 62px;" value="${data?escapeHtml(data.quantity):''}">
       <button type="button" class="icon-btn" onclick="this.parentElement.remove()">✕</button>`;
   } else if(type==='gravity'){
-    row.innerHTML = `<input type="date" class="rg-date" style="flex:0 0 130px;" value="${data?data.date:''}">
-      <input type="number" step="0.001" min="1.000" placeholder="比重" class="rg-val" style="flex:0 0 80px;" value="${data?data.gravity:''}">
-      <input type="number" step="0.01" min="0" max="14" placeholder="pH" class="rg-ph" style="flex:0 0 70px;" value="${data&&data.ph?data.ph:''}">
-      <button type="button" class="icon-btn" onclick="this.parentElement.remove()">✕</button>`;
+    row.className = 'gravity-entry gravity-gui-row';
+    row.innerHTML = `<div class="gravity-date-field">
+        <div><span class="gravity-entry-label">測定日</span><input type="date" class="rg-date" aria-label="測定日" value="${data&&data.date?data.date:''}" onchange="updateFermentationSummary()"></div>
+        <button type="button" class="icon-btn" aria-label="この測定を削除" onclick="this.closest('.gravity-entry').remove(); updateFermentationSummary();">✕</button>
+      </div>
+      <div class="gravity-metric"><span class="gravity-entry-label">比重</span><input type="number" step="0.001" min="1.000" max="1.200" placeholder="1.050" aria-label="比重" class="rg-val" value="${data&&data.gravity?data.gravity:''}" oninput="updateFermentationSummary()"></div>
+      <div class="gravity-metric"><span class="gravity-entry-label">pH</span><input type="number" step="0.01" min="0" max="14" placeholder="5.20" aria-label="pH" class="rg-ph" value="${data&&data.ph?data.ph:''}" oninput="updateFermentationSummary()"></div>`;
   }
   c.appendChild(row);
   refreshAllInvSelectColors();
+  if(type==='gravity' && containerId==='fm_gravityRows' && typeof updateFermentationSummary==='function') updateFermentationSummary();
 }
  
 function collectRows(containerId, type){
@@ -3214,7 +3238,25 @@ function loadFermentationBatch(){
   (b.gravityLog||[]).forEach(x=>addRow('fm_gravityRows','gravity',x));
   if(!(b.gravityLog||[]).length) addRow('fm_gravityRows','gravity',{date:todayDateValue(),gravity:'',ph:''});
   wrapAllDateInputs($('viewFermentation'));
+  enhanceNumberInputs($('viewFermentation'));
   syncAllDateDisplays();
+  updateFermentationSummary();
+}
+
+function updateFermentationSummary(){
+  const b = currentFermentationBatch();
+  const rows = $('fm_gravityRows') ? [...$('fm_gravityRows').querySelectorAll('.gravity-entry')] : [];
+  const values = rows.map(r=>({
+    date:(r.querySelector('input.rg-date')||{}).value||'',
+    gravity:(r.querySelector('.rg-val')||{}).value||'',
+    ph:(r.querySelector('.rg-ph')||{}).value||''
+  })).filter(x=>x.date||x.gravity||x.ph).sort((a,b2)=>(a.date||'').localeCompare(b2.date||''));
+  const latest = values.length ? values[values.length-1] : null;
+  const start = $('fm_fermentStart') ? $('fm_fermentStart').value : '';
+  $('fm_statusSummary').innerHTML = `
+    <div class="fermentation-summary-item"><span class="fermentation-summary-label">発酵開始</span><span class="fermentation-summary-value">${escapeHtml(start||'—')}</span></div>
+    <div class="fermentation-summary-item"><span class="fermentation-summary-label">最新比重</span><span class="fermentation-summary-value">${escapeHtml(latest&&latest.gravity?latest.gravity:(b&&(b.actualOG||b.targetOG))||'—')}</span></div>
+    <div class="fermentation-summary-item"><span class="fermentation-summary-label">最新pH</span><span class="fermentation-summary-value">${escapeHtml(latest&&latest.ph?latest.ph:'—')}</span></div>`;
 }
 
 async function saveFermentationView(){
@@ -4077,7 +4119,7 @@ function ensureAccessibleLabels(root){
 
 function enhanceNumberInputs(root){
   const scope = root || document;
-  scope.querySelectorAll('.field input[type=number]:not([data-number-enhanced])').forEach(input=>{
+  scope.querySelectorAll('.field input[type=number]:not([data-number-enhanced]), .gravity-gui-row input[type=number]:not([data-number-enhanced])').forEach(input=>{
     input.dataset.numberEnhanced = '1';
     const wrap = document.createElement('div');
     wrap.className = 'number-control';
