@@ -1,6 +1,12 @@
 name: Supabase keepalive
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/supabase-keepalive.yml'
+      - 'supabase-config.js'
+      - 'supabase-keepalive.sql'
   schedule:
     # 1日3回（UTC 00:17 / 08:17 / 16:17）に実行します。
     # 毎時0分を避け、GitHub Actionsの混雑による遅延を減らします。
