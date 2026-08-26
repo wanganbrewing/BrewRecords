@@ -851,7 +851,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
  
   <div class="app-meta">
     <div class="mock-banner">試作版</div>
-    <div class="version-line">2026.08.26 在庫メニュー初期閉鎖</div>
+    <div class="version-line">2026.08.26 開閉メニュー初期閉鎖</div>
   </div>
 
   <!-- Gauge: featured latest batch -->
@@ -867,7 +867,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   <div id="viewList" hidden></div>
  
   <div id="viewForm">
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">基本情報</summary>
       <div class="field"><label>バッチ名</label><input type="text" id="f_batchName" placeholder="例）第12仕込み・APA"></div>
       <div class="grid2">
@@ -885,7 +885,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       </div>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">仕込み工程</summary>
       <div class="grid2">
         <div class="field"><label>目標 OG</label><input type="number" step="0.001" min="1.000" id="f_targetOG" placeholder="1.050"></div>
@@ -921,13 +921,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <button type="button" class="add-row-btn" onclick="addRow('mineralRows','mineral')">＋ 添加剤を追加</button>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">原材料 — モルト</summary>
       <div id="fermentableRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('fermentableRows','fermentable')">＋ モルトを追加</button>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">原材料 — ホップ</summary>
       <div id="hopRows"></div>
       <button type="button" class="add-row-btn" onclick="addRow('hopRows','hop')">＋ ホップを追加</button>
@@ -940,7 +940,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <div class="sched-note">※在庫と連携しても、ここで保存しただけでは受渡簿から差し引かれません。保存後、バッチ詳細画面の「在庫から消費を記録」を押した時点で反映されます。</div>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">酵母</summary>
       <div class="hop-entry" id="yeastEntry">
         <div class="dyn-row">
@@ -964,7 +964,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       </div>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">発酵</summary>
       <div class="grid2">
         <div class="field"><label>発酵開始日</label><input type="date" id="f_fermentStart"></div>
@@ -975,7 +975,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
       <button type="button" class="add-row-btn" onclick="addRow('gravityRows','gravity')">＋ 測定を追加</button>
     </details>
  
-    <details class="section" open>
+    <details class="section">
       <summary class="section-title">パッケージング</summary>
       <div class="grid2">
         <div class="field"><label>FG（最終比重）</label><input type="number" step="0.001" min="1.000" id="f_fg" placeholder="1.010"></div>
