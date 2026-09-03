@@ -25,7 +25,7 @@ function app(){
     renderGauge(){}, renderList(){}, renderInventory(){}, renderFormInvDeductArea(){}, openDetail(){}, showView(){}, toggleDataMenu(){},
     window:{storage:{async set(k,v){data.set(k,v);}, async get(k){if(!data.has(k)) throw Error('missing'); return {value:data.get(k)};}, async delete(k){data.delete(k);}},fermentCloudSync:{queueSave(){}}},
     downloadBlob:(...args)=>{c.download=args;},
-    persist:async()=>{}, persistInventory:async()=>{},
+    persist:async()=>{}, persistInventory:async()=>{}, maybeAutoBackup:async()=>{},
     resetForm:()=>vm.runInContext('copiedScheduleSteps=[]',c),
     populateFormFields:x=>{c.populated=x;},
   });
@@ -34,6 +34,8 @@ function app(){
   for(const name of ['invStock','deductInventoryForBatch','syncInventoryForBatch','copyScheduleForNewBatch','duplicateBatch','scaleDuplicateBatch','buildBatchFromForm','saveBatch','preservePackageShipments','prepareDeletion','finishDeletion','undoLastDeletion','deleteInventoryReceipt','deleteInventoryItem','deleteInventoryConsumption','deleteBatch','deleteShipmentLot','csvEscape','exportInventoryCSV']) vm.runInContext(extract(name),c);
   c.INV_CATEGORY_LABEL={hop:'ホップ'};
   vm.runInContext(extract('confirmDataAction'),c);
+  vm.runInContext('let inventoryAdjustmentState=null,inventoryAdjustmentSaving=false;',c);
+  for(const name of ['getInventoryLedgerRows','filterInventoryLedgerRows','buildInventoryAdjustment','submitInventoryAdjustment']) vm.runInContext(extract(name),c);
   c.getPackages=b=>b.packages||[];
   c.set=(b,i)=>{c.seedB=b;c.seedI=i;vm.runInContext('batches=seedB;inventory=seedI',c);};
   c.read=()=>c.window.fermentCloudData.getSnapshot();
@@ -181,6 +183,78 @@ test('same-name inventory CSV balances remain separate',()=>{
   const rows=c.download[0].split('\r\n').slice(1).map(x=>x.split(','));
   assert.deepEqual(rows.map(x=>x[6]),['100','20']);
   assert.deepEqual(rows.map(x=>x[9]),['h','h2']);
+});
+
+test('stocktake adjustment is a delta: receipts and recipe consumptions stay unchanged',()=>{
+  const c=app();const i=item(25);i.consumptions=[{id:'c',amount:3,date:'2026-09-02'}];
+  const originals=JSON.stringify([i.receipts,i.consumptions]);
+  const a=c.buildInventoryAdjustment(i,'20.125','実地棚卸','2026-09-03','2026-09-03T00:00:00Z');
+  assert.equal(a.before,22);assert.equal(a.amount,-1.875);i.adjustments=[a];
+  assert.equal(c.invStock(i),20.125);
+  assert.equal(JSON.stringify([i.receipts,i.consumptions]),originals);
+  i.adjustments.push(c.buildInventoryAdjustment(i,'0','廃棄確認','2026-09-03','now'));
+  assert.equal(c.invStock(i),0);
+  i.adjustments.push(c.buildInventoryAdjustment(i,'0.25','再計量','2026-09-03','now'));
+  assert.equal(c.invStock(i),0.25);
+});
+
+test('stocktake rejects blank, negative, nonfinite, excessive precision, no reason, unchanged and future records',()=>{
+  const c=app();const i=item();
+  for(const value of ['', ' ', '-1','NaN','Infinity','1000000001','0.0001']) assert.throws(()=>c.buildInventoryAdjustment(i,value,'棚卸','2026-09-03','now'));
+  assert.throws(()=>c.buildInventoryAdjustment(i,'1',' ','2026-09-03','now'));
+  assert.throws(()=>c.buildInventoryAdjustment(i,'1','あ'.repeat(301),'2026-09-03','now'));
+  assert.throws(()=>c.buildInventoryAdjustment(i,'100','棚卸','2026-09-03','now'));
+  i.receipts[0].date='2026-09-04';assert.throws(()=>c.buildInventoryAdjustment(i,'1','棚卸','2026-09-03','now'));
+});
+
+test('ledger and CSV include adjustments and retain opening balance with date filters',()=>{
+  const c=app();const i=item(25);i.consumptions=[{id:'c',amount:3,date:'2026-09-02'}];
+  i.adjustments=[c.buildInventoryAdjustment(i,'20','こぼれ','2026-09-03','now')];
+  const other=item(7);other.id='h2';c.set([],[i,other]);
+  const all=c.getInventoryLedgerRows();
+  const selected=c.filterInventoryLedgerRows(all,{from:'2026-09-03',to:'2026-09-03',search:'hOP',category:'hop'});
+  assert.equal(selected.length,1);assert.equal(selected[0].balance,20);assert.equal(selected[0].reason,'こぼれ');
+  assert.equal(all.filter(r=>r.itemId==='h2').at(-1).balance,7);
+  c.exportInventoryCSV();const csv=c.download[0];
+  assert.match(csv,/棚卸調整,-2,g,20/);assert.match(csv,/こぼれ,22,20,now/);
+  assert.match(csv,/調整記録日時/);
+});
+
+test('inventory deduction honors stocktake adjustments',async()=>{
+  const c=app();const i=item(100);i.adjustments=[c.buildInventoryAdjustment(i,'5','棚卸','2026-09-03','now')];
+  c.set([batch([10])],[i]);await c.deductInventoryForBatch('b','list');
+  assert.equal(c.read().inventory[0].consumptions.length,0);
+  c.set([batch([5])],[i]);await c.deductInventoryForBatch('b','list');
+  assert.equal(c.invStock(c.read().inventory[0]),0);
+});
+
+function prepareStocktake(c){
+  c.set([],[item(25)]);
+  c.run('inventoryAdjustmentState={itemId:"h",before:JSON.stringify(window.fermentCloudData.getSnapshot())}');
+  c.$('inventoryAdjustmentActual').value='20';
+  c.$('inventoryAdjustmentReason').value='棚卸';
+  c.$('inventoryAdjustmentDialog').close=()=>{c.closed=true;};
+}
+
+test('stocktake persists once, roundtrips snapshot and backs up without modifying recipe',async()=>{
+  const c=app();prepareStocktake(c);await c.submitInventoryAdjustment();
+  const saved=JSON.parse(c.data.get('wangan-inventory'));
+  assert.equal(c.invStock(saved[0]),20);assert.equal(saved[0].adjustments.length,1);
+  assert.equal(c.closed,true);
+  const snapshot=c.read();await c.window.fermentCloudData.applySnapshot(JSON.parse(JSON.stringify(snapshot)));
+  assert.equal(c.invStock(c.read().inventory[0]),20);
+});
+
+test('stocktake cancellation, double submission, failed save and stale form are safe',async()=>{
+  const c=app();prepareStocktake(c);const original=JSON.stringify(c.read());
+  c.confirmAction=async()=>false;await c.submitInventoryAdjustment();assert.equal(JSON.stringify(c.read()),original);
+  c.confirmAction=async()=>true;c.window.storage.set=async()=>{throw Error('quota');};
+  await c.submitInventoryAdjustment();assert.equal(JSON.stringify(c.read()),original);assert.match(c.$('inventoryAdjustmentError').textContent,/保存できなかった/);
+  c.run('inventory[0].name="changed"');await c.submitInventoryAdjustment();assert.match(c.$('inventoryAdjustmentError').textContent,/更新/);
+  const d=app();prepareStocktake(d);let release;
+  d.confirmAction=()=>new Promise(r=>release=r);
+  const first=d.submitInventoryAdjustment();await d.submitInventoryAdjustment();release(true);await first;
+  assert.equal(d.read().inventory[0].adjustments.length,1);
 });
 
 function cloudApp({remoteRevision=1, pending='0', localOrg='org', localRevision=1, hasLocal=true}={}){

@@ -81,6 +81,10 @@ a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);out
       <p>アプリを開いたとき最初に表示される画面です。モルト、ホップ、酵母、副原料の4分類をアイコン付きで管理します。</p>
       <ol><li>管理したい分類を押して開きます。</li><li>「品目を追加」から原材料名と単位を登録します。</li><li>品目を開き、入荷または消費を記録します。</li></ol>
       <p>帳簿を書き出す場合は、右上の☰メニューから<strong>「帳簿データを書き出す（原材料受渡簿CSV）」</strong>を押します。</p>
+      <p><strong>在庫一覧：</strong>原材料画面の「在庫一覧」で全品目の現在庫を確認できます。分類・品目名で絞り込めます。PCでは横幅を広く使い、スマートフォンでは表を横にスクロールできます。</p>
+      <p><strong>受払一覧：</strong>入荷・消費・棚卸調整を日付順に表示します。分類・品目名・期間で絞り込めます。残高は品目ごとに期間前の履歴も含めて計算します。同日の表示順は入荷→消費→調整です。</p>
+      <p><strong>棚卸調整：</strong>品目または在庫一覧の「棚卸調整」を押し、現在の実在庫と理由を入力します。「調整前 → 実在庫」と差分を確認して保存します。0への調整も可能です。現在の理論在庫との差分だけを本日付で記録し、元の入荷・消費・仕込み記録は変更しません。</p>
+      <div class="note">棚卸調整は履歴として残り、クラウド同期・JSONバックアップ・CSVにも含まれます。誤った調整は、正しい実在庫で再度調整してください。過去日付の棚卸、月末の棚卸金額の自動保存はまだ対象外です。後から古い入荷や消費を変更すると、現在庫も再計算されます。</div>
     </div>
   </details>
   <details>
@@ -99,7 +103,7 @@ a:focus-visible,summary:focus-visible{outline:3px solid rgba(240,173,78,.55);out
   </details>
   <details>
     <summary>CSV書き出し</summary>
-    <div class="content"><ul><li><strong>CSV書き出し（Excel用）：</strong>仕込み記録の一覧</li><li><strong>出荷記録CSV（課税移出）：</strong>出荷明細</li><li><strong>課税移出 月次集計CSV：</strong>月ごとの集計</li><li><strong>原材料受渡簿CSV：</strong>原材料の入荷・消費履歴</li></ul></div>
+    <div class="content"><ul><li><strong>CSV書き出し（Excel用）：</strong>仕込み記録の一覧</li><li><strong>出荷記録CSV（課税移出）：</strong>出荷明細</li><li><strong>課税移出 月次集計CSV：</strong>月ごとの集計</li><li><strong>原材料受渡簿CSV：</strong>原材料の入荷・消費・棚卸調整の全履歴。画面の絞り込み条件は適用されません。調整理由・調整時の理論在庫・実在庫・記録日時も末尾の列に含まれます。</li></ul></div>
   </details>
   <details>
     <summary>BeerXMLレシピの取り込み</summary>

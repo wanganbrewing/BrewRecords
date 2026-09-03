@@ -1,7 +1,7 @@
-const CACHE_NAME = 'fermenters-ledger-v53';
+const CACHE_NAME = 'fermenters-ledger-v54';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
 
-APP_SHELL.push('./supabase-config.js?v=53', './cloud-sync.js?v=53');
+APP_SHELL.push('./supabase-config.js?v=54', './cloud-sync.js?v=54', './help.html?embedded=1&v=54');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
