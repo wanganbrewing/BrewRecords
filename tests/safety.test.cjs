@@ -60,7 +60,7 @@ test('release number agrees across visible labels, scripts, help and service wor
   const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
   assert.ok(sw.includes(`fermenters-ledger-v${v}`));
   assert.ok(sw.includes("pathname.endsWith('/version.json')"));
-  for(const file of ['supabase-config.js','cloud-sync.js','inventory-costing.js','inventory-valuation-ui.js']){
+  for(const file of ['supabase-config.js','cloud-sync.js','inventory-costing.js','inventory-valuation-ui.js','batch-expenses.js','batch-expenses-ui.js']){
     assert.ok(html.includes(`${file}?v=${v}`));assert.ok(sw.includes(`${file}?v=${v}`));
   }
   assert.ok(html.includes(`help.html?embedded=1&v=${v}`));
@@ -125,6 +125,17 @@ test('copy and scale-copy preserve steps on new save, not actuals or source IDs'
     c.resetForm();assert.equal(c.buildBatchFromForm(null).customScheduleSteps.length,0);
   }
 });
+test('editing preserves additional costs and both copy modes start without costs or history',()=>{
+  for(const scaled of [false,true]){
+    const c=app(),b=batch();b.batchSize='20';b.otherCosts=[{id:'cost1',amount:1000,percent:20}];b.otherCostsReviewed=true;b.otherCostHistory=[{id:'audit1'}];c.set([b],[]);
+    const edited=c.buildBatchFromForm('b');
+    assert.equal(JSON.stringify(edited.otherCosts),JSON.stringify(b.otherCosts));assert.equal(edited.otherCostsReviewed,true);assert.equal(edited.otherCostHistory[0].id,'audit1');
+    c.prompt=()=> '40';if(scaled)c.scaleDuplicateBatch('b');else c.duplicateBatch('b');
+    assert.equal(c.populated.otherCosts.length,0);assert.equal(c.populated.otherCostHistory.length,0);assert.equal(c.populated.otherCostsReviewed,false);
+    const fresh=c.buildBatchFromForm(null);assert.equal(fresh.otherCosts.length,0);assert.equal(fresh.otherCostHistory.length,0);assert.equal(fresh.otherCostsReviewed,false);
+  }
+});
+
 test('receipt delete writes durable checkpoint; undo does not overwrite later edits',async()=>{
   const c=app();c.set([],[item()]);
   await c.deleteInventoryReceipt('h','r');

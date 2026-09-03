@@ -89,6 +89,7 @@ test('new scripts parse and snapshot/backup wiring includes valuation data',()=>
 
 test('real snapshot adapter and backup export roundtrip the new report archive',async()=>{
   const c=harness();await c.saveValuationReport();
+  c.run('batches=[{id:"cost-batch",otherCosts:[{id:"e",category:"electricity",name:"電気代",amount:10000,percent:20}],otherCostsReviewed:true,otherCostHistory:[{id:"audit",reason:"初回登録"}]}]');
   c.renderGauge=()=>{};c.renderList=()=>{};c.renderInventory=()=>{};
   c.exportableBatches=()=>c.read().batches;
   const start=html.indexOf('window.fermentCloudData = {'),end=html.indexOf('\n};',start)+3;
@@ -98,5 +99,8 @@ test('real snapshot adapter and backup export roundtrip the new report archive',
   assert.equal(c.read().valuationBook.reports[0].subtotal,2000);
   const begin=html.indexOf('function buildBackupFileData(){'),rest=html.slice(begin);vm.runInContext(rest.slice(0,rest.search(/^}/m)+1),c);
   assert.equal(JSON.parse(c.buildBackupFileData().text).valuationBook.reports[0].subtotal,2000);
+  const expenses=JSON.parse(c.buildBackupFileData().text).batches[0];
+  assert.equal(expenses.otherCosts[0].amount,10000);assert.equal(expenses.otherCostsReviewed,true);assert.equal(expenses.otherCostHistory[0].reason,'初回登録');
+  assert.equal(c.read().batches[0].otherCosts[0].percent,20);
   await c.window.fermentCloudData.applySnapshot({batches:[],inventory:[]});assert.equal(c.read().valuationBook.reports.length,0);
 });
