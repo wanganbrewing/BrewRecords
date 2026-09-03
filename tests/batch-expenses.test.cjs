@@ -40,6 +40,7 @@ function harness(){
   const c=vm.createContext({console,Date,BatchExpenses:engine,InventoryCosting:costing,uid:()=>`new-${++seq}`,todayDateValue:()=> '2026-09-03',yenReference:x=>x==null?'未計算':`¥${x}`,escapeHtml:s=>String(s??'').replaceAll('<','&lt;').replaceAll('>','&gt;'),csvEscape:v=>String(v??''),getUnlinkedMaterials:()=>[],maybeAutoBackup(){},openDetail(){},confirmDataAction:async()=>true,
     $:id=>{if(!fields.has(id))fields.set(id,{value:'',checked:false,close(){this.closed=true;}});return fields.get(id);},document:{addEventListener(){}},window:{storage:{async set(k,v){writes.push([k,v]);}},fermentCloudSync:{queueSave(){}}},downloadBlob:(...a)=>{c.download=a;}});
   c.seed=batch();vm.runInContext('let batches=[seed],inventory=[];',c);vm.runInContext('window.fermentCloudData={getSnapshot(){return JSON.parse(JSON.stringify({batches,inventory}));}};',c);vm.runInContext(ui,c);
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../cost-catalog-ui.js'),'utf8'),c);
   c.readExpenseDraft=()=>JSON.parse(JSON.stringify(draft));c.renderExpenseDraft=rows=>{draft=JSON.parse(JSON.stringify(rows));};c.setDraft=rows=>draft=rows;c.draft=()=>draft;c.read=()=>c.window.fermentCloudData.getSnapshot();c.run=s=>vm.runInContext(s,c);c.writes=writes;c.exportableBatches=()=>c.read().batches;
   c.run('expenseEditorState={batchId:"b",before:JSON.stringify(window.fermentCloudData.getSnapshot()),removed:[]}');c.$('expenseReason').value='UAT';c.$('expenseReviewed').checked=true;c.setDraft([{...row(),amount:12000}]);return c;
 }
@@ -65,4 +66,13 @@ test('CSV contains allocated costs, details, history and incomplete state',()=>{
 test('UI escapes expense content and history',()=>{
   const c=harness(),b=batch();b.otherCosts[0].name='<img src=x>';const result=c.renderExpenseSummary(b,{subtotal:100,complete:true});assert.ok(!result.includes('<img'));assert.match(result,/&lt;img/);
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(__dirname,'../batch-expenses.js'),'utf8'));
+});
+test('form expenses remain draft until batch save; cancellation and later sync are guarded',async()=>{
+  for(const cancel of [true,false]){
+    const c=harness();c.alert=()=>{};c.run('expenseEditorState.origin="form";expenseEditorState.batchSnapshot=batches[0]');c.confirmDataAction=async()=>!cancel;
+    await c.saveExpenseEditor();assert.equal(c.writes.length,0);assert.equal(c.read().batches[0].otherCosts[0].amount,10000);
+    if(cancel)assert.equal(c.run('formExpenseDraft'),null);else{
+      assert.equal(c.run('formExpenseDraft.otherCosts[0].amount'),12000);assert.equal(c.validateFormCostDraft(),true);c.run('batches[0].batchName="remote change"');assert.equal(c.validateFormCostDraft(),false);
+    }
+  }
 });

@@ -60,7 +60,7 @@ test('release number agrees across visible labels, scripts, help and service wor
   const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
   assert.ok(sw.includes(`fermenters-ledger-v${v}`));
   assert.ok(sw.includes("pathname.endsWith('/version.json')"));
-  for(const file of ['supabase-config.js','cloud-sync.js','inventory-costing.js','inventory-valuation-ui.js','batch-expenses.js','batch-expenses-ui.js']){
+  for(const file of ['supabase-config.js','cloud-sync.js','inventory-costing.js','inventory-valuation-ui.js','batch-expenses.js','batch-expenses-ui.js','cost-catalog.js','cost-catalog-ui.js']){
     assert.ok(html.includes(`${file}?v=${v}`));assert.ok(sw.includes(`${file}?v=${v}`));
   }
   assert.ok(html.includes(`help.html?embedded=1&v=${v}`));

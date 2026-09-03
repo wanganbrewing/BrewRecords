@@ -15,10 +15,17 @@
     if(!name||name.length>120)throw Error('内容を120文字以内で入力してください。');
     const date=String(row.date||'');
     if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date+'T00:00:00Z').toISOString().slice(0,10)!==date||date>today))throw Error('日付は本日以前の有効な日付にしてください（空欄も可）。');
-    const amount=decimal(row.amount,1e9,'元の金額',true),percent=decimal(row.percent,100,'割り当てる割合',false);
+    let amount=decimal(row.amount,1e9,'元の金額',true),percent=decimal(row.percent,100,'割り当てる割合',false),pricing;
+    if(row.pricing){
+      const p=row.pricing,rate=Number(p.rate),quantity=p.quantity==null||String(p.quantity).trim()===''?'':Number(p.quantity);
+      if(!p.catalogId||!['mL','L','g','kg','個','回（1仕込み）'].includes(p.unit)||p.rate==null||String(p.rate).trim()===''||!Number.isFinite(rate)||rate<0||rate>1e9||Math.abs(rate*10000-Math.round(rate*10000))>0.0001)throw Error('保存された参考単価を確認してください。');
+      if(quantity!==''&&(!Number.isFinite(quantity)||quantity<0||quantity>1e9||Math.abs(quantity*10000-Math.round(quantity*10000))>0.0001))throw Error('使用量は0〜10億、小数第4位までで入力してください。');
+      if(quantity!==''&&rate*quantity>1e9)throw Error('1行の参考費用は10億円以下にしてください。');
+      pricing={catalogId:String(p.catalogId),revision:p.revision,unit:p.unit,rate,quantity};amount=quantity===''?'':round(rate*quantity);percent=100;
+    }
     const reference=String(row.reference||'').trim(),note=String(row.note||'').trim();
     if(reference.length>120||note.length>300)throw Error('伝票番号は120文字、メモは300文字以内で入力してください。');
-    return {id:String(row.id||''),category,name,date,amount,percent,reference,note};
+    return {id:String(row.id||''),category,name,date,amount,percent,reference,note,...(pricing?{pricing}:{})};
   }
   function summarize(rows,today){
     if(rows==null)rows=[];
@@ -40,6 +47,7 @@
     if(batch.otherCosts!=null&&!Array.isArray(batch.otherCosts))throw Error('保存済みの費用形式が不正です。バックアップを確認してください。');
     const clean=rows.map(row=>normalizeRow(row,today));
     const ids=new Set();for(const r of clean){if(!r.id||ids.has(r.id))throw Error('費用のIDが重複しています。画面を開き直してください。');ids.add(r.id);}
+    const sources=new Set();for(const row of clean){if(row.pricing){if(sources.has(row.pricing.catalogId))throw Error('同じ消耗品が重複しています。使用量を1行にまとめてください。');sources.add(row.pricing.catalogId);}}
     const why=String(reason||'').trim();if(!why||why.length>300)throw Error('保存・訂正理由を300文字以内で入力してください。');
     if(reviewed&&summarize(clean,today).unknown)throw Error('金額未入力の費用があります。入力完了にはできません。');
     const before={rows:JSON.parse(JSON.stringify(batch.otherCosts||[])),reviewed:batch.otherCostsReviewed===true};

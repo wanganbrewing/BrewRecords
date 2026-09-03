@@ -83,12 +83,14 @@ test('concurrent confirmation edits block persistence; double click saves only o
 test('new scripts parse and snapshot/backup wiring includes valuation data',()=>{
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(__dirname,'../inventory-costing.js'),'utf8'));
   assert.match(html,/valuationBook: JSON\.parse\(JSON\.stringify\(valuationBook\)\)/);
-  assert.match(html,/const payload = \{ batches: targetBatches, inventory: inventory, valuationBook \}/);
+  assert.ok(html.includes('inventory: inventory, valuationBook, costCatalog:catalogSnapshot()'));
   assert.match(html,/JSON\.stringify\(window\.fermentCloudData\.getSnapshot\(\)\)/);
 });
 
 test('real snapshot adapter and backup export roundtrip the new report archive',async()=>{
   const c=harness();await c.saveValuationReport();
+  c.CostCatalog=require('../cost-catalog.js');c.document={addEventListener(){}};
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../cost-catalog-ui.js'),'utf8'),c);
   c.run('batches=[{id:"cost-batch",otherCosts:[{id:"e",category:"electricity",name:"電気代",amount:10000,percent:20}],otherCostsReviewed:true,otherCostHistory:[{id:"audit",reason:"初回登録"}]}]');
   c.renderGauge=()=>{};c.renderList=()=>{};c.renderInventory=()=>{};
   c.exportableBatches=()=>c.read().batches;
