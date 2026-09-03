@@ -17,7 +17,7 @@ function app(){
   const alerts = [];
   const fields = new Map();
   const c = vm.createContext({console, alerts, data, Date,
-    alert:x=>alerts.push(x), confirm:()=>true,
+    alert:x=>alerts.push(x), confirm:()=>true, confirmAction:async()=>true,
     uid:(()=>{let n=0; return ()=>`new-${++n}`;})(),
     todayDateValue:()=> '2026-09-03', round2:x=>Math.round(x*100)/100,
     $:id=>{if(!fields.has(id)) fields.set(id,{value:'', hidden:true}); return fields.get(id);},
@@ -33,6 +33,7 @@ function app(){
   vm.runInContext('window.fermentCloudData={getSnapshot(){return JSON.parse(JSON.stringify({schemaVersion:1,batches,inventory}));},async applySnapshot(p){batches=p.batches;inventory=p.inventory;}};',c);
   for(const name of ['invStock','deductInventoryForBatch','syncInventoryForBatch','copyScheduleForNewBatch','duplicateBatch','scaleDuplicateBatch','buildBatchFromForm','saveBatch','preservePackageShipments','prepareDeletion','finishDeletion','undoLastDeletion','deleteInventoryReceipt','deleteInventoryItem','deleteInventoryConsumption','deleteBatch','deleteShipmentLot','csvEscape','exportInventoryCSV']) vm.runInContext(extract(name),c);
   c.INV_CATEGORY_LABEL={hop:'ホップ'};
+  vm.runInContext(extract('confirmDataAction'),c);
   c.getPackages=b=>b.packages||[];
   c.set=(b,i)=>{c.seedB=b;c.seedI=i;vm.runInContext('batches=seedB;inventory=seedI',c);};
   c.read=()=>c.window.fermentCloudData.getSnapshot();
@@ -115,6 +116,37 @@ test('checkpoint failure prevents deletion',async()=>{
   const c=app();c.set([],[item()]);c.window.storage.set=async()=>{throw Error('quota');};
   await c.deleteInventoryReceipt('h','r');
   assert.equal(c.read().inventory[0].receipts.length,1);
+});
+
+test('canceling each deletion leaves data and checkpoints unchanged',async()=>{
+  for(const action of [c=>c.deleteInventoryItem('h'),c=>c.deleteInventoryReceipt('h','r'),c=>c.deleteInventoryConsumption('h','c'),c=>c.deleteBatch('b'),c=>c.deleteShipmentLot('b',0,'lot')]){
+    const c=app();const i=item();i.consumptions=[{id:'c',amount:10,batchId:'b'}];
+    const b=batch([10]);b.packages=[{shipments:[{id:'lot',quantity:2}]}];c.set([b],[i]);
+    const before=JSON.stringify(c.read());c.confirmAction=async()=>false;
+    await action(c);
+    assert.equal(JSON.stringify(c.read()),before);
+    assert.equal(c.data.has('wangan-last-deletion'),false);
+  }
+});
+
+test('confirmation-time edits or cloud replacements abort deletion',async()=>{
+  for(const replace of [false,true]){
+    const c=app();c.set([],[item()]);let calls=0;
+    c.confirmAction=async()=>{if(++calls===1)c.run(replace?'inventory=JSON.parse(JSON.stringify(inventory))':'inventory[0].name="Updated"');return true;};
+    await c.deleteInventoryItem('h');
+    assert.equal(c.read().inventory.length,1);
+    assert.equal(c.data.has('wangan-last-deletion'),false);
+  }
+});
+
+test('cancel or concurrent edits while confirming undo do not restore',async()=>{
+  for(const cancel of [true,false]){
+    const c=app();c.set([],[item()]);await c.deleteInventoryReceipt('h','r');
+    c.confirmAction=async()=>{if(!cancel)c.run('inventory[0].name="Updated"');return !cancel;};
+    await c.undoLastDeletion();
+    assert.equal(c.read().inventory[0].receipts.length,0);
+    assert.equal(c.data.has('wangan-last-deletion'),true);
+  }
 });
 test('edits during deletion persistence cannot be rolled back by undo',async()=>{
   const c=app();c.set([],[item()]);
