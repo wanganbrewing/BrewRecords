@@ -34,7 +34,8 @@ function app(){
   for(const name of ['invStock','deductInventoryForBatch','syncInventoryForBatch','copyScheduleForNewBatch','duplicateBatch','scaleDuplicateBatch','buildBatchFromForm','saveBatch','preservePackageShipments','prepareDeletion','finishDeletion','undoLastDeletion','deleteInventoryReceipt','deleteInventoryItem','deleteInventoryConsumption','deleteBatch','deleteShipmentLot','csvEscape','exportInventoryCSV']) vm.runInContext(extract(name),c);
   c.INV_CATEGORY_LABEL={hop:'ホップ'};
   vm.runInContext(extract('confirmDataAction'),c);
-  vm.runInContext('let inventoryAdjustmentState=null,inventoryAdjustmentSaving=false;',c);
+  vm.runInContext('let inventoryAdjustmentState=null,inventoryAdjustmentSaving=false;let inventorySort="usage",inventoryEditorState=null,inventoryEditSaving=false;',c);
+  for(const name of ['inventoryItemLabel','inventoryUsage','sortInventoryItems','invItemsByCategory','escapeHtml','invSelectOptions','validateInventoryMetadata','inventoryIdentityExists','receiptEditableFields','buildInventoryReceipt','persistInventoryReplacement','submitInventoryEditor','receiptCorrectionsHtml','inventoryMetadataHistoryHtml'])vm.runInContext(extract(name),c);
   for(const name of ['getInventoryLedgerRows','filterInventoryLedgerRows','buildInventoryAdjustment','submitInventoryAdjustment']) vm.runInContext(extract(name),c);
   c.getPackages=b=>b.packages||[];
   c.set=(b,i)=>{c.seedB=b;c.seedI=i;vm.runInContext('batches=seedB;inventory=seedI',c);};
