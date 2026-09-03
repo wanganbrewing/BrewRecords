@@ -1,7 +1,7 @@
-const CACHE_NAME = 'fermenters-ledger-v54';
+const CACHE_NAME = 'fermenters-ledger-v55';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
 
-APP_SHELL.push('./supabase-config.js?v=54', './cloud-sync.js?v=54', './help.html?embedded=1&v=54');
+APP_SHELL.push('./supabase-config.js?v=55', './cloud-sync.js?v=55', './help.html?embedded=1&v=55');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -17,6 +17,11 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if(event.request.method !== 'GET') return;
+  // バージョン判定にオフライン／古いキャッシュを使わない。
+  if(new URL(event.request.url).pathname.endsWith('/version.json')){
+    event.respondWith(fetch(event.request,{cache:'no-store'}));
+    return;
+  }
   // オンラインでは最新画面を優先し、オフライン時だけ保存済み画面を使う。
   if(event.request.mode === 'navigate' && new URL(event.request.url).origin === self.location.origin){
     event.respondWith(fetch(event.request).then(response => {

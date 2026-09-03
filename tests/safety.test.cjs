@@ -48,6 +48,36 @@ test('all inline scripts and cloud script parse',()=>{
   for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) new vm.Script(match[1]);
   new vm.Script(cloud);
 });
+
+test('release number agrees across visible labels, scripts, help and service worker',()=>{
+  const release=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'));
+  const v=release.version;
+  assert.ok(Number.isSafeInteger(v)&&v>0);
+  assert.ok(html.includes(`const APP_VERSION = ${v};`));
+  assert.match(html,new RegExp(`id="appVersion"[^>]*>v${v}</span>`));
+  assert.ok(html.includes(`id="menuAppVersion">v${v}</strong>`));
+  const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+  assert.ok(sw.includes(`fermenters-ledger-v${v}`));
+  assert.ok(sw.includes("pathname.endsWith('/version.json')"));
+  for(const file of ['supabase-config.js','cloud-sync.js']) assert.ok(html.includes(`${file}?v=${v}`));
+  assert.ok(html.includes(`help.html?embedded=1&v=${v}`));
+  assert.ok(fs.readFileSync(path.join(root,'help.html'),'utf8').includes(`<strong>v${v}</strong>`));
+});
+
+test('version check distinguishes latest, newer, rollout, offline and invalid responses',async()=>{
+  const fields=new Map();const version=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8')).version;
+  const c=vm.createContext({Number,Date,AbortController,setTimeout,clearTimeout,location:{protocol:'https:'},
+    $:id=>{if(!fields.has(id))fields.set(id,{});return fields.get(id);}});
+  vm.runInContext(`const APP_VERSION=${version};let versionCheckBusy=false;`,c);
+  vm.runInContext(extract('versionStatusMessage'),c);vm.runInContext(extract('checkAppVersion'),c);
+  for(const [remote,expected] of [[version,/確認時点の公開最新版/],[version+1,/新しい公開版/],[version-1,/配信切り替え中/],['bad',/確認できません/]]){
+    c.fetch=async(url,options)=>{assert.equal(options.cache,'no-store');assert.ok(url.startsWith('./version.json?check='));return {ok:true,json:async()=>({version:remote})};};
+    await c.checkAppVersion();assert.match(c.$('versionCheckStatus').textContent,expected);assert.equal(c.$('versionCheckButton').disabled,false);
+  }
+  c.fetch=async()=>{throw Error('offline');};await c.checkAppVersion();assert.match(c.$('versionCheckStatus').textContent,/確認できません/);
+  c.fetch=async()=>({ok:false});await c.checkAppVersion();assert.match(c.$('versionCheckStatus').textContent,/確認できません/);
+  c.location.protocol='file:';await c.checkAppVersion();assert.match(c.$('versionCheckStatus').textContent,/ローカルファイル/);
+});
 test('staged hops use total stock; insufficient consumption makes no writes',async()=>{
   const c=app(); c.set([batch()],[item()]);
   await c.deductInventoryForBatch('b','list');
