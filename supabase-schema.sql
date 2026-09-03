@@ -40,6 +40,18 @@ create table if not exists public.sync_events (
 create index if not exists sync_events_org_created_idx
   on public.sync_events (organization_id, created_at desc);
 
+-- 保存前の版をサーバー側で保持。クライアントから履歴の更新・削除は許可しない。
+create table if not exists public.app_snapshot_history (
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  revision bigint not null,
+  payload jsonb not null,
+  updated_at timestamptz not null,
+  updated_by uuid references auth.users(id) on delete set null,
+  archived_at timestamptz not null default now(),
+  archived_by uuid references auth.users(id) on delete set null,
+  primary key (organization_id, revision)
+);
+
 create or replace function public.is_organization_member(target_organization_id uuid)
 returns boolean
 language sql
@@ -62,6 +74,13 @@ alter table public.organizations enable row level security;
 alter table public.organization_members enable row level security;
 alter table public.app_snapshots enable row level security;
 alter table public.sync_events enable row level security;
+alter table public.app_snapshot_history enable row level security;
+revoke all on table public.app_snapshot_history from anon, authenticated;
+grant select on table public.app_snapshot_history to authenticated;
+drop policy if exists "members_read_snapshot_history" on public.app_snapshot_history;
+create policy "members_read_snapshot_history"
+on public.app_snapshot_history for select to authenticated
+using (public.is_organization_member(organization_id));
 
 revoke all on table public.organizations from anon, authenticated;
 revoke all on table public.organization_members from anon, authenticated;
@@ -152,14 +171,24 @@ declare
   current_user_id uuid := auth.uid();
   current_revision bigint;
   next_revision bigint;
+  member_role text;
 begin
   if current_user_id is null then
     raise exception 'authentication_required';
   end if;
-  if not public.is_organization_member(target_organization_id) then
+  select membership.role into member_role
+  from public.organization_members membership
+  where membership.organization_id = target_organization_id
+    and membership.user_id = current_user_id
+  for share;
+  if member_role is null or member_role not in ('owner', 'admin', 'brewer') then
     raise exception 'permission_denied';
   end if;
   if snapshot_payload is null or jsonb_typeof(snapshot_payload) <> 'object' then
+    raise exception 'invalid_snapshot';
+  end if;
+  if jsonb_typeof(snapshot_payload->'batches') is distinct from 'array'
+     or jsonb_typeof(snapshot_payload->'inventory') is distinct from 'array' then
     raise exception 'invalid_snapshot';
   end if;
 
@@ -176,6 +205,12 @@ begin
   end if;
 
   next_revision := current_revision + 1;
+  insert into public.app_snapshot_history
+    (organization_id, revision, payload, updated_at, updated_by, archived_by)
+  select organization_id, revision, payload, updated_at, updated_by, current_user_id
+  from public.app_snapshots
+  where organization_id = target_organization_id;
+
   update public.app_snapshots
   set payload = snapshot_payload,
       revision = next_revision,
@@ -191,7 +226,7 @@ begin
 end;
 $$;
 
-revoke all on function public.save_app_snapshot(uuid, jsonb, bigint, text) from public;
+revoke all on function public.save_app_snapshot(uuid, jsonb, bigint, text) from public, anon;
 grant execute on function public.save_app_snapshot(uuid, jsonb, bigint, text) to authenticated;
 
 -- 無料プランの低アクティビティ停止を避けるためのデータ非参照ヘルスチェック。

@@ -10,11 +10,23 @@
     saveTimer: null,
     applyingRemote: false,
     busy: false,
+    conflict: false,
+    scopeMismatch: false,
+    changeCounter: 0,
     enabled: Boolean(config.enabled && config.supabaseUrl && config.supabasePublishableKey)
   };
 
   const byId = id => document.getElementById(id);
   const deviceId = getOrCreateDeviceId();
+  const pendingKey = 'ferment-cloud-pending-v1';
+  const localOrganizationKey = 'ferment-cloud-local-organization';
+
+  function hasPendingChanges(){ return localStorage.getItem(pendingKey)==='1'; }
+  function markPending(){ localStorage.setItem(pendingKey, '1'); }
+  function markSynced(){
+    localStorage.setItem(pendingKey, '0');
+    localStorage.setItem(localOrganizationKey, state.organizationId);
+  }
 
   function getOrCreateDeviceId(){
     const key = 'ferment-cloud-device-id';
@@ -74,11 +86,16 @@
   }
 
   async function ensureOrganization(){
+    const requestedUserId = state.session?.user?.id;
     const {data, error} = await state.client.rpc('create_personal_organization', {
       organization_name: '個人ワークスペース'
     });
     if(error) throw error;
+    if(requestedUserId!==state.session?.user?.id) throw new Error('session_changed');
     state.organizationId = data;
+    const localOrganization = localStorage.getItem(localOrganizationKey);
+    state.scopeMismatch = Boolean(localOrganization && localOrganization!==data && window.fermentCloudData.hasLocalData());
+    if(!state.scopeMismatch) localStorage.setItem(localOrganizationKey, data);
     setStoredRevision(getStoredRevision());
   }
 
@@ -102,6 +119,8 @@
     try{
       await window.fermentCloudData.applySnapshot(remote.payload || {schemaVersion:1, batches:[], inventory:[]});
       setStoredRevision(remote.revision);
+      markSynced();
+      state.conflict = false;
     }finally{
       state.applyingRemote = false;
     }
@@ -109,13 +128,16 @@
 
   async function saveNow(options){
     const manual = Boolean(options && options.manual);
-    if(!state.enabled || !state.session || state.applyingRemote || state.busy) return;
+    if(!state.enabled || !state.session || !state.organizationId || state.scopeMismatch || state.applyingRemote || state.busy || (state.conflict && !manual)) return;
     if(!navigator.onLine){
       setStatus('syncing', '同期待ち', 'オフライン：端末内へ保存済み', '通信が戻ったときにクラウドへ自動保存します。');
       return;
     }
 
     state.busy = true;
+    const sentCounter = state.changeCounter;
+    const sentOrganization = state.organizationId;
+    const sentUser = state.session.user.id;
     setStatus('syncing', '同期中', 'クラウドへ保存しています', '端末内への保存は完了しています。クラウドへ送信中です。');
     try{
       const snapshot = window.fermentCloudData.getSnapshot();
@@ -125,42 +147,77 @@
         expected_revision: state.revision,
         source_device_id: deviceId
       });
+      if(state.organizationId!==sentOrganization || state.session?.user?.id!==sentUser) return;
       if(error) throw error;
       setStoredRevision(data);
-      setStatus('connected', '同期済み', '端末内・クラウドへ保存済み', `クラウド同期は正常です。更新番号 ${state.revision}`);
+      if(sentCounter===state.changeCounter){
+        state.conflict = false;
+        markSynced();
+        setStatus('connected', '同期済み', '端末内・クラウドへ保存済み', `クラウド同期は正常です。更新番号 ${state.revision}`);
+      }else{
+        setStatus('syncing', '同期待ち', '追加の変更をクラウドへ保存します');
+      }
     }catch(error){
       const conflict = String(error && (error.message || error.details || error)).includes('sync_conflict');
       if(conflict){
+        state.conflict = true;
         setStatus('error', '選択が必要', 'PC・スマホの両方で変更されています', '自動同期を一時停止しています。「今すぐ同期」を押し、クラウド版とこの端末版のどちらを残すか確認してください。');
         if(manual) await resolveConflict();
+      }else if(String(error && error.message).includes('permission_denied')){
+        state.conflict = true;
+        setStatus('error', '保存権限なし', 'クラウドへの編集権限がありません', 'このアカウントではクラウドへ保存できません。端末内の変更は保持しています。管理者に権限を確認してください。');
       }else{
         console.error('cloud save error', error);
         setStatus('error', '再試行待ち', '端末内へ保存済み・クラウド保存待ち', 'クラウドへの保存に失敗しました。通信回復後に再試行します。');
       }
     }finally{
       state.busy = false;
+      if(sentCounter!==state.changeCounter && hasPendingChanges() && !state.conflict){
+        clearTimeout(state.saveTimer);
+        state.saveTimer = setTimeout(()=>saveNow({manual:false}), 1200);
+      }
     }
   }
 
   async function resolveConflict(){
+    const before = JSON.stringify(window.fermentCloudData.getSnapshot());
     const remote = await fetchRemote();
+    if(before!==JSON.stringify(window.fermentCloudData.getSnapshot())){
+      setStatus('error', '選択が必要', '確認中に端末のデータが変更されました', '保存が終わってから、もう一度「今すぐ同期」を押してください。');
+      return;
+    }
     const useRemote = confirm('PC・スマホの両方で同じデータが変更されています。\n\nOK：クラウドに保存されている最新版をこの端末へ取り込む\nキャンセル：この端末の内容を残す（クラウドへの保存は保留）');
     if(useRemote){
+      // 競合解決で端末版を置き換える前に、通常の自動バックアップとは別に退避。
+      await window.storage.set('wangan-before-cloud-replace', before, false);
+      if(before!==JSON.stringify(window.fermentCloudData.getSnapshot())){
+        state.conflict = true;
+        setStatus('error', '選択が必要', '退避中に端末のデータが変更されました', '端末版を保持しました。もう一度「今すぐ同期」を押してください。');
+        return;
+      }
       await applyRemote(remote);
       setStatus('connected', '同期済み', 'クラウドの最新版を取り込みました', `クラウド同期は正常です。更新番号 ${state.revision}`);
     }
   }
 
   async function reconcile(){
-    if(!state.session || !state.organizationId) return;
+    if(!state.session || !state.organizationId || state.busy) return;
+    if(state.scopeMismatch){
+      setStatus('error', 'アカウント確認', '別のワークスペースの端末データがあります', '誤送信を防ぐため同期を停止しました。元のアカウントでログインするか、別のブラウザープロファイルを使ってください。');
+      return;
+    }
     state.busy = true;
+    const checkedCounter = state.changeCounter;
+    const checkedOrganization = state.organizationId;
     setStatus('syncing', '確認中', 'クラウドの最新版を確認しています');
     try{
       const remote = await fetchRemote();
+      if(state.organizationId!==checkedOrganization || !state.session) return;
       const localRevision = getStoredRevision();
       state.revision = localRevision;
       const hasLocal = window.fermentCloudData.hasLocalData();
-      const hasRemote = remoteHasData(remote);
+      // 旧版からの移行時は未送信か判定できないため、安全側で端末版を保持する。
+      if(localStorage.getItem(pendingKey)===null && hasLocal) markPending();
 
       if(Number(remote.revision) === 0 && hasLocal){
         state.busy = false;
@@ -168,13 +225,24 @@
         return;
       }
       if(Number(remote.revision) > localRevision){
-        if(localRevision === 0 && hasLocal && hasRemote){
+        if(hasPendingChanges() || checkedCounter!==state.changeCounter){
+          state.conflict = true;
           setStatus('error', '選択が必要', 'この端末とクラウドの両方にデータがあります', '「今すぐ同期」を押し、クラウド版とこの端末版のどちらを残すか確認してください。');
           return;
         }
         await applyRemote(remote);
       }else{
+        if(Number(remote.revision)<localRevision){
+          state.conflict = true;
+          setStatus('error', '選択が必要', 'クラウドの更新番号が以前より古くなっています', '自動上書きを停止しました。バックアップとクラウドの状態を確認してください。');
+          return;
+        }
         setStoredRevision(remote.revision);
+        if(hasPendingChanges()){
+          state.busy = false;
+          await saveNow({manual:false});
+          return;
+        }
       }
       setStatus('connected', '同期済み', '端末内・クラウドへ保存済み', `クラウド同期は正常です。更新番号 ${state.revision}`);
     }catch(error){
@@ -186,7 +254,11 @@
   }
 
   async function handleSession(session){
+    const sameUser = state.session?.user?.id && state.session.user.id===session?.user?.id;
     state.session = session || null;
+    if(sameUser && state.organizationId) return;
+    clearTimeout(state.saveTimer);
+    state.conflict = false;
     refreshControls();
     if(!state.session){
       state.organizationId = '';
@@ -259,10 +331,10 @@
   };
 
   window.syncCloudNow = async function(){
-    if(!state.session) return;
+    if(!state.session || state.busy || state.scopeMismatch) return;
     try{
       const remote = await fetchRemote();
-      if(Number(remote.revision) > state.revision){
+      if(Number(remote.revision) !== state.revision){
         await resolveConflict();
       }else{
         await saveNow({manual:true});
@@ -282,7 +354,10 @@
 
   window.fermentCloudSync = {
     queueSave(){
-      if(!state.enabled || !state.session || state.applyingRemote) return;
+      if(!state.enabled || state.applyingRemote) return;
+      state.changeCounter++;
+      markPending();
+      if(!state.session || state.scopeMismatch || state.conflict) return;
       clearTimeout(state.saveTimer);
       state.saveTimer = setTimeout(()=>saveNow({manual:false}), 1200);
     }
