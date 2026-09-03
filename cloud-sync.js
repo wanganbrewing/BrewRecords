@@ -111,19 +111,22 @@
 
   function remoteHasData(remote){
     const payload = remote && remote.payload;
-    return Boolean(payload && ((Array.isArray(payload.batches) && payload.batches.length) || (Array.isArray(payload.inventory) && payload.inventory.length)));
+    return Boolean(payload && ((Array.isArray(payload.batches) && payload.batches.length) || (Array.isArray(payload.inventory) && payload.inventory.length) || payload.valuationBook?.reports?.length || payload.valuationBook?.autoEnabled));
   }
 
   async function applyRemote(remote){
+    const payload=remote.payload||{schemaVersion:1,batches:[],inventory:[]};
+    const prepared=window.fermentCloudData.prepareRemoteSnapshot?window.fermentCloudData.prepareRemoteSnapshot(payload):{payload,needsSave:false};
     state.applyingRemote = true;
     try{
-      await window.fermentCloudData.applySnapshot(remote.payload || {schemaVersion:1, batches:[], inventory:[]});
+      await window.fermentCloudData.applySnapshot(prepared.payload);
       setStoredRevision(remote.revision);
       markSynced();
       state.conflict = false;
     }finally{
       state.applyingRemote = false;
     }
+    if(prepared.needsSave)window.fermentCloudSync.queueSave();
   }
 
   async function saveNow(options){

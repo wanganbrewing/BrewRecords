@@ -60,7 +60,9 @@ test('release number agrees across visible labels, scripts, help and service wor
   const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
   assert.ok(sw.includes(`fermenters-ledger-v${v}`));
   assert.ok(sw.includes("pathname.endsWith('/version.json')"));
-  for(const file of ['supabase-config.js','cloud-sync.js']) assert.ok(html.includes(`${file}?v=${v}`));
+  for(const file of ['supabase-config.js','cloud-sync.js','inventory-costing.js','inventory-valuation-ui.js']){
+    assert.ok(html.includes(`${file}?v=${v}`));assert.ok(sw.includes(`${file}?v=${v}`));
+  }
   assert.ok(html.includes(`help.html?embedded=1&v=${v}`));
   assert.ok(fs.readFileSync(path.join(root,'help.html'),'utf8').includes(`<strong>v${v}</strong>`));
 });
@@ -319,6 +321,20 @@ test('edits during cloud request are sent in a follow-up save',async()=>{
 });
 test('same revision with pending changes uploads on login',async()=>{
   const h=cloudApp({pending:'1'});await h.events.load();assert.equal(h.saves.length,1);
+});
+
+test('monthly archives missing from older cloud payloads are retained and re-uploaded',async()=>{
+  const engine=require('../inventory-costing.js');
+  const h=cloudApp({remoteRevision:2});
+  const report=engine.makeReport([{id:'i',name:'test',receipts:[],consumptions:[]}],'2026-08','2026-09-03','r','now','test');
+  h.c.window.fermentCloudData.getSnapshot().valuationBook={reports:[report],autoEnabled:false,startMonth:''};
+  h.c.window.fermentCloudData.prepareRemoteSnapshot=payload=>{
+    const merged=engine.mergeArchive(h.c.window.fermentCloudData.getSnapshot().valuationBook,payload.valuationBook);
+    return {payload:{...payload,valuationBook:merged.book},needsSave:merged.needsSave};
+  };
+  await h.events.load();await h.drain();
+  assert.equal(h.applyCount(),1);assert.equal(h.saves.length,1);
+  assert.equal(h.saves[0].snapshot_payload.valuationBook.reports[0].id,'r');
 });
 test('different workspace data is neither uploaded nor replaced',async()=>{
   const h=cloudApp({localOrg:'other',pending:'1'});await h.events.load();h.edit();await h.drain();
