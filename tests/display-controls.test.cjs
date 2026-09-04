@@ -1,5 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('month-end valuation follows all inventory views without duplicating the panel',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.equal((html.match(/id="valuationPanel"/g)||[]).length,1);
+  assert.ok(html.indexOf('id="valuationPanel"')>html.indexOf('id="inv_addform_adjunct"'));
+  assert.ok(html.indexOf('id="valuationPanel"')<html.indexOf('<!-- inventoryCards / viewInventory -->'));
+});
 test('mobile inputs include wide phones and month/search controls with adequate delete targets',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('@media(max-width:700px){'));
