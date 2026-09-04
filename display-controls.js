@@ -24,3 +24,16 @@ function clearRecordFilters(){
   recordSearch='';recordStatus='';if($('recordSearch'))$('recordSearch').value='';if($('recordStatus'))$('recordStatus').value='';applyRecordFilters();
 }
 document.addEventListener('DOMContentLoaded',()=>setInventoryMode(preferredInventoryMode(),false));
+function preferredEntryMode(){
+  try{return localStorage.getItem('ferment-entry-mode-v1')==='simple'?'simple':'detail';}catch(error){return 'detail';}
+}
+function setEntryMode(mode,remember=true){
+  if(!['simple','detail'].includes(mode))return;
+  const form=$('viewForm');if(!form)return;
+  form.dataset.entryMode=mode;
+  $('entryModeSimple').setAttribute('aria-pressed',String(mode==='simple'));
+  $('entryModeDetail').setAttribute('aria-pressed',String(mode==='detail'));
+  $('entryModeNote').textContent=mode==='simple'?'簡易表示：水質調整・パッケージング・消耗品費用を非表示にしています。入力済みの値は保持され、仕込みを保存する際も含まれます。確認・変更する場合は「詳細」に切り替えてください。':'詳細表示：水質調整・パッケージング・消耗品費用を含む、すべての入力項目を表示します。必要な項目だけ開いて入力してください。';
+  if(remember)try{localStorage.setItem('ferment-entry-mode-v1',mode);}catch(error){}
+}
+document.addEventListener('DOMContentLoaded',()=>setEntryMode(preferredEntryMode(),false));
