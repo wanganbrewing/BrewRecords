@@ -1,10 +1,10 @@
-const CACHE_NAME = 'fermenters-ledger-v59';
+const CACHE_NAME = 'fermenters-ledger-v60';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
 
-APP_SHELL.push('./supabase-config.js?v=59', './cloud-sync.js?v=59', './help.html?embedded=1&v=59');
-APP_SHELL.push('./inventory-costing.js?v=59','./inventory-valuation-ui.js?v=59');
-APP_SHELL.push('./batch-expenses.js?v=59','./batch-expenses-ui.js?v=59');
-APP_SHELL.push('./cost-catalog.js?v=59','./cost-catalog-ui.js?v=59');
+APP_SHELL.push('./supabase-config.js?v=60', './cloud-sync.js?v=60', './help.html?embedded=1&v=60');
+APP_SHELL.push('./inventory-costing.js?v=60','./inventory-valuation-ui.js?v=60');
+APP_SHELL.push('./batch-expenses.js?v=60','./batch-expenses-ui.js?v=60');
+APP_SHELL.push('./cost-catalog.js?v=60','./cost-catalog-ui.js?v=60');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

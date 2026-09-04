@@ -63,6 +63,36 @@ test('draft row deletion can be undone before save; addition never saves implici
 test('CSV contains allocated costs, details, history and incomplete state',()=>{
   const c=harness();c.exportBatchCostsCSV();assert.match(c.download[0],/2000/);assert.match(c.download[0],/小計（未確定）/);assert.match(c.download[0],/INV-01/);
 });
+
+test('detail export separates saved reference price, quantity and manual allocation without repeated totals',()=>{
+  const c=harness();c.run(`inventory=[{id:'h',name:'Hop',category:'hop',unit:'g',manufacturer:'Maker',lotCode:'Lot-1',receipts:[{date:'2026-09-01',amount:10,price:100}],consumptions:[{date:'2026-09-02',amount:2,batchId:'b'}]}]; batches[0].otherCosts.push({id:'ref',category:'sanitizer',name:'Sanitizer',amount:200,percent:100,pricing:{catalogId:'cat',revision:1,unit:'L',rate:2000,quantity:0.1}});`);
+  const before=JSON.stringify(c.read());
+  const rows=c.run('batchCostDetailRows(batches,InventoryCosting.calculate(inventory,todayDateValue()),todayDateValue())');
+  assert.ok(rows.every(r=>r.length===rows[0].length));
+  const objects=rows.slice(1).map(r=>Object.fromEntries(rows[0].map((key,i)=>[key,r[i]])));
+  const material=objects.find(r=>r['区分']==='原材料'),ref=objects.find(r=>r['区分']==='消耗品参考費用'),manual=objects.find(r=>r['区分']==='手入力費用');
+  assert.equal(material['単価(円)'],10);assert.equal(material['明細参考額(円)'],20);assert.equal(material['メーカー'],'Maker');
+  assert.equal(ref['単価(円)'],2000);assert.equal(ref['数量／使用量'],0.1);assert.equal(ref['明細参考額(円)'],200);assert.equal(ref['元の金額(円)'],'');assert.equal(ref['参考単価版'],1);
+  assert.equal(manual['元の金額(円)'],10000);assert.equal(manual['配分率(%)'],20);assert.equal(manual['明細参考額(円)'],2000);
+  c.run("inventory[0].category='fermentable'");assert.equal(c.run('batchCostDetailRows(batches,InventoryCosting.calculate(inventory,todayDateValue()),todayDateValue())')[1][7],'モルト');c.run("inventory[0].category='hop'");
+  assert.ok(!rows[0].includes('合計'));c.exportBatchCostDetailsCSV('b');assert.ok(c.download[0].startsWith('\uFEFF'));assert.match(c.download[1],/選択した仕込み/);assert.equal(JSON.stringify(c.read()),before);assert.equal(c.writes.length,0);
+});
+test('detail CSV retains unknown amounts, explicit zeros and issues even with malformed saved expenses',()=>{
+  const c=harness();c.run(`batches[0].otherCosts=[{id:'zero',category:'other',name:'Zero',amount:0,percent:100},{id:'blank',category:'other',name:'Blank',amount:'',percent:100}];`);
+  let rows=c.run('batchCostDetailRows(batches,InventoryCosting.calculate(inventory,todayDateValue()),todayDateValue())');
+  const ix=key=>rows[0].indexOf(key),amount=ix('明細参考額(円)');
+  assert.ok(rows.every(r=>r.length===rows[0].length));assert.equal(rows.find(r=>r[ix('品目・内容')]==='Zero')[amount],0);assert.equal(rows.find(r=>r[ix('品目・内容')]==='Blank')[amount],'');
+  assert.ok(rows.some(r=>String(r[ix('未計算・確認事項')]).includes('消費記録')));
+  c.run('batches[0].otherCosts={}');rows=c.run('batchCostDetailRows(batches,InventoryCosting.calculate(inventory,todayDateValue()),todayDateValue())');assert.ok(rows.every(r=>r.length===rows[0].length));assert.ok(rows.some(r=>String(r[ix('未計算・確認事項')]).includes('形式')));
+});
+test('detail export selects one batch, supports all, and refuses missing selection without download',()=>{
+  const c=harness();c.run(`batches.push({...batches[0],id:'second',batchName:'Second'})`);c.exportBatchCostDetailsCSV('b');assert.ok(!c.download[0].includes('Second'));c.exportBatchCostDetailsCSV();assert.match(c.download[0],/Second/);
+  c.download=null;c.alert=message=>{c.message=message;};c.exportBatchCostDetailsCSV('missing');assert.equal(c.download,null);assert.match(c.message,/ありません/);
+});
+test('detail CSV quotes commas, quotes, CR/LF and neutralizes spreadsheet formulas',()=>{
+  const c=harness();assert.equal(c.costDetailCSVCell('a,b'),'"a,b"');assert.equal(c.costDetailCSVCell('a"b'),'"a""b"');assert.equal(c.costDetailCSVCell('a\rb'),'"a\rb"');assert.equal(c.costDetailCSVCell('a\nb'),'"a\nb"');
+  for(const value of ['=SUM(1)','+1','-1','@x',' \t=1','\u0000=1'])assert.ok(c.costDetailCSVCell(value).includes("'"));assert.equal(c.costDetailCSVCell(0),'0');assert.equal(c.costDetailCSVCell(null),'');
+});
 test('UI escapes expense content and history',()=>{
   const c=harness(),b=batch();b.otherCosts[0].name='<img src=x>';const result=c.renderExpenseSummary(b,{subtotal:100,complete:true});assert.ok(!result.includes('<img'));assert.match(result,/&lt;img/);
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(__dirname,'../batch-expenses.js'),'utf8'));

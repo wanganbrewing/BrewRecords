@@ -1,5 +1,5 @@
 {
-"version": 59,
-  "releasedAt": "2026-09-03",
-  "summary": "消耗品の参考単価・仕込み使用量を連携"
+"version": 60,
+  "releasedAt": "2026-09-04",
+  "summary": "原価明細CSV・仕込み別出力"
 }

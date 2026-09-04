@@ -93,6 +93,7 @@ function renderExpenseSummary(batch,material){
     <p class="inventory-table-note">原材料費は消費記録から計算します。その他は下の入力で割り当てた費用のみです。参考単価からの概算と手入力の費用を含みます。未登録の費用は合計に含まれません。会計・申告用の確定原価ではありません。</p>
     ${batch.otherCostsReviewed!==true?'<p class="inv-unlinked-warning">その他の費用が入力済みか未確認です。追加費用がない場合も入力画面で確認してください。</p>':''}${sum.extra.unknown?`<p class="inv-unlinked-warning">その他の原価：未計算 ${sum.extra.unknown}行。${escapeHtml(sum.extra.error||'')}</p>`:''}
     <button type="button" class="btn btn-primary" data-expense-batch="${escapeHtml(batch.id)}">その他の原価を入力・訂正</button>
+    <button type="button" class="btn" data-cost-detail-export="${escapeHtml(batch.id)}">この仕込みの原価明細CSV</button>
     <details><summary>その他の原価の内訳</summary><div class="detail-list">${sum.extra.rows.map(r=>`<div class="row"><div>${escapeHtml(BatchExpenses.categories[r.category]||r.category||'分類未設定')}：${escapeHtml(r.name||'内容未入力')}<br>${escapeHtml(expensePricingText(r))}${r.reference?'<br>伝票：'+escapeHtml(r.reference):''}${r.note?'<br>'+escapeHtml(r.note):''}${r.reason?'<br>'+escapeHtml(r.reason):''}</div><span>${yenReference(r.value)}</span></div>`).join('')||'<p>追加費用の登録はありません。</p>'}</div></details>${costHistoryHtml(batch)}`;
 }
 function exportBatchCostsCSV(){
@@ -102,4 +103,42 @@ function exportBatchCostsCSV(){
   const safeCell=value=>csvEscape(typeof value==='string'&&/^[\s]*[=+\-@]/.test(value)?"'"+value:value);
   downloadBlob('\uFEFF'+rows.map(row=>row.map(safeCell).join(',')).join('\r\n'),`仕込み別原価参考額_${todayDateValue()}.csv`,'text/csv;charset=utf-8');
 }
-document.addEventListener('click',event=>{const edit=event.target.closest('[data-expense-batch]'),remove=event.target.closest('[data-remove-expense]');if(edit)openExpenseEditor(edit.dataset.expenseBatch);else if(remove)removeExpenseDraft(remove.dataset.removeExpense);});
+// Detail-only output: do not repeat batch totals on each line (which would double count in spreadsheets).
+function batchCostDetailRows(selected,calculation,day){
+  const columns=['集計日','バッチID','バッチ名','バッチ全体の計算状態','その他費用の入力確認','区分','明細ID／品目ID','分類','品目・内容','メーカー','ロット番号','日付','数量／使用量','単位','単価(円)','元の金額(円)','配分率(%)','明細参考額(円)','明細の計算状態','未計算・確認事項','伝票番号','メモ','参考単価版'];
+  const rows=[columns];
+  for(const b of selected){
+    const material=InventoryCosting.batchCost(b,calculation,getUnlinkedMaterials(b));
+    const sum=BatchExpenses.combined(b,material,day);
+    const prefix=[day,b.id,b.batchName,sum.complete?'登録範囲の計算完了':'未確定',b.otherCostsReviewed===true?'済み':'未確認'];
+    const add=detail=>rows.push([...prefix,...detail]);
+    for(const use of material.uses){
+      const item=calculation.rows.find(r=>r.itemId===use.itemId);
+      const known=Number.isFinite(use.value);
+      add(['原材料',use.itemId,({fermentable:'モルト',malt:'モルト',hop:'ホップ',yeast:'酵母',adjunct:'副原料'})[item?.category]||item?.category||'',use.name,use.manufacturer,use.lotCode,use.date,use.amount,use.unit,known&&use.amount>0?use.value/use.amount:'','','',known?BatchExpenses.round(use.value):'',known?'計算済み':'未計算',use.reason||'','','消費時点の移動平均単価。明細の端数により合計CSVと差が生じる場合があります。','']);
+    }
+    if(!material.complete){
+      add(['確認事項','','原材料','原材料費の確認','','','','','','','','','','未確定',[...material.missing,...(!material.uses.length?['消費記録がありません']:[])].join('／')||'未計算の消費記録があります','','金額空欄は0円ではありません。','']);
+    }
+    for(const r of sum.extra.rows){
+      const known=Number.isFinite(r.value),p=r.pricing;
+      add([p?'消耗品参考費用':'手入力費用',r.id,BatchExpenses.categories[r.category]||r.category||'',r.name||'内容未入力','','',r.date||'',p?.quantity??'',p?.unit||'',p?.rate??'',p?'':r.amount??'',p?'':r.percent??'',known?r.value:'',known?'計算済み':'未計算',r.reason||'',r.reference||'',r.note||'',p?.revision??'']);
+    }
+    if(sum.extra.error)add(['確認事項','','その他費用','費用データの確認','','','','','','','','','','未計算',sum.extra.error,'','','']);
+    if(!sum.extra.rows.length)add(['確認事項','','その他費用','追加費用の登録なし','','','','','','','','','','確認事項',b.otherCostsReviewed===true?'追加費用なしを確認済み':'費用の入力有無が未確認です','','','']);
+  }
+  return rows;
+}
+function costDetailCSVCell(value){
+  let text=String(value??'');
+  if(typeof value==='string'&&/^[\s\u0000-\u001f]*[=+\-@]/.test(text))text="'"+text;
+  return /[",\r\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text;
+}
+function exportBatchCostDetailsCSV(batchId){
+  const selected=exportableBatches().filter(b=>batchId==null||b.id===batchId);
+  if(!selected.length){alert('書き出せる仕込み記録がありません。');return;}
+  const day=todayDateValue(),calculation=InventoryCosting.calculate(inventory,day);
+  const rows=batchCostDetailRows(selected,calculation,day);
+  downloadBlob('\uFEFF'+rows.map(row=>row.map(costDetailCSVCell).join(',')).join('\r\n'),`原価明細参考額_${batchId==null?'全仕込み':'選択した仕込み'}_${day}.csv`,'text/csv;charset=utf-8');
+}
+document.addEventListener('click',event=>{const edit=event.target.closest('[data-expense-batch]'),remove=event.target.closest('[data-remove-expense]'),detail=event.target.closest('[data-cost-detail-export]');if(edit)openExpenseEditor(edit.dataset.expenseBatch);else if(remove)removeExpenseDraft(remove.dataset.removeExpense);else if(detail)exportBatchCostDetailsCSV(detail.dataset.costDetailExport);});
