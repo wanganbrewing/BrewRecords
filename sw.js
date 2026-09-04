@@ -1,12 +1,12 @@
-const CACHE_NAME = 'fermenters-ledger-v65';
+const CACHE_NAME = 'fermenters-ledger-v66';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
 
-APP_SHELL.push('./supabase-config.js?v=65', './cloud-sync.js?v=65', './help.html?embedded=1&v=65');
-APP_SHELL.push('./inventory-costing.js?v=65','./inventory-valuation-ui.js?v=65');
-APP_SHELL.push('./batch-expenses.js?v=65','./batch-expenses-ui.js?v=65');
-APP_SHELL.push('./cost-catalog.js?v=65','./cost-catalog-ui.js?v=65');
-APP_SHELL.push('./process-measurements.js?v=65','./process-measurements-ui.js?v=65');
-APP_SHELL.push('./display-controls.js?v=65');
+APP_SHELL.push('./supabase-config.js?v=66', './cloud-sync.js?v=66', './help.html?embedded=1&v=66');
+APP_SHELL.push('./inventory-costing.js?v=66','./inventory-valuation-ui.js?v=66');
+APP_SHELL.push('./batch-expenses.js?v=66','./batch-expenses-ui.js?v=66');
+APP_SHELL.push('./cost-catalog.js?v=66','./cost-catalog-ui.js?v=66');
+APP_SHELL.push('./process-measurements.js?v=66','./process-measurements-ui.js?v=66');
+APP_SHELL.push('./display-controls.js?v=66');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
