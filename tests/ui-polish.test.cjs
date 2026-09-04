@@ -1,11 +1,26 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const dir=path.join(__dirname,'..'),source=fs.readFileSync(path.join(dir,'ui-polish.js'),'utf8');
-function harness(){const els={editorStatus:{},screenHeading:{},editorToolbar:{}},buttons=[{},{}];const c=vm.createContext({document:{addEventListener(){},getElementById:id=>els[id],querySelectorAll:()=>buttons},formIsOpen:true,saveBatch:async()=>{},cancelForm(){},confirm:()=>false});vm.runInContext(source,c);return {c,els,buttons};}
-test('screen headings describe the task and toolbar is scoped to brewing',()=>{const {c,els}=harness();c.updateScreenChrome('form');assert.equal(els.screenHeading.textContent,'仕込みの内容を入力する');assert.equal(els.editorToolbar.hidden,false);c.updateScreenChrome('inventory');assert.equal(els.screenHeading.textContent,'在庫と入荷・使用を管理する');assert.equal(els.editorToolbar.hidden,true);});
+function harness(){const els={editorStatus:{hidden:true,textContent:''},screenHeading:{}},buttons=[{}];const c=vm.createContext({document:{addEventListener(){},getElementById:id=>els[id],querySelectorAll:()=>buttons},formIsOpen:true,saveBatch:async()=>{},cancelForm(){},confirm:()=>false});vm.runInContext(source,c);return {c,els,buttons};}
+test('screen headings describe the task without displaying a clean form status',()=>{const {c,els}=harness();c.updateScreenChrome('form');assert.equal(els.screenHeading.textContent,'仕込みの内容を入力する');assert.equal(els.editorStatus.hidden,true);c.updateScreenChrome('inventory');assert.equal(els.screenHeading.textContent,'在庫と入荷・使用を管理する');});
 test('save errors and validation keep status honest and unlock controls',async()=>{const {c,els,buttons}=harness();await c.saveFromEditor();assert.match(els.editorStatus.textContent,/まだ保存されていません/);c.saveBatch=async()=>{throw Error('offline');};await c.saveFromEditor();assert.match(els.editorStatus.textContent,/保存できません/);assert.ok(buttons.every(b=>b.disabled===false));});
-test('save prevents double submission and reports local versus cloud distinctly',async()=>{const {c,els}=harness();let count=0,finish;c.saveBatch=()=>{count++;return new Promise(r=>finish=r);};const first=c.saveFromEditor();await c.saveFromEditor();assert.equal(count,1);c.formIsOpen=false;finish();await first;assert.match(els.editorStatus.textContent,/端末への保存/);assert.match(els.editorStatus.textContent,/クラウド同期/);});
+test('save prevents double submission and hides status after completion',async()=>{const {c,els}=harness();let count=0,finish;c.markEditorDirty();c.saveBatch=()=>{count++;return new Promise(r=>finish=r);};const first=c.saveFromEditor();await c.saveFromEditor();assert.equal(count,1);assert.equal(els.editorStatus.hidden,false);c.formIsOpen=false;finish();await first;assert.equal(els.editorStatus.hidden,true);assert.equal(els.editorStatus.textContent,'');});
 test('cancel leaves dirty form intact when discard is declined',()=>{const {c}=harness();let calls=0;c.cancelForm=()=>calls++;vm.runInContext('uiFormDirty=true',c);c.cancelFromEditor();assert.equal(calls,0);c.confirm=()=>true;c.cancelFromEditor();assert.equal(calls,1);});
 test('UI assets are versioned and cached',()=>{const v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;for(const file of ['index.html','sw.js'])for(const asset of ['ui-polish.css','ui-polish.js'])assert.ok(fs.readFileSync(path.join(dir,file),'utf8').includes(`${asset}?v=${v}`));});
+
+test('unsaved status appears on edit, survives navigation and clears on form reset or cancel',()=>{
+  const {c,els}=harness();c.markEditorDirty();assert.equal(els.editorStatus.hidden,false);assert.match(els.editorStatus.textContent,/下部の「保存する」/);
+  c.updateScreenChrome('inventory');c.updateScreenChrome('form');assert.equal(els.editorStatus.hidden,false);
+  c.resetEditorState();assert.equal(els.editorStatus.hidden,true);assert.equal(vm.runInContext('uiFormDirty',c),false);
+  c.markEditorDirty();c.confirm=()=>true;c.cancelFromEditor();assert.equal(els.editorStatus.hidden,true);
+});
+test('form has only bottom actions and no toolbar; clean status is hidden',()=>{
+  const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),form=html.slice(html.indexOf('<div id="viewForm"'),html.indexOf('<div id="viewDetail"'));
+  assert.ok(!html.includes('editorToolbar'));assert.ok(!form.includes('editor-toolbar'));
+  assert.equal((form.match(/onclick="saveFromEditor\(\)"/g)||[]).length,1);assert.equal((form.match(/onclick="cancelFromEditor\(\)"/g)||[]).length,1);
+  assert.ok(form.lastIndexOf('saveFromEditor()')>form.indexOf('id="formInvDeductArea"'));
+  assert.match(form,/id="editorStatus" role="status" hidden><\/p>/);
+  assert.match(html,/function resetForm\(\)\{\s*resetEditorState\(\)/);
+});
 
 function welcomeHarness(){
   const {c,els}=harness(),stored=new Map();

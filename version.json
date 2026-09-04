@@ -1,5 +1,5 @@
 {
-"version": 77,
+"version": 78,
   "releasedAt": "2026-09-04",
-  "summary": "初回案内・書き出し・ヘルプを整理"
+  "summary": "仕込みの保存操作を下部に統一"
 }

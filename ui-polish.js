@@ -38,19 +38,20 @@ function closeExportDialog(){document.getElementById('exportDialog')?.close();}
 function updateScreenChrome(name){
   const heading=document.getElementById('screenHeading');
   if(heading)heading.textContent=({inventory:'在庫と入荷・使用を管理する',form:'仕込みの内容を入力する',list:'保存した仕込みを確認する',detail:'仕込みの詳細',schedule:'工程の予定と実績を記録する',fermentation:'日々の発酵を記録する'})[name]||"Fermenter's Ledger";
-  const toolbar=document.getElementById('editorToolbar');
-  if(toolbar)toolbar.hidden=name!=='form';
 }
-function updateEditorStatus(message){
-  const status=document.getElementById('editorStatus');if(status)status.textContent=message;
+function updateEditorStatus(message=''){
+  const status=document.getElementById('editorStatus');
+  if(status){status.textContent=message;status.hidden=!message;}
 }
+function resetEditorState(){uiFormDirty=false;updateEditorStatus();}
+function markEditorDirty(){uiFormDirty=true;updateEditorStatus('未保存の変更があります。下部の「保存する」で確定してください。');}
 async function saveFromEditor(){
   if(uiSaving)return;
   uiSaving=true;updateEditorStatus('保存しています…');
   const buttons=[...document.querySelectorAll('[data-editor-save]')];buttons.forEach(b=>b.disabled=true);
   try{
     await saveBatch();
-    if(!formIsOpen){uiFormDirty=false;updateEditorStatus('端末への保存が完了しました。クラウド同期の状態はメニューで確認できます。');}
+    if(!formIsOpen)resetEditorState();
     else updateEditorStatus('入力内容を確認してください。まだ保存されていません。');
   }catch(error){updateEditorStatus('保存できませんでした。入力内容を残しています。もう一度お試しください。');}
   finally{uiSaving=false;buttons.forEach(b=>b.disabled=false);}
@@ -58,7 +59,7 @@ async function saveFromEditor(){
 function cancelFromEditor(){
   if(uiSaving)return;
   if(uiFormDirty&&!confirm('入力中の変更を破棄しますか？保存済みの記録は削除されません。'))return;
-  uiFormDirty=false;cancelForm();updateEditorStatus('編集内容は「保存」で確定します。');
+  cancelForm();resetEditorState();
 }
 function prepareInputHints(root){
   root.querySelectorAll('input[type=number]').forEach(input=>{
@@ -72,9 +73,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   const form=document.getElementById('viewForm');
   ['input','change'].forEach(type=>form.addEventListener(type,event=>{
-    if(event.target.matches('input,textarea,select')){uiFormDirty=true;updateEditorStatus('未保存の変更があります。基本・詳細をまとめて保存します。');}
+    if(event.target.matches('input,textarea,select'))markEditorDirty();
   }));
-  form.addEventListener('click',event=>{if(event.target.closest('.add-row-btn,.icon-btn,button[onclick="openFormExpenses()"]')){uiFormDirty=true;updateEditorStatus('編集内容はまだ保存されていません。');}});
+  form.addEventListener('click',event=>{if(event.target.closest('.add-row-btn,.icon-btn'))markEditorDirty();});
   prepareInputHints(document);updateScreenChrome(typeof currentTab==='string'?currentTab:'inventory');
   new MutationObserver(records=>{
     if(records.some(record=>[...record.addedNodes].some(node=>node.nodeType===1&&!node.classList.contains('field-example'))))prepareInputHints(document);

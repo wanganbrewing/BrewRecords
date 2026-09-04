@@ -11,9 +11,7 @@ header .mark{width:36px;height:36px;}
 header{padding-bottom:12px;margin-bottom:12px;}
 .screen-heading{margin:0 0 16px;font-size:1.75rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere;}
 .record-list-title,.record-list-kicker,.inventory-ledger-title,.inventory-ledger-kicker{display:none;}
-.editor-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 16px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);}
-.editor-toolbar-actions{display:flex;gap:12px;}
-.editor-toolbar-status{font-size:.875rem;color:var(--text-muted);flex:1 1 150px;}
+.editor-status{margin:0 0 16px;font-size:.875rem;line-height:1.6;color:var(--text-muted);}
 .entry-mode-buttons,.inventory-display-buttons{gap:2px;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;}
 .entry-mode-buttons .btn,.inventory-display-buttons .inv-action-btn{border-color:transparent;box-shadow:none;border-radius:8px;}
 .entry-mode-buttons .btn[aria-pressed=true],.inventory-display-buttons .inv-action-btn[aria-pressed=true]{background:#e4dccf;color:#201c17;}
@@ -56,8 +54,6 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
   .screen-heading{font-size:1.5rem;}
   .app-meta{margin-bottom:12px;}
   .mock-banner,.version-line{font-size:.75rem;}
-  .editor-toolbar-actions{width:100%;justify-content:space-between;}
-  .editor-toolbar-actions .btn{min-width:88px;}
   .has-help{flex-wrap:wrap;}
   .welcome-actions{grid-template-columns:1fr;}
   .export-dialog{padding:16px;}

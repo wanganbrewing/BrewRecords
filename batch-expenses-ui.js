@@ -76,6 +76,7 @@ async function saveExpenseEditor(){
       if(state.before!==JSON.stringify(window.fermentCloudData.getSnapshot()))throw Error('確認中にデータが更新されました。開き直してください。');
       formExpenseDraft={otherCosts:next.otherCosts,otherCostsReviewed:next.otherCostsReviewed,otherCostHistory:next.otherCostHistory,expectedSnapshot:state.before};
       $('formCostStatus').textContent=`消耗品・その他費用：${yenReference(sum.subtotal)}（未保存）。仕込み画面の「保存する」で確定してください。`;
+      if(typeof markEditorDirty==='function')markEditorDirty();
     }else await persistBatchExpenses(next,state.before);
     $('expenseDialog').close();if(state.origin!=='form')openDetail(next.id);
     const panel=$('batchCostPanel');if(panel)panel.open=true;
