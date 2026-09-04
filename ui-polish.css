@@ -23,7 +23,28 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
 .inv-card-actions .inv-action-danger{margin-left:auto;color:#f5a895;border-color:#875a50;}
 .icon-btn{min-width:44px;min-height:44px;}
 .icon-btn[aria-label*="削除"]{color:#f5a895;}
-.field-example{display:block;margin-top:4px;color:var(--text-muted);font-size:.8rem;}
+.welcome-panel{padding:20px;margin-bottom:20px;border:1px solid var(--copper);border-radius:16px;background:var(--surface);}
+.welcome-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.welcome-heading h3{font-size:1.15rem;margin:0;}
+.welcome-panel p{margin:12px 0;color:var(--text-muted);}
+.welcome-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.welcome-actions .btn{white-space:normal;min-height:52px;}
+.inventory-empty-guide{font-size:.95rem;margin:0 0 20px;}
+.operational-note{padding:10px 14px;border-left:3px solid var(--copper);background:rgba(196,129,40,.08);font-size:.875rem;}
+.calendar-export-actions{display:flex;align-items:center;gap:16px;}
+.calendar-export-actions .add-row-btn{flex:1;min-width:0;}
+.calendar-export-actions .help-button{flex:0 0 44px;}
+.menu-section-title:has(.help-button){display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.export-dialog{width:calc(100% - 32px);max-width:720px;max-height:85vh;max-height:85dvh;overflow:auto;box-sizing:border-box;padding:24px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:18px;}
+.export-dialog::backdrop{background:rgba(0,0,0,.65);}
+.export-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.export-dialog-head h2{font-size:1.3rem;margin:0;}
+.export-dialog-note{font-size:.875rem;color:var(--text-muted);line-height:1.7;}
+.export-group{margin:20px 0;padding:16px 0;border-top:1px solid var(--border);}
+.export-group h3{font-size:1rem;margin:0 0 12px;}
+.export-dialog .footer-actions{display:grid;gap:10px;}
+.export-dialog .footer-link{width:100%;min-height:48px;white-space:normal;font-size:.95rem;}
+.sched-col-header-planned,.sched-col-header-actual{white-space:normal;}
 .sync-status-badge{font-size:.8rem;}
 @media(max-width:700px){
   .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom));}
@@ -38,5 +59,7 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
   .editor-toolbar-actions{width:100%;justify-content:space-between;}
   .editor-toolbar-actions .btn{min-width:88px;}
   .has-help{flex-wrap:wrap;}
+  .welcome-actions{grid-template-columns:1fr;}
+  .export-dialog{padding:16px;}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;}}

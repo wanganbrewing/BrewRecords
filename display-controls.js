@@ -33,7 +33,7 @@ function setEntryMode(mode,remember=true){
   form.dataset.entryMode=mode;
   $('entryModeSimple').setAttribute('aria-pressed',String(mode==='simple'));
   $('entryModeDetail').setAttribute('aria-pressed',String(mode==='detail'));
-  $('entryModeNote').textContent=(mode==='simple'?'基本項目を表示しています。':'水質調整・パッケージング・参考費用を表示しています。')+' 非表示の入力値も保持し、基本・詳細をまとめて保存します。';
+  $('entryModeNote').textContent=(mode==='simple'?'基本：基本情報・仕込み工程・原材料・メモを表示。':'詳細：水質調整・パッケージング・参考費用を表示。')+' 非表示の入力値も保持し、基本・詳細をまとめて保存します。';
   if(remember)try{localStorage.setItem('ferment-entry-mode-v2',mode);}catch(error){}
 }
 document.addEventListener('DOMContentLoaded',()=>setEntryMode(preferredEntryMode(),false));

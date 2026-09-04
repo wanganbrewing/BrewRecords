@@ -1,6 +1,6 @@
 {
   "name": "Fermenter's Ledger",
-  "short_name": "Ferment Log",
+  "short_name": "Fermenter's Ledger",
   "description": "ビール・ワイン・日本酒などの仕込み、発酵、原材料をまとめて管理する酒造り記録アプリ",
   "lang": "ja",
   "start_url": "./",
