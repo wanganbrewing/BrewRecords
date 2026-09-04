@@ -25,7 +25,7 @@ function clearRecordFilters(){
 }
 document.addEventListener('DOMContentLoaded',()=>setInventoryMode(preferredInventoryMode(),false));
 function preferredEntryMode(){
-  try{return localStorage.getItem('ferment-entry-mode-v1')==='simple'?'simple':'detail';}catch(error){return 'detail';}
+  try{return localStorage.getItem('ferment-entry-mode-v2')==='detail'?'detail':'simple';}catch(error){return 'simple';}
 }
 function setEntryMode(mode,remember=true){
   if(!['simple','detail'].includes(mode))return;
@@ -33,7 +33,21 @@ function setEntryMode(mode,remember=true){
   form.dataset.entryMode=mode;
   $('entryModeSimple').setAttribute('aria-pressed',String(mode==='simple'));
   $('entryModeDetail').setAttribute('aria-pressed',String(mode==='detail'));
-  $('entryModeNote').textContent=mode==='simple'?'簡易表示：水質調整・パッケージング・消耗品費用を非表示にしています。入力済みの値は保持され、仕込みを保存する際も含まれます。確認・変更する場合は「詳細」に切り替えてください。':'詳細表示：水質調整・パッケージング・消耗品費用を含む、すべての入力項目を表示します。必要な項目だけ開いて入力してください。';
-  if(remember)try{localStorage.setItem('ferment-entry-mode-v1',mode);}catch(error){}
+  $('entryModeNote').textContent=mode==='simple'?'基本表示：水質調整・パッケージング・消耗品費用を非表示にしています。入力済みの値は保持され、仕込みを保存する際も含まれます。確認・変更する場合は「詳細」に切り替えてください。':'詳細表示：水質調整・パッケージング・消耗品費用を含む、すべての入力項目を表示します。必要な項目だけ開いて入力してください。';
+  if(remember)try{localStorage.setItem('ferment-entry-mode-v2',mode);}catch(error){}
 }
 document.addEventListener('DOMContentLoaded',()=>setEntryMode(preferredEntryMode(),false));
+function preferredOptionalNavigation(){
+  try{const value=JSON.parse(localStorage.getItem('ferment-optional-navigation-v1')||'{}');return {schedule:value?.schedule===true,fermentation:value?.fermentation===true};}catch(error){return {schedule:false,fermentation:false};}
+}
+function setOptionalNavigation(name,enabled,remember=true){
+  if(!['schedule','fermentation'].includes(name))return;
+  const tab=document.querySelector(`.tab[data-tab="${name}"]`);if(!tab)return;
+  tab.hidden=!enabled;
+  $('show'+(name==='schedule'?'Schedule':'Fermentation')+'Tab').checked=!!enabled;
+  const settings={schedule:!document.querySelector('.tab[data-tab="schedule"]').hidden,fermentation:!document.querySelector('.tab[data-tab="fermentation"]').hidden};
+  document.documentElement.style.setProperty('--visible-tab-count',String(3+Number(settings.schedule)+Number(settings.fermentation)));
+  if(remember)try{localStorage.setItem('ferment-optional-navigation-v1',JSON.stringify(settings));}catch(error){}
+  if(!enabled&&typeof currentTab!=='undefined'&&currentTab===name)showView('inventory',false);
+}
+document.addEventListener('DOMContentLoaded',()=>{const settings=preferredOptionalNavigation();setOptionalNavigation('schedule',settings.schedule,false);setOptionalNavigation('fermentation',settings.fermentation,false);});

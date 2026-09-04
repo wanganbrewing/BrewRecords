@@ -1,10 +1,16 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('optional navigation defaults off, remembers independent choices and redirects hidden active view',()=>{
+  const tabs={schedule:{hidden:true},fermentation:{hidden:true}},fields={},store=new Map();let count,redirect;
+  const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:s=>tabs[s.includes('schedule')?'schedule':'fermentation'],documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
+  assert.equal(c.preferredOptionalNavigation().schedule,false);c.setOptionalNavigation('schedule',true);assert.equal(count,'4');assert.equal(tabs.fermentation.hidden,true);assert.equal(c.preferredOptionalNavigation().schedule,true);
+  c.setOptionalNavigation('fermentation',true);assert.equal(count,'5');c.currentTab='schedule';c.setOptionalNavigation('schedule',false);assert.equal(redirect[0],'inventory');assert.equal(count,'4');c.setOptionalNavigation('fermentation',false);assert.equal(count,'3');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().schedule,false);
+});
 test('entry mode changes presentation only, preserves values and remembers choice safely',()=>{
   const fields=new Map(),store=new Map();const c=vm.createContext({document:{addEventListener(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},$:id=>{if(!fields.has(id))fields.set(id,{dataset:{},value:'keep',open:true,setAttribute(k,v){this[k]=v;}});return fields.get(id);}});vm.runInContext(source,c);
-  assert.equal(c.preferredEntryMode(),'detail');c.setEntryMode('simple');assert.equal(c.preferredEntryMode(),'simple');assert.equal(c.$('viewForm').dataset.entryMode,'simple');assert.equal(c.$('entryModeSimple')['aria-pressed'],'true');assert.match(c.$('entryModeNote').textContent,/保持/);
+  assert.equal(c.preferredEntryMode(),'simple');c.setEntryMode('simple');assert.equal(c.preferredEntryMode(),'simple');assert.equal(c.$('viewForm').dataset.entryMode,'simple');assert.equal(c.$('entryModeSimple')['aria-pressed'],'true');assert.match(c.$('entryModeNote').textContent,/保持/);
   c.setEntryMode('detail');assert.equal(c.$('viewForm').dataset.entryMode,'detail');for(const field of fields.values()){assert.equal(field.value,'keep');assert.equal(field.open,true);}
-  c.setEntryMode('invalid');assert.equal(c.$('viewForm').dataset.entryMode,'detail');c.localStorage.setItem=()=>{throw Error('blocked');};assert.doesNotThrow(()=>c.setEntryMode('simple'));c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredEntryMode(),'detail');
+  c.setEntryMode('invalid');assert.equal(c.$('viewForm').dataset.entryMode,'detail');c.localStorage.setItem=()=>{throw Error('blocked');};assert.doesNotThrow(()=>c.setEntryMode('simple'));c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredEntryMode(),'simple');
 });
 test('only the three optional brewing sections are hidden and never disabled',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');assert.equal((html.match(/<details class="section" data-entry-advanced>/g)||[]).length,3);for(const title of ['水質調整','パッケージング','消耗品・参考費用'])assert.ok(new RegExp('<details class="section" data-entry-advanced>\\s*<summary[^>]*>'+title).test(html));assert.ok(html.includes('#viewForm[data-entry-mode="simple"]>[data-entry-advanced]'));assert.ok(!source.includes('.disabled='));
