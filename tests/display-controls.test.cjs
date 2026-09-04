@@ -1,9 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
-test('brewing uses wide desktop layout only while the brewing view is active',()=>{
+test('brewing, schedule and fermentation use wide layout only on desktop and in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes("document.body.classList.toggle('form-wide',name==='form');"));
-  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap{max-width:1400px;}}'));
+  for(const view of ['form','schedule','fermentation'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
+  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap{max-width:1400px;}}'));
 });
 test('optional navigation defaults off, remembers independent choices and redirects hidden active view',()=>{
   const tabs={schedule:{hidden:true},fermentation:{hidden:true}},fields={},store=new Map();let count,redirect;
