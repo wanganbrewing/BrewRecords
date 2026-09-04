@@ -1,5 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('item cards use desktop wide layout in every inventory mode',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes("document.body.classList.toggle('inventory-wide',!$('viewInventory').hidden);"));
+  assert.ok(html.includes("document.body.classList.toggle('inventory-wide',name==='inventory');"));
+  assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));'));
+});
 test('month-end valuation follows all inventory views without duplicating the panel',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.equal((html.match(/id="valuationPanel"/g)||[]).length,1);
