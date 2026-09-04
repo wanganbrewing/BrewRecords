@@ -1,5 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('consumable reference prices appear last after month-end valuation',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.equal((html.match(/id="costCatalogPanel"/g)||[]).length,1);
+  assert.ok(html.indexOf('id="costCatalogPanel"')>html.indexOf('id="valuationPanel"'));
+  assert.ok(html.indexOf('id="costCatalogPanel"')<html.indexOf('<!-- inventoryCards / viewInventory -->'));
+});
 test('item cards use desktop wide layout in every inventory mode',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',!$('viewInventory').hidden);"));

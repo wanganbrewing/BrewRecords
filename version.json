@@ -1,5 +1,5 @@
 {
-"version": 74,
+"version": 75,
   "releasedAt": "2026-09-04",
-  "summary": "品目別表示のPCワイド・2列対応"
+  "summary": "消耗品・参考単価を原材料管理の最下段へ移動"
 }
