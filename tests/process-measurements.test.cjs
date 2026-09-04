@@ -14,7 +14,7 @@ test('validates dates, time, precision and ranges without inventing missing meas
 test('correction preserves ID and immutable before/after history; safeguards malformed and stale selections',()=>{
   const b=P.revise({actualOG:1.05,gravityLog:[{gravity:1.01}],customScheduleSteps:[{label:'別鍋'}]},null,sample(),'測定','2026-09-04','r','now');
   const original=JSON.stringify(b),next=P.revise(b,'r',{...sample(),ph:5.3},'入力訂正','2026-09-04','unused','later');assert.equal(next.processMeasurements[0].id,'r');assert.equal(next.processMeasurements[0].history[1].before.ph,5.2);assert.equal(next.processMeasurements[0].history[1].after.ph,5.3);assert.equal(JSON.stringify(b),original);assert.equal(next.actualOG,b.actualOG);assert.deepEqual(next.gravityLog,b.gravityLog);
-  assert.throws(()=>P.revise(b,'missing',sample(),'訂正','2026-09-04','x','now'));assert.throws(()=>P.revise(b,'r',sample(),'変更なし','2026-09-04','x','now'));assert.throws(()=>P.revise(b,null,sample(),'','2026-09-04','x','now'));assert.throws(()=>P.revise({processMeasurements:{}},null,sample(),'追加','2026-09-04','x','now'));
+  assert.throws(()=>P.revise(b,'missing',sample(),'訂正','2026-09-04','x','now'));assert.throws(()=>P.revise(b,'r',sample(),'変更なし','2026-09-04','x','now'));assert.throws(()=>P.revise(b,null,sample(),'x'.repeat(301),'2026-09-04','x','now'));assert.throws(()=>P.revise({processMeasurements:{}},null,sample(),'追加','2026-09-04','x','now'));
 });
 function harness(){
   const els=new Map(),writes=[],c=vm.createContext({ProcessMeasurements:P,console,Date,uid:()=> 'new',todayDateValue:()=> '2026-09-04',escapeHtml:s=>String(s??'').replaceAll('<','&lt;').replaceAll('>','&gt;'),document:{addEventListener(){}},$:id=>{if(!els.has(id))els.set(id,{value:'',hidden:true,dataset:{},close(){this.closed=true;}});return els.get(id);},window:{storage:{async set(k,v){writes.push([k,v]);}},fermentCloudSync:{queueSave(){}}},confirmDataAction:async()=>true,maybeAutoBackup(){},currentScheduleBatch:()=>null,openDetail(){},downloadBlob:(...args)=>c.download=args,alert:m=>c.message=m});
@@ -23,6 +23,17 @@ function harness(){
   c.run('processEditor={batchId:"b",recordId:null,before:JSON.stringify(window.fermentCloudData.getSnapshot())}');
   for(const [id,value] of Object.entries({processStage:'糖化終了',processDate:'2026-09-04',processTime:'10:30',processNote:'別鍋',processReason:'測定',pm_gravity:'1.042',pm_ph:'5.2',pm_temperature:'65',pm_volume:'20'}))c.$(id).value=value;return c;
 }
+test('optional correction reasons retain automatic history and existing reasons',async()=>{
+  const c=harness();await c.saveProcessEditor();let b=c.read().batches[0];assert.equal(b.processMeasurements[0].history[0].reason,'');
+  c.run('processEditor={batchId:"b",recordId:"new",before:JSON.stringify(window.fermentCloudData.getSnapshot())}');c.$('processReason').value='';c.$('pm_ph').value='5.3';await c.saveProcessEditor();b=c.read().batches[0];
+  assert.equal(b.processMeasurements[0].history.length,2);assert.equal(b.processMeasurements[0].history[1].before.ph,5.2);assert.equal(b.processMeasurements[0].history[1].after.ph,5.3);assert.ok(b.processMeasurements[0].history[1].recordedAt);
+  const old=P.revise({},null,sample(),'以前の理由','2026-09-04','r','now'),next=P.revise(old,'r',{...sample(),ph:5.4},'   ','2026-09-04','x','later');assert.equal(next.processMeasurements[0].history[0].reason,'以前の理由');assert.equal(next.processMeasurements[0].history[1].reason,'');
+});
+test('reason field is hidden for new records and shown optionally for corrections',()=>{
+  const c=harness();c.computeScheduleSteps=()=>[];c.enhanceNumberInputs=()=>{};c.$('processDialog').showModal=()=>{};c.$('processStage').focus=()=>{};
+  c.openProcessEditor('b');assert.equal(c.$('processReasonField').hidden,true);
+  c.run('batches[0].processMeasurements=[{id:"r",stage:"糖化終了",ph:5.2}]');c.openProcessEditor('b','r');assert.equal(c.$('processReasonField').hidden,false);assert.equal(c.$('processReason').value,'');
+});
 test('save is guarded against cancellation, concurrency and storage failure',async()=>{
   for(const mode of ['save','cancel','stale','during','failure']){
     const c=harness();if(mode==='cancel')c.confirmDataAction=async()=>false;if(mode==='stale')c.run('batches[0].batchName="Changed"');if(mode==='during')c.confirmDataAction=async()=>{c.run('batches[0].batchName="Changed"');return true;};if(mode==='failure')c.window.storage.set=async()=>{throw Error('quota');};

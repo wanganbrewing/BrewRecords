@@ -1,5 +1,5 @@
 {
-"version": 61,
+"version": 62,
   "releasedAt": "2026-09-04",
-  "summary": "工程ごとの比重・pH・温度・液量"
+  "summary": "実測記録の理由入力を任意化"
 }

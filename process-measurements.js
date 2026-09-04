@@ -26,7 +26,7 @@
     if(recordId&&!before)throw Error('訂正する実測記録が見つかりません。');
     if(!before&&rows.length>=1000)throw Error('実測記録は1仕込み1000件までです。');
     const clean=normalize(input,today),why=String(reason||'').trim();
-    if(!why||why.length>300)throw Error('登録・訂正理由を300文字以内で入力してください。');
+    if(why.length>300)throw Error('訂正理由を入力する場合は300文字以内にしてください。');
     const values=r=>Object.fromEntries(['stage','date','time','note',...Object.keys(fields)].map(k=>[k,r[k]??'']));
     if(before&&JSON.stringify(values(before))===JSON.stringify(clean))throw Error('変更がありません。');
     if(before?.history!=null&&!Array.isArray(before.history))throw Error('訂正履歴の形式を確認してください。');

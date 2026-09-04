@@ -18,6 +18,7 @@ function openProcessEditor(batchId,recordId){
   if(!Array.isArray(rows)||rows.some(r=>!r||!r.id)){alert('保存済み実測記録の形式を確認してください。');return;}
   const row=recordId?rows.find(r=>r.id===recordId):null;if(recordId&&!row)return;
   processEditor={batchId,recordId:recordId||null,before:JSON.stringify(window.fermentCloudData.getSnapshot())};
+  $('processReasonField').hidden=!row;
   $('processBatch').textContent=batch.batchName||'名称未設定';$('processError').textContent='';
   $('processStage').value=row?.stage||'';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
   const labels=[...computeScheduleSteps(batch).map(s=>s.label),...(batch.customScheduleSteps||[]).map(s=>s.label),...rows.map(r=>r.stage)].filter(Boolean);
@@ -34,7 +35,7 @@ async function saveProcessEditor(){
     if(snapshot()!==state.before)throw Error('入力中にデータが更新されました。閉じてから開き直してください。');
     const batch=batches.find(b=>b.id===state.batchId);if(!batch)throw Error('対象の仕込みが見つかりません。');
     const input={stage:$('processStage').value,date:$('processDate').value,time:$('processTime').value,note:$('processNote').value,...Object.fromEntries(Object.keys(ProcessMeasurements.fields).map(k=>[k,$('pm_'+k).value]))};
-    const next=ProcessMeasurements.revise(batch,state.recordId,input,$('processReason').value,todayDateValue(),uid(),new Date().toISOString());
+    const next=ProcessMeasurements.revise(batch,state.recordId,input,state.recordId?$('processReason').value:'',todayDateValue(),uid(),new Date().toISOString());
     processSaving=true;$('processSave').disabled=true;$('processCancel').disabled=true;
     if(!await confirmDataAction(`${batch.batchName||''}\n${input.stage}\n${input.date} ${input.time}\n${processValuesText(input)}\n\n実測記録を保存します。OG・発酵記録・在庫・タンク残量は自動変更しません。`,'実測記録を保存'))return;
     if(snapshot()!==state.before)throw Error('確認中にデータが更新されました。開き直してください。');
