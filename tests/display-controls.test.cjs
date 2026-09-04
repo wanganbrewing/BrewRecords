@@ -1,5 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('narrow phones keep fermentation metrics readable with 44px step controls',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('.gravity-entry .number-step-button{min-width:44px;min-height:44px;}'));
+  assert.ok(html.includes('@media(max-width:420px){\n  .gravity-entry{grid-template-columns:minmax(0,1fr);}')||html.includes('@media(max-width:420px){\r\n  .gravity-entry{grid-template-columns:minmax(0,1fr);}'));
+  const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
+  assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
+});
 test('basic and detail sections are mutually exclusive while shared identity and save remain visible',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('#viewForm[data-entry-mode="detail"]>details.section:not([data-entry-advanced])'));
