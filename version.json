@@ -1,5 +1,5 @@
 {
-"version": 60,
+"version": 61,
   "releasedAt": "2026-09-04",
-  "summary": "原価明細CSV・仕込み別出力"
+  "summary": "工程ごとの比重・pH・温度・液量"
 }

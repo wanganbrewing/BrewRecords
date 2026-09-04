@@ -92,6 +92,7 @@ test('real snapshot adapter and backup export roundtrip the new report archive',
   c.CostCatalog=require('../cost-catalog.js');c.document={addEventListener(){}};
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../cost-catalog-ui.js'),'utf8'),c);
   c.run('batches=[{id:"cost-batch",otherCosts:[{id:"e",category:"electricity",name:"電気代",amount:10000,percent:20}],otherCostsReviewed:true,otherCostHistory:[{id:"audit",reason:"初回登録"}]}]');
+  c.run('batches[0].processMeasurements=[{id:"p",stage:"糖化終了",ph:5.2,history:[{reason:"測定",after:{ph:5.2}}]}]');
   c.renderGauge=()=>{};c.renderList=()=>{};c.renderInventory=()=>{};
   c.exportableBatches=()=>c.read().batches;
   const start=html.indexOf('window.fermentCloudData = {'),end=html.indexOf('\n};',start)+3;
@@ -104,5 +105,6 @@ test('real snapshot adapter and backup export roundtrip the new report archive',
   const expenses=JSON.parse(c.buildBackupFileData().text).batches[0];
   assert.equal(expenses.otherCosts[0].amount,10000);assert.equal(expenses.otherCostsReviewed,true);assert.equal(expenses.otherCostHistory[0].reason,'初回登録');
   assert.equal(c.read().batches[0].otherCosts[0].percent,20);
+  assert.equal(expenses.processMeasurements[0].ph,5.2);assert.equal(c.read().batches[0].processMeasurements[0].history[0].reason,'測定');
   await c.window.fermentCloudData.applySnapshot({batches:[],inventory:[]});assert.equal(c.read().valuationBook.reports.length,0);
 });

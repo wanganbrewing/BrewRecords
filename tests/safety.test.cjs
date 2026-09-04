@@ -149,6 +149,14 @@ test('receipt delete writes durable checkpoint; undo does not overwrite later ed
   assert.equal(c.read().inventory[0].receipts.length,0);
   assert.ok(c.download);
 });
+
+test('editing retains process observations while new, copied and scaled batches start empty',()=>{
+  for(const scaled of [false,true]){
+    const c=app(),b=batch();b.batchSize='20';b.processMeasurements=[{id:'p',ph:5.2,history:[{reason:'測定'}]}];c.set([b],[]);
+    assert.deepEqual(c.buildBatchFromForm('b').processMeasurements,b.processMeasurements);
+    c.prompt=()=> '40';if(scaled)c.scaleDuplicateBatch('b');else c.duplicateBatch('b');assert.equal(c.populated.processMeasurements.length,0);assert.equal(c.buildBatchFromForm(null).processMeasurements.length,0);
+  }
+});
 test('deleting linked item then undo restores links and consumption',async()=>{
   const c=app();c.set([batch([10])],[item()]);
   await c.deductInventoryForBatch('b','list');
