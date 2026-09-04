@@ -1,5 +1,21 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('mobile inputs include wide phones and month/search controls with adequate delete targets',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('@media(max-width:700px){'));
+  assert.ok(html.includes('input[type=month],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;min-height:44px;}'));
+  assert.ok(html.includes('.icon-btn{width:44px;min-width:44px;height:44px;}'));
+  assert.ok(html.includes('.dyn-row,.dyn-subrow{flex-wrap:wrap;gap:8px;}'));
+  assert.ok(html.includes('#viewForm[data-entry-mode="detail"] #basicEntryGuide{display:none;}'));
+});
+test('guide matches separated detail navigation and current menu labels',()=>{
+  const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
+  assert.ok(help.includes('仕込み → 詳細 → 消耗品・参考費用'));
+  assert.ok(help.includes('クラウド同期の設定・状態確認'));
+  assert.ok(help.includes('メニューや詳細項目が見つからない'));
+  assert.ok(!help.includes('「クラウド同期を設定」'));
+  assert.ok(!help.includes('<h2>PCで複数の情報を確認する</h2>'));
+});
 test('dynamic number controls associate field names before button enhancement',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   const fn=html.split('function enhanceNumberInputs(root){')[1];
