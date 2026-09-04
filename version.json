@@ -1,5 +1,5 @@
 {
-"version": 78,
+"version": 79,
   "releasedAt": "2026-09-04",
-  "summary": "仕込みの保存操作を下部に統一"
+  "summary": "PC向け目標仕込み表を追加"
 }
