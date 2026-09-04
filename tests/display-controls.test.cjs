@@ -1,5 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('dynamic number controls associate field names before button enhancement',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  const fn=html.split('function enhanceNumberInputs(root){')[1];
+  assert.ok(fn.indexOf('ensureAccessibleLabels(scope);')<fn.indexOf('scope.querySelectorAll'));
+  assert.ok(html.includes('control.id = `field-control-${uid()}`'));
+});
 test('narrow phones keep fermentation metrics readable with 44px step controls',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('.gravity-entry .number-step-button{min-width:44px;min-height:44px;}'));
