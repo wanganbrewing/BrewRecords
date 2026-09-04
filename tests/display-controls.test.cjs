@@ -1,5 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('desktop parallel panels preserve hidden empty states and span timelines and save actions',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('@media(min-width:1200px)'));
+  assert.ok(html.includes('.desktop-workspace:not([hidden]){display:grid;'));
+  assert.ok(html.includes('.desktop-workspace>*{grid-column:1/-1;min-width:0;}'));
+  for(const id of ['scheduleBatchPanel','scheduleStepsPanel','fermentationInfoPanel','fermentationMeasurementsPanel'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
+});
 test('brewing, schedule and fermentation use wide layout only on desktop and in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   for(const view of ['form','schedule','fermentation'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));

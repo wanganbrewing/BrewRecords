@@ -1,5 +1,5 @@
 {
-"version": 67,
+"version": 68,
   "releasedAt": "2026-09-04",
-  "summary": "PCの時間割・発酵管理をワイド表示"
+  "summary": "PCの時間割・発酵情報を並列表示"
 }
