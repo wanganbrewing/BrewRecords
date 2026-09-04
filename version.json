@@ -1,5 +1,5 @@
 {
-"version": 68,
+"version": 69,
   "releasedAt": "2026-09-04",
-  "summary": "PCの時間割・発酵情報を並列表示"
+  "summary": "基本と詳細の入力項目を分離"
 }

@@ -33,7 +33,7 @@ function setEntryMode(mode,remember=true){
   form.dataset.entryMode=mode;
   $('entryModeSimple').setAttribute('aria-pressed',String(mode==='simple'));
   $('entryModeDetail').setAttribute('aria-pressed',String(mode==='detail'));
-  $('entryModeNote').textContent=mode==='simple'?'基本表示：水質調整・パッケージング・消耗品費用を非表示にしています。入力済みの値は保持され、仕込みを保存する際も含まれます。確認・変更する場合は「詳細」に切り替えてください。':'詳細表示：水質調整・パッケージング・消耗品費用を含む、すべての入力項目を表示します。必要な項目だけ開いて入力してください。';
+  $('entryModeNote').textContent=(mode==='simple'?'基本表示：基本情報・仕込み工程・原材料・メモなどの基本項目だけを表示します。':'詳細表示：水質調整・パッケージング・消耗品参考費用だけを表示します。基本項目を確認・変更する場合は「基本」に戻してください。')+' バッチ名と保存操作は共通です。非表示の入力値も保持され、基本・詳細をまとめて保存します。';
   if(remember)try{localStorage.setItem('ferment-entry-mode-v2',mode);}catch(error){}
 }
 document.addEventListener('DOMContentLoaded',()=>setEntryMode(preferredEntryMode(),false));

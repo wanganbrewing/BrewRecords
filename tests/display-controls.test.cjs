@@ -1,5 +1,13 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
+test('basic and detail sections are mutually exclusive while shared identity and save remain visible',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('#viewForm[data-entry-mode="detail"]>details.section:not([data-entry-advanced])'));
+  assert.ok(html.includes('#viewForm[data-entry-mode="detail"]>#formInvDeductArea{display:none!important;}'));
+  assert.ok(html.includes('#viewForm[data-entry-mode="simple"]>[data-entry-advanced]{display:none!important;}'));
+  assert.ok(!source.split('function setEntryMode(')[1].split("document.addEventListener")[0].includes('.value='));
+  assert.ok(source.includes('基本・詳細をまとめて保存'));
+});
 test('desktop parallel panels preserve hidden empty states and span timelines and save actions',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('@media(min-width:1200px)'));
