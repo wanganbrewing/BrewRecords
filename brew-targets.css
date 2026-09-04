@@ -22,7 +22,9 @@
 .target-material-table label{margin-bottom:8px;}
 .target-row-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap;}
 .target-material-table output,.target-row-footer output{font-size:.85rem;}
-.target-unit{margin-left:4px;color:var(--text-muted);font-size:.8rem;}
+.target-quantity-input{display:flex;align-items:center;gap:6px;}
+#targetSheetBody .target-quantity-input input{flex:1;width:0;min-width:0;}
+.target-quantity-unit{flex:0 0 auto;max-width:45%;overflow-wrap:anywhere;color:var(--text);font-size:.9rem;font-weight:600;}
 .target-step{padding:14px 0;border-top:1px solid var(--border);}
 .target-step-head{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
 .target-step-head>input{flex:1;}

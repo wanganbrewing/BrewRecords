@@ -1,5 +1,5 @@
 {
-"version": 79,
+"version": 80,
   "releasedAt": "2026-09-04",
-  "summary": "PC向け目標仕込み表を追加"
+  "summary": "目標仕込み表の数量単位を明確化"
 }

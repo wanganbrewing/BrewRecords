@@ -87,3 +87,23 @@ test('target assets are included in the application and offline cache',()=>{
   const v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;
   for(const file of ['index.html','sw.js'])for(const asset of ['brew-targets.js','brew-targets-ui.js','brew-targets.css'])assert.ok(fs.readFileSync(path.join(dir,file),'utf8').includes(`${asset}?v=${v}`));
 });
+test('planned quantity inputs display permanent units for both batches without changing stored values',()=>{
+  const c=context();
+  for(const [type,unit] of [['hop','g'],['fermentable','kg'],['mineral','g'],['adjunct','mg']]){
+    const row={name:'Material',amount:'1111',unit,targetMeta:{batch1:'1000',batch2:'111'}},before=JSON.stringify(row);
+    const rendered=c.targetRowHtml(type,row,0);
+    assert.equal((rendered.match(new RegExp('data-quantity-unit aria-hidden="true">'+unit+'<','g'))||[]).length,2);
+    assert.match(rendered,/value="1000"/);assert.match(rendered,/value="111"/);assert.equal(JSON.stringify(row),before);
+    assert.ok(!rendered.includes('value="1000 '+unit+'"'));
+  }
+  assert.match(c.targetRowsSection('hop',{}),/予定量（g）/);
+  assert.match(c.targetRowsSection('hop',{}),/100 gなら「100」/);
+  assert.match(c.targetRowsSection('hop',{}),/1回仕込みの場合はBatch 1だけ/);
+});
+test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{
+  const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 Batch 1'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 Batch 2'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};
+  const row={querySelector:()=>unit,querySelectorAll:s=>s==='[data-quantity-unit]'?badges:inputs};
+  assert.equal(c.updateTargetRowUnits(row,'adjunct'),'mg');assert.ok(badges.every(e=>e.textContent==='mg'));assert.equal(inputs[0]['aria-label'],'副原料1 Batch 1（mg）');
+  unit.value='L';assert.equal(c.updateTargetRowUnits(row,'adjunct'),'L');assert.ok(badges.every(e=>e.textContent==='L'));assert.equal(inputs[0].value,'1000');assert.equal(inputs[1].value,'111');
+  unit.value='';c.updateTargetRowUnits(row,'adjunct');assert.ok(badges.every(e=>e.textContent==='単位未設定'));
+});

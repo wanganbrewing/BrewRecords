@@ -49,15 +49,15 @@ function targetOptions(type,selected){
 function targetRowHtml(type,row,index){
   const m=BrewTargets.rowMeta(row),label=TARGET_ROW_LABELS[type]+(index+1),unit=type==='adjunct'?(row.unit||'g'):BrewTargets.rowTypes[type][1];
   const cell=(key,value,number=false,meta=false)=>targetControl(`data-${meta?'meta':'row'}="${key}" ${type==='mineral'&&key==='name'?'list="targetAdditiveNames"':''} aria-label="${targetEsc(label+' '+({name:'名称',manufacturer:'メーカー',lot:'ロット',alpha:'α酸（%）',ibu:'目標IBU',timingValue:'投入タイミング',unit:'単位',timingNote:'投入条件',concentration:'濃度（%）'}[key]||key))}"`,value,number?'number':'text');
-  const qty=k=>targetControl(`data-meta="${k}" aria-label="${targetEsc(label+' '+(k==='batch1'?'Batch 1':'Batch 2')+'（'+unit+'）')}"`,m[k]??'', 'number');
+  const qty=k=>{const quantityLabel=label+' '+(k==='batch1'?'Batch 1':'Batch 2');return `<span class="target-quantity-input">${targetControl(`data-meta="${k}" data-quantity-label="${targetEsc(quantityLabel)}" aria-label="${targetEsc(quantityLabel+'（'+unit+'）')}"`,m[k]??'', 'number')}<span class="target-quantity-unit" data-quantity-unit aria-hidden="true">${targetEsc(unit)}</span></span>`;};
   const details=type==='hop'?`<label>α酸（%）${cell('alpha',m.alpha,true,true)}</label><label>目標IBU${cell('ibu',m.ibu,true,true)}</label><label>投入方法<select data-row="timingType" aria-label="${label} 投入方法"><option value="boil" ${row.timingType!=='dryhop'?'selected':''}>煮沸終了前（分）</option><option value="dryhop" ${row.timingType==='dryhop'?'selected':''}>ドライホップ（日目）</option></select></label>${cell('timingValue',row.timingValue,true)}`:
     type==='adjunct'?`<label>単位${cell('unit',unit)}</label><label>投入工程<select data-row="timing" aria-label="${label} 投入工程">${['仕込み時','煮沸中','一次発酵中','二次発酵時','パッケージング時'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></label><label>投入条件（終了何分前等）${cell('timingNote',m.timingNote,false,true)}</label>`:
     type==='mineral'?`<label>投入先<select data-row="timing" aria-label="${label} 投入先">${['仕込み水','スパージ水','煮沸中'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></label><label>濃度（%・必要な場合）${cell('concentration',m.concentration,true,true)}</label>`:'<output data-ratio aria-label="配合比率"></output>';
-  return `<tr data-target-row="${type}" data-base="${targetEsc(JSON.stringify(row))}"><td><label>名称${cell('name',row.name)}</label>${type!=='mineral'?`<label>在庫品目<select data-row="invId" aria-label="${label} 在庫品目">${targetOptions(type,row.invId)}</select></label><label>メーカー${cell('manufacturer',m.manufacturer,false,true)}</label><label>ロット${cell('lot',m.lot,false,true)}</label>`:''}</td><td><label>Batch 1${qty('batch1')}</label><label>Batch 2${qty('batch2')}</label><output data-amount-total></output>${type!=='adjunct'?`<span class="target-unit">${unit}</span>`:''}</td><td>${details}</td><td><button type="button" class="inv-action-btn" data-remove-target-row aria-label="${label}の計画行を削除">削除</button></td></tr>`;
+  return `<tr data-target-row="${type}" data-base="${targetEsc(JSON.stringify(row))}"><td><label>名称${cell('name',row.name)}</label>${type!=='mineral'?`<label>在庫品目<select data-row="invId" aria-label="${label} 在庫品目">${targetOptions(type,row.invId)}</select></label><label>メーカー${cell('manufacturer',m.manufacturer,false,true)}</label><label>ロット${cell('lot',m.lot,false,true)}</label>`:''}</td><td><label>Batch 1${qty('batch1')}</label><label>Batch 2${qty('batch2')}</label><output data-amount-total></output></td><td>${details}</td><td><button type="button" class="inv-action-btn" data-remove-target-row aria-label="${label}の計画行を削除">削除</button></td></tr>`;
 }
 function targetRowsSection(type,b){
-  const rows=b[BrewTargets.rowTypes[type][0]]||[],title=TARGET_ROW_LABELS[type];
-  return targetSection(title+`の予定量`, `<div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}の計画</caption><thead><tr><th>品目</th><th>予定量（2回仕込み）</th><th>${type==='fermentable'?'配合比率':'投入・成分の目標'}</th><th>操作</th></tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div>`);
+  const rows=b[BrewTargets.rowTypes[type][0]]||[],title=TARGET_ROW_LABELS[type],unit=type==='adjunct'?'':BrewTargets.rowTypes[type][1];
+  return targetSection(title+`の予定量`, `<p class="target-note">数量は数字だけ入力してください${unit?`（例：100 ${unit}なら「100」）`: '（単位は各行で指定）'}。1回仕込みの場合はBatch 1だけ入力します。</p><div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}の計画</caption><thead><tr><th>品目</th><th>予定量${unit?'（'+unit+'）':''}</th><th>${type==='fermentable'?'配合比率':'投入・成分の目標'}</th><th>操作</th></tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div>`);
 }
 function targetMetricHtml(step,key,b){
   const m=BrewTargets.metrics[key];if(m[2]==='bound')return targetBound(key,b);
@@ -140,10 +140,16 @@ function applyBrewTargetSheet(event){
     targetSheetDirty=false;document.getElementById('targetSheetDialog').close();
   }catch(e){error.textContent=e.message;error.focus();}
 }
+function updateTargetRowUnits(tr,type){
+  const unit=type==='adjunct'?(tr.querySelector('[data-row=unit]')?.value||'').trim():BrewTargets.rowTypes[type][1];
+  tr.querySelectorAll('[data-quantity-unit]').forEach(e=>e.textContent=unit||'単位未設定');
+  tr.querySelectorAll('[data-quantity-label]').forEach(e=>e.setAttribute('aria-label',e.dataset.quantityLabel+'（'+(unit||'単位未設定')+'）'));
+  return unit;
+}
 function updateTargetSheetTotals(){
   for(const type of Object.keys(BrewTargets.rowTypes)){
     const rows=[...document.querySelectorAll(`#target-rows-${type} tr`)];let total=0,has=false,invalid=false;
-    rows.forEach(tr=>{const a=tr.querySelector('[data-meta=batch1]').value,b=tr.querySelector('[data-meta=batch2]').value;try{const sum=BrewTargets.sum(BrewTargets.numeric(a,'量'),BrewTargets.numeric(b,'量'));tr.dataset.sum=sum;tr.querySelector('[data-amount-total]').textContent=sum===''?'合計 未設定':'合計 '+sum;if(sum!==''){has=true;total+=Number(sum);}}catch(e){tr.dataset.sum='';tr.querySelector('[data-amount-total]').textContent='数値を確認';invalid=true;}});
+    rows.forEach(tr=>{const unit=updateTargetRowUnits(tr,type),a=tr.querySelector('[data-meta=batch1]').value,b=tr.querySelector('[data-meta=batch2]').value;try{const sum=BrewTargets.sum(BrewTargets.numeric(a,'量'),BrewTargets.numeric(b,'量'));tr.dataset.sum=sum;tr.querySelector('[data-amount-total]').textContent=sum===''?'合計 未設定':'合計 '+sum+' '+(unit||'（単位未設定）');if(sum!==''){has=true;total+=Number(sum);}}catch(e){tr.dataset.sum='';tr.querySelector('[data-amount-total]').textContent='数値を確認';invalid=true;}});
     const out=document.getElementById('target-total-'+type);if(out)out.textContent=type==='adjunct'?'単位の異なる副原料は合算しません。':invalid?'入力値を確認してください':has?`合計 ${Number(total.toFixed(6))} ${BrewTargets.rowTypes[type][1]}`:'合計 未設定';
     if(type==='fermentable')rows.forEach(tr=>tr.querySelector('[data-ratio]').textContent=total>0&&tr.dataset.sum!==''&&!invalid?(Number(tr.dataset.sum)/total*100).toFixed(1)+'%':'—');
   }
