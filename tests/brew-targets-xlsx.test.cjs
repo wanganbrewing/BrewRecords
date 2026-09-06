@@ -44,6 +44,7 @@ test('round trip preserves all planned sheets while clearing actuals and ledger 
   const {result}=roundTrip(),b=result.batch;
   assert.equal(b.batchName,'Excel 試験');assert.equal(b.batchIcon,'auto');assert.equal(b.taxCategory,'ビール・発泡酒等(発泡性酒類)');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');assert.equal(b.phAcidType,undefined);assert.equal(b.sCa,'');assert.equal(b.sHCO3,'');
   assert.equal(b.brewTargets.fields.targetSRM,'8');assert.equal(b.brewTargets.fields.targetABV,'5.3');assert.equal(b.brewTargets.fields.yeastSource,'fresh pitch');
+  assert.equal(b.brewTargets.fields.targetIBU,'46');assert.equal(b.hops[0].targetMeta.ibu,'46.0');
   assert.equal(b.brewTargets.fields.batchNumber,'WB-82');assert.equal(b.brewTargets.fields.doubleBrew,true);assert.equal(b.brewTargets.steps[1].values.ph,'5.2');
   assert.equal(b.fermentables[0].amount,'80');assert.equal(b.fermentables[0].invId,'m1');assert.equal(b.hops[0].targetMeta.alpha,'6.2');assert.equal(b.yeastInvId,'y1');
   assert.equal(b.actualOG,'');assert.equal(b.fermentStart,'');assert.deepEqual(b.gravityLog,[]);assert.deepEqual(b.packages,[]);assert.equal(b.inventoryDeducted,false);assert.deepEqual(b.processMeasurements,[]);

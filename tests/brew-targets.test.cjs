@@ -25,10 +25,15 @@ test('time, date and negative residual alkalinity are validated separately',()=>
   const p={version:1,fields:{sanitizeDate:'2026-02-28',residualAlkalinity:'-38.1'},steps:[{id:'s',name:'Start',slots:['time'],values:{time:'09:15'}}]};
   assert.equal(B.normalize(p).fields.residualAlkalinity,'-38.1');p.fields.sanitizeDate='2026-02-30';assert.throws(()=>B.normalize(p));p.fields.sanitizeDate='';p.steps[0].values.time='25:00';assert.throws(()=>B.normalize(p));
 });
-test('batch 1 and 2 quantities sum once and keep hop lot, alpha and target IBU',()=>{
+test('batch 1 and 2 quantities sum once and keep hop alpha and calculated IBU data',()=>{
   const row={name:'Northern Brewer',invId:'hop-lot1',amount:'old',timingType:'boil',timingValue:'60',targetMeta:{batch1:'160',batch2:'20',manufacturer:'Maker',lot:'L1',alpha:'4.32',ibu:'2'}};
   const n=B.validateRow('hop',row);assert.equal(n.amount,'180');assert.equal(n.targetMeta.alpha,'4.32');assert.equal(n.invId,'hop-lot1');assert.equal(row.amount,'old');
   assert.throws(()=>B.validateRow('hop',{...row,targetMeta:{...row.targetMeta,alpha:'101'}}));
+});
+test('Tinseth IBU estimate uses hop weight, alpha, time, volume and target OG',()=>{
+  const hop={name:'Cascade',amount:'900',timingType:'boil',timingValue:'60',targetMeta:{batch1:'800',batch2:'100',alpha:'6.2'}};
+  assert.equal(B.hopIbu(hop,'280','1.050'),'46.0');assert.equal(B.hopIbu({...hop,timingType:'dryhop'},'280','1.050'),'0.0');assert.equal(B.hopIbu(hop,'','1.050'),'');
+  const result=B.autoIbuRows([hop,{...hop,amount:'100',targetMeta:{batch1:'100',batch2:'',alpha:'5'}}],'280','1.050');assert.equal(result.total,'50.1');assert.equal(result.rows[0].targetMeta.ibu,'46.0');
 });
 test('ordinary amount edits reset only stale batch split while retaining target metadata',()=>{
   const old={batch1:'100',batch2:'20',alpha:'6.76',lot:'x'};
@@ -87,7 +92,7 @@ test('unified target plan may assign the clearly labelled actual OG but never ot
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(dir,'brew-targets.js'),'utf8'));
   assert.ok(new RegExp("\\['actualOG',").test(ui));
   for(const field of ['fermentStart','fermentTemp','fermentStartPh','gravityLog','packages'])assert.ok(!new RegExp("\\['"+field+"',").test(ui));
-  assert.match(ui,/左側で目標を設定/);assert.match(ui,/実測値は目標仕込み表のExcelには書き出しません/);
+  assert.match(ui,/今回の仕込み目標を設定/);assert.match(ui,/実測値は目標仕込み表のExcelには書き出しません/);
   assert.ok(!ui.includes('storage.set'));assert.ok(!ui.includes('deductInventoryForBatch('));
   assert.match(html,/brewTargets: typeof collectBrewTargets/);assert.match(html,/data-view-brew-targets/);assert.match(html,/目標仕込み表\(JSON\)/);
 });
@@ -97,16 +102,16 @@ test('target assets are included in the application and offline cache',()=>{
 });
 test('planned quantity inputs display permanent units for both batches without changing stored values',()=>{
   const c=context();
-  for(const [type,unit] of [['hop','g'],['fermentable','kg'],['mineral','g'],['adjunct','mg']]){
-    const row={name:'Material',amount:'1111',unit,targetMeta:{batch1:'1000',batch2:'111'}},before=JSON.stringify(row);
+  for(const [type,unit] of [['hop','g'],['fermentable','kg'],['mineral','g'],['adjunct','g']]){
+    const row={name:'Material',amount:'1111',unit:'mg',targetMeta:{batch1:'1000',batch2:'111'}},before=JSON.stringify(row);
     const rendered=c.targetRowHtml(type,row,0);
     assert.equal((rendered.match(new RegExp('data-quantity-unit aria-hidden="true">'+unit+'<','g'))||[]).length,2);
     assert.match(rendered,/value="1000"/);assert.match(rendered,/value="111"/);assert.equal(JSON.stringify(row),before);
     assert.ok(!rendered.includes('value="1000 '+unit+'"'));
   }
   assert.match(c.targetRowsSection('hop',{}),/100 gなら「100」/);
-  assert.match(c.targetRowsSection('hop',{}),/仕込み1回目（g）/);
-  assert.match(c.targetRowsSection('hop',{}),/data-second-brew>仕込み2回目（g）/);
+  assert.match(c.targetRowsSection('hop',{}),/重さ（g）/);
+  assert.match(c.targetRowsSection('hop',{}),/data-second-brew>2回目の重さ（g）/);
 });
 test('PC target entry uses a merged plan and a process sheet with one save action',()=>{
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
@@ -121,7 +126,7 @@ test('unified plan exposes the requested current fields and omits retired input 
   for(const key of ['taxCategory','actualOG'])assert.match(ui,new RegExp("\\['"+key+"',"));
   assert.ok(ui.includes("'targetSRM'"));
   for(const key of ['batchIcon','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.doesNotMatch(ui,new RegExp("\\['"+key+"',"));
-  for(const text of ['仕込みの目標と実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','FV1〜FV8'])assert.ok(ui.includes(text));
+  for(const text of ['スタイル・目標・実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','FV1〜FV8','目標IBU（自動計算）'])assert.ok(ui.includes(text));
   for(const text of ['原水とpH調整','酸の添加量を計算','水質調整剤の予定量'])assert.ok(!ui.includes(text));
   assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
   assert.ok(html.includes('class="form-batch-name brew-batch-visible"'));
@@ -136,10 +141,9 @@ test('selection helpers keep reference values separate and calculate target ABV'
   assert.match(c.targetRowHtml('hop',{name:'Cascade',targetMeta:{}},0),/data-label="α酸（%）"/);
   assert.match(ui,/スタイルガイド参考値（入力値ではありません）/);assert.doesNotMatch(ui,/\$\{targetEsc\(style\.id\)\} \$\{targetEsc\(style\.name\)\}/);
 });
-test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{
-  const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 仕込み1回目'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 仕込み2回目'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};
-  const row={querySelector:()=>unit,querySelectorAll:s=>s==='[data-quantity-unit]'?badges:inputs};
-  assert.equal(c.updateTargetRowUnits(row,'adjunct'),'mg');assert.ok(badges.every(e=>e.textContent==='mg'));assert.equal(inputs[0]['aria-label'],'副原料1 仕込み1回目（mg）');
-  unit.value='L';assert.equal(c.updateTargetRowUnits(row,'adjunct'),'L');assert.ok(badges.every(e=>e.textContent==='L'));assert.equal(inputs[0].value,'1000');assert.equal(inputs[1].value,'111');
-  unit.value='';c.updateTargetRowUnits(row,'adjunct');assert.ok(badges.every(e=>e.textContent==='単位未設定'));
+test('adjunct quantities use a fixed gram weight without a separate unit input',()=>{
+  const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 重さ'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 2回目の重さ'},setAttribute(k,v){this[k]=v;}}];
+  const row={querySelectorAll:s=>s==='[data-quantity-unit]'?badges:inputs};
+  assert.equal(c.updateTargetRowUnits(row,'adjunct'),'g');assert.ok(badges.every(e=>e.textContent==='g'));assert.equal(inputs[0]['aria-label'],'副原料1 重さ（g）');
+  const rendered=c.targetRowHtml('adjunct',{name:'Sugar',amount:'10',unit:'mg',targetMeta:{batch1:'10'}},0);assert.doesNotMatch(rendered,/data-row="unit"/);assert.match(rendered,/重さ（g）/);
 });

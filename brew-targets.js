@@ -79,9 +79,22 @@
     if(!r.name&&Object.entries(m).some(([k,v])=>!['batch1','batch2'].includes(k)&&v!=null&&text(v).trim()!==''))throw Error('成分・ロット等を入力した原材料の名称も入力してください。');
     return r;
   }
+  function hopIbu(row,volume,og){
+    const meta=rowMeta(row),weight=Number(sum(meta.batch1,meta.batch2)),liters=Number(volume),gravity=Number(og),alpha=Number(meta.alpha),minutes=Number(row?.timingValue);
+    if(!(weight>0))return '';
+    if(row?.timingType==='dryhop')return '0.0';
+    if(!(liters>0)||!(gravity>=1&&gravity<=1.3)||!(alpha>0&&alpha<=100)||!(minutes>=0))return '';
+    const utilization=1.65*Math.pow(0.000125,gravity-1)*(1-Math.exp(-0.04*minutes))/4.15;
+    return (weight*(alpha/100)*utilization*1000/liters).toFixed(1);
+  }
+  function autoIbuRows(rows,volume,og){
+    let has=false,total=0;
+    const updated=(rows||[]).map(row=>{const next=clone(row),meta=rowMeta(next),ibu=hopIbu(next,volume,og);meta.ibu=ibu;next.targetMeta=meta;if(ibu!==''){has=true;total+=Number(ibu);}return next;});
+    return {rows:updated,total:has?total.toFixed(1):''};
+  }
   function waterPlan(plan,total){const p=normalize(plan),m=rowMeta({amount:text(total),targetMeta:{batch1:p.fields.mashWater1,batch2:p.fields.mashWater2}});p.fields.mashWater1=m.batch1;p.fields.mashWater2=m.batch2;return p;}
   function scalePlan(plan,ratio){const p=normalize(plan);for(const f of fields){if(f[3]==='L'&&p.fields[f[0]]!=='')p.fields[f[0]]=String(Number(p.fields[f[0]])*ratio);}for(const s of p.steps){if(s.values.volume!=null&&s.values.volume!=='')s.values.volume=String(Number(s.values.volume)*ratio);}return p;}
   function scaleMeta(meta,ratio){const m=clone(meta||{});for(const k of ['batch1','batch2'])if(m[k]!=null&&m[k]!=='')m[k]=String(Math.round(Number(m[k])*ratio*1e6)/1e6);return m;}
-  const api={fields,steps,metrics,rowTypes,empty,normalize,expandedSteps,rowMeta,validateRow,waterPlan,numeric,sum,scalePlan,scaleMeta};
+  const api={fields,steps,metrics,rowTypes,empty,normalize,expandedSteps,rowMeta,validateRow,hopIbu,autoIbuRows,waterPlan,numeric,sum,scalePlan,scaleMeta};
   root.BrewTargets=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
