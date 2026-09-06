@@ -11,7 +11,7 @@
   const fields=[
     ['batchNumber','バッチ番号','text'],['tradeName','帳簿・取引先向け名称','text'],['productName','商品名','text'],['tank','使用予定タンク','text'],
     ['sanitizeDate','洗浄・殺菌の予定日','date'],['sanitizeBy','洗浄・殺菌の予定担当','text'],['millGap','ミルギャップ','number','mm'],
-    ['mashWater1','糖化用水 Batch 1','number','L'],['mashWater2','糖化用水 Batch 2','number','L'],['spargeWater1','スパージ水 Batch 1','number','L'],['spargeWater2','スパージ水 Batch 2','number','L'],
+    ['mashWater1','糖化用水 仕込み1回目','number','L'],['mashWater2','糖化用水 仕込み2回目','number','L'],['spargeWater1','スパージ水 仕込み1回目','number','L'],['spargeWater2','スパージ水 仕込み2回目','number','L'],
     ['sulfateChlorideRatio','SO₄ / Cl 目標比','number',''],['residualAlkalinity','残留アルカリ度 目標','number','mg/L as CaCO₃',-1000,1000],
     ['yeastSource','酵母の由来（fresh pitch等）','text'],['yeastGeneration','酵母の世代','text'],['yeastHarvestDate','酵母回収予定日','date'],
     ['pitchRate','酵母投入率 目標','number',''],['pitchRateUnit','投入率の単位','text'],['cellDensity','細胞密度 目標','number','×10⁶ cells/mL'],
@@ -42,6 +42,7 @@
     if(plan.version!==1||!plan.fields||typeof plan.fields!=='object'||Array.isArray(plan.fields)||!Array.isArray(plan.steps))throw Error('目標仕込み表の形式を確認できません。更新版で開き直してください。');
     const result=clone(plan);if(result.steps.length>100)throw Error('目標工程は100行以内にしてください。');
     for(const f of fields){if(f[2]==='number')result.fields[f[0]]=numeric(result.fields[f[0]],f[1],f[4]??0,f[5]??1e9);else{result.fields[f[0]]=text(result.fields[f[0]]);if(result.fields[f[0]].length>1000)throw Error(`${f[1]}は1000文字以内です。`);if(f[2]==='date'&&result.fields[f[0]]&&!validDate(result.fields[f[0]]))throw Error(`${f[1]}の日付を確認してください。`);}}
+    result.fields.doubleBrew=result.fields.doubleBrew===true;
     const ids=new Set();
     result.steps=result.steps.map(s=>{
       if(!s||typeof s!=='object'||typeof s.id!=='string'||!s.id||ids.has(s.id))throw Error('目標工程の識別情報が重複しています。');ids.add(s.id);
@@ -70,7 +71,7 @@
   }
   function validateRow(type,row){
     const r=clone(row),m={...r.targetMeta};r.name=text(r.name).trim();
-    m.batch1=numeric(m.batch1,`${r.name||'原材料'} Batch 1`);m.batch2=numeric(m.batch2,`${r.name||'原材料'} Batch 2`);
+    m.batch1=numeric(m.batch1,`${r.name||'原材料'} 仕込み1回目`);m.batch2=numeric(m.batch2,`${r.name||'原材料'} 仕込み2回目`);
     if(!r.name&&(m.batch1!==''||m.batch2!==''))throw Error('数量を入力した原材料の名称も入力してください。');
     r.amount=sum(m.batch1,m.batch2);r.targetMeta=m;
     for(const k of ['manufacturer','lot','timingNote']){m[k]=text(m[k]);if(m[k].length>300)throw Error('メーカー・ロット・投入条件は300文字以内です。');}

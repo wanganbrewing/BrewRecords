@@ -45,6 +45,12 @@ test('water splits reconcile with the canonical mash-water total without includi
   const changed=B.waterPlan(plan,'25');assert.equal(changed.fields.mashWater1,'25');assert.equal(changed.fields.mashWater2,'');assert.equal(changed.fields.spargeWater1,'30');
   const c=context();c.loadBrewTargetDraft({brewTargets:plan});c.document.getElementById=()=>({value:'25'});assert.equal(c.collectBrewTargets(null).fields.mashWater1,'25');assert.equal(plan.fields.mashWater1,'15');
 });
+test('second brew is explicit, optional and normalized to a boolean',()=>{
+  const off=B.empty();assert.equal(B.normalize(off).fields.doubleBrew,false);
+  const on=B.empty();on.fields.doubleBrew=true;assert.equal(B.normalize(on).fields.doubleBrew,true);
+  const invalid=B.empty();invalid.fields.doubleBrew='true';assert.equal(B.normalize(invalid).fields.doubleBrew,false);
+  assert.equal(B.fields.find(f=>f[0]==='mashWater1')[1],'糖化用水 仕込み1回目');
+});
 test('a metadata-only material cannot be silently discarded on ordinary form collection',()=>{
   assert.throws(()=>B.validateRow('hop',{name:'',timingType:'boil',targetMeta:{alpha:'6.7'}}),/名称/);
   assert.throws(()=>B.validateRow('fermentable',{name:'',targetMeta:{lot:'LOT1'}}),/名称/);
@@ -96,14 +102,22 @@ test('planned quantity inputs display permanent units for both batches without c
     assert.match(rendered,/value="1000"/);assert.match(rendered,/value="111"/);assert.equal(JSON.stringify(row),before);
     assert.ok(!rendered.includes('value="1000 '+unit+'"'));
   }
-  assert.match(c.targetRowsSection('hop',{}),/予定量（g）/);
   assert.match(c.targetRowsSection('hop',{}),/100 gなら「100」/);
-  assert.match(c.targetRowsSection('hop',{}),/1回仕込みの場合はBatch 1だけ/);
+  assert.match(c.targetRowsSection('hop',{}),/仕込み1回目（g）/);
+  assert.match(c.targetRowsSection('hop',{}),/data-second-brew>仕込み2回目（g）/);
+});
+test('PC target entry is split into three sheets with one save action',()=>{
+  const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
+  for(const sheet of ['① 基本計画','② 原材料・水','③ 仕込み工程'])assert.ok(source.includes(sheet));
+  assert.match(html,/id="targetSheetApply">仕込み計画を保存</);
+  assert.doesNotMatch(source,/画面下部の「保存する」で確定/);
+  assert.match(c.targetExtra('mashWater2',B.empty()),/data-second-brew/);
+  assert.doesNotMatch(c.targetExtra('mashWater1',B.empty()),/data-second-brew/);
 });
 test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{
-  const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 Batch 1'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 Batch 2'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};
+  const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 仕込み1回目'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 仕込み2回目'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};
   const row={querySelector:()=>unit,querySelectorAll:s=>s==='[data-quantity-unit]'?badges:inputs};
-  assert.equal(c.updateTargetRowUnits(row,'adjunct'),'mg');assert.ok(badges.every(e=>e.textContent==='mg'));assert.equal(inputs[0]['aria-label'],'副原料1 Batch 1（mg）');
+  assert.equal(c.updateTargetRowUnits(row,'adjunct'),'mg');assert.ok(badges.every(e=>e.textContent==='mg'));assert.equal(inputs[0]['aria-label'],'副原料1 仕込み1回目（mg）');
   unit.value='L';assert.equal(c.updateTargetRowUnits(row,'adjunct'),'L');assert.ok(badges.every(e=>e.textContent==='L'));assert.equal(inputs[0].value,'1000');assert.equal(inputs[1].value,'111');
   unit.value='';c.updateTargetRowUnits(row,'adjunct');assert.ok(badges.every(e=>e.textContent==='単位未設定'));
 });

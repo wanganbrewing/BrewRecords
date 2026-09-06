@@ -37,7 +37,8 @@ function targetControl(attrs,value,type='text'){
 }
 function targetField(def,value,scope='extra'){
   const [key,label,type,unit]=def,id=`target-${scope}-${key}`;
-  return `<div class="target-field"><label for="${id}">${targetEsc(label)}${unit?'（'+targetEsc(unit)+'）':''}</label>${targetControl(`id="${id}" data-${scope}="${key}"`,value,type)}</div>`;
+  const second=scope==='extra'&&['mashWater2','spargeWater2'].includes(key)?' data-second-brew':'';
+  return `<div class="target-field"${second}><label for="${id}">${targetEsc(label)}${unit?'（'+targetEsc(unit)+'）':''}</label>${targetControl(`id="${id}" data-${scope}="${key}"`,value,type)}</div>`;
 }
 function targetBound(key,b){return targetField(TARGET_BINDINGS.find(x=>x[0]===key),b[key]??'','bound');}
 function targetExtra(key,plan){return targetField(BrewTargets.fields.find(x=>x[0]===key),plan.fields[key]??'');}
@@ -49,15 +50,27 @@ function targetOptions(type,selected){
 function targetRowHtml(type,row,index){
   const m=BrewTargets.rowMeta(row),label=TARGET_ROW_LABELS[type]+(index+1),unit=type==='adjunct'?(row.unit||'g'):BrewTargets.rowTypes[type][1];
   const cell=(key,value,number=false,meta=false)=>targetControl(`data-${meta?'meta':'row'}="${key}" ${type==='mineral'&&key==='name'?'list="targetAdditiveNames"':''} aria-label="${targetEsc(label+' '+({name:'名称',manufacturer:'メーカー',lot:'ロット',alpha:'α酸（%）',ibu:'目標IBU',timingValue:'投入タイミング',unit:'単位',timingNote:'投入条件',concentration:'濃度（%）'}[key]||key))}"`,value,number?'number':'text');
-  const qty=k=>{const quantityLabel=label+' '+(k==='batch1'?'Batch 1':'Batch 2');return `<span class="target-quantity-input">${targetControl(`data-meta="${k}" data-quantity-label="${targetEsc(quantityLabel)}" aria-label="${targetEsc(quantityLabel+'（'+unit+'）')}"`,m[k]??'', 'number')}<span class="target-quantity-unit" data-quantity-unit aria-hidden="true">${targetEsc(unit)}</span></span>`;};
-  const details=type==='hop'?`<label>α酸（%）${cell('alpha',m.alpha,true,true)}</label><label>目標IBU${cell('ibu',m.ibu,true,true)}</label><label>投入方法<select data-row="timingType" aria-label="${label} 投入方法"><option value="boil" ${row.timingType!=='dryhop'?'selected':''}>煮沸終了前（分）</option><option value="dryhop" ${row.timingType==='dryhop'?'selected':''}>ドライホップ（日目）</option></select></label>${cell('timingValue',row.timingValue,true)}`:
-    type==='adjunct'?`<label>単位${cell('unit',unit)}</label><label>投入工程<select data-row="timing" aria-label="${label} 投入工程">${['仕込み時','煮沸中','一次発酵中','二次発酵時','パッケージング時'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></label><label>投入条件（終了何分前等）${cell('timingNote',m.timingNote,false,true)}</label>`:
-    type==='mineral'?`<label>投入先<select data-row="timing" aria-label="${label} 投入先">${['仕込み水','スパージ水','煮沸中'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></label><label>濃度（%・必要な場合）${cell('concentration',m.concentration,true,true)}</label>`:'<output data-ratio aria-label="配合比率"></output>';
-  return `<tr data-target-row="${type}" data-base="${targetEsc(JSON.stringify(row))}"><td><label>名称${cell('name',row.name)}</label>${type!=='mineral'?`<label>在庫品目<select data-row="invId" aria-label="${label} 在庫品目">${targetOptions(type,row.invId)}</select></label><label>メーカー${cell('manufacturer',m.manufacturer,false,true)}</label><label>ロット${cell('lot',m.lot,false,true)}</label>`:''}</td><td><label>Batch 1${qty('batch1')}</label><label>Batch 2${qty('batch2')}</label><output data-amount-total></output></td><td>${details}</td><td><button type="button" class="inv-action-btn" data-remove-target-row aria-label="${label}の計画行を削除">削除</button></td></tr>`;
+  const qty=k=>{const quantityLabel=label+' '+(k==='batch1'?'仕込み1回目':'仕込み2回目');return `<span class="target-quantity-input">${targetControl(`data-meta="${k}" data-quantity-label="${targetEsc(quantityLabel)}" aria-label="${targetEsc(quantityLabel+'（'+unit+'）')}"`,m[k]??'', 'number')}<span class="target-quantity-unit" data-quantity-unit aria-hidden="true">${targetEsc(unit)}</span></span>`;};
+  const inventoryCell=type==='mineral'?'':`<td class="target-cell-wide"><select data-row="invId" aria-label="${label} 在庫品目">${targetOptions(type,row.invId)}</select></td>`;
+  const manufacturer=type==='mineral'?'':`<td>${cell('manufacturer',m.manufacturer,false,true)}</td><td>${cell('lot',m.lot,false,true)}</td>`;
+  const second=`<td data-second-brew>${qty('batch2')}</td>`;
+  const total='<td><output data-amount-total></output></td>';
+  let details='',unitCell='';
+  if(type==='fermentable')details=`<td><output data-ratio aria-label="配合比率"></output></td>`;
+  if(type==='hop')details=`<td>${cell('alpha',m.alpha,true,true)}</td><td><select data-row="timingType" aria-label="${label} 投入方法"><option value="boil" ${row.timingType!=='dryhop'?'selected':''}>煮沸終了前</option><option value="dryhop" ${row.timingType==='dryhop'?'selected':''}>ドライホップ</option></select></td><td>${cell('timingValue',row.timingValue,true)}</td><td>${cell('ibu',m.ibu,true,true)}</td>`;
+  if(type==='adjunct'){unitCell=`<td>${cell('unit',unit)}</td>`;details=`<td><select data-row="timing" aria-label="${label} 投入工程">${['仕込み時','煮沸中','一次発酵中','二次発酵時','パッケージング時'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></td><td>${cell('timingNote',m.timingNote,false,true)}</td>`;}
+  if(type==='mineral')details=`<td><select data-row="timing" aria-label="${label} 投入先">${['仕込み水','スパージ水','煮沸中'].map(v=>`<option ${v===row.timing?'selected':''}>${v}</option>`).join('')}</select></td><td>${cell('concentration',m.concentration,true,true)}</td>`;
+  return `<tr data-target-row="${type}" data-base="${targetEsc(JSON.stringify(row))}"><td class="target-cell-wide">${cell('name',row.name)}</td>${inventoryCell}${manufacturer}<td>${qty('batch1')}</td>${second}${unitCell}${total}${details}<td><button type="button" class="inv-action-btn" data-remove-target-row aria-label="${label}の計画行を削除">削除</button></td></tr>`;
+}
+function targetRowHeaders(type,unit){
+  const base=type==='mineral'?['名称']:['名称','在庫品目','メーカー','ロット'];
+  const quantities=['仕込み1回目'+(unit?'（'+unit+'）':''),'仕込み2回目'+(unit?'（'+unit+'）':'')];
+  const end={fermentable:['合計','配合率'],hop:['合計','α酸（%）','投入方法','投入時期','目標IBU'],adjunct:['単位','合計','投入工程','投入条件'],mineral:['合計','投入先','濃度（%）']}[type];
+  return [...base,...quantities,...end,'操作'].map((v,i)=>`<th ${i===base.length+1?'data-second-brew':''}>${v}</th>`).join('');
 }
 function targetRowsSection(type,b){
   const rows=b[BrewTargets.rowTypes[type][0]]||[],title=TARGET_ROW_LABELS[type],unit=type==='adjunct'?'':BrewTargets.rowTypes[type][1];
-  return targetSection(title+`の予定量`, `<p class="target-note">数量は数字だけ入力してください${unit?`（例：100 ${unit}なら「100」）`: '（単位は各行で指定）'}。1回仕込みの場合はBatch 1だけ入力します。</p><div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}の計画</caption><thead><tr><th>品目</th><th>予定量${unit?'（'+unit+'）':''}</th><th>${type==='fermentable'?'配合比率':'投入・成分の目標'}</th><th>操作</th></tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div>`);
+  return targetSection(title+`の予定量`, `<p class="target-note">数量は数字だけ入力してください${unit?`（例：100 ${unit}なら「100」）`: '（単位は各行で指定）'}。</p><div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}の計画</caption><thead><tr>${targetRowHeaders(type,unit)}</tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div>`);
 }
 function targetMetricHtml(step,key,b){
   const m=BrewTargets.metrics[key];if(m[2]==='bound')return targetBound(key,b);
@@ -65,7 +78,9 @@ function targetMetricHtml(step,key,b){
   const compare=m[2]==='number'&&['gravity','ph','volume'].includes(key)?`<select data-compare="${key}" aria-label="${prefix}の条件">${['=','<','<=','>','>='].map(op=>`<option value="${targetEsc(op)}" ${op===(step.comparisons?.[key]||'=')?'selected':''}>${targetEsc(op)}</option>`).join('')}</select>`:'';
   return `<div class="target-field"><label>${label}</label><div class="target-metric-input">${compare}${targetControl(`data-metric="${key}" aria-label="${prefix}"`,val,m[2])}${key==='gravity'?`<select data-gravity-unit aria-label="${prefix}の単位"><option ${step.gravityUnit==='SG'?'selected':''}>SG</option><option ${step.gravityUnit==='°P'?'selected':''}>°P</option></select>`:''}</div></div>`;
 }
-function targetStepHtml(step,b){return `<div class="target-step" data-step="${targetEsc(JSON.stringify(step))}"><div class="target-step-head">${targetControl('data-step-name aria-label="工程名"',step.name)}<button type="button" class="inv-action-btn" data-step-up aria-label="${targetEsc(step.name)}を上へ">↑</button><button type="button" class="inv-action-btn" data-step-down aria-label="${targetEsc(step.name)}を下へ">↓</button></div><div class="target-metrics">${step.slots.map(k=>targetMetricHtml(step,k,b)).join('')}</div></div>`;}
+function targetStepGroup(step,keys,b,label){const fields=keys.filter(k=>step.slots.includes(k)).map(k=>targetMetricHtml(step,k,b)).join('');return `<td data-label="${label}">${fields||'<span class="target-empty-cell">—</span>'}</td>`;}
+function targetStepHtml(step,b,index=0){return `<tr class="target-step" data-step="${targetEsc(JSON.stringify(step))}"><td data-label="順番"><span class="target-step-number">${index+1}</span></td><td class="target-step-head" data-label="工程">${targetControl('data-step-name aria-label="工程名"',step.name)}</td>${targetStepGroup(step,['time'],b,'予定時刻')}${targetStepGroup(step,['duration','mashTime','boilTime'],b,'時間')}${targetStepGroup(step,['temp','mashTemp'],b,'温度')}${targetStepGroup(step,['volume'],b,'液量')}${targetStepGroup(step,['gravity','targetOG','plato'],b,'比重・糖度')}${targetStepGroup(step,['ph'],b,'pH')}${targetStepGroup(step,['flow','pressure','note'],b,'条件・備考')}<td class="target-step-actions" data-label="操作"><button type="button" class="inv-action-btn" data-step-up aria-label="${targetEsc(step.name)}を上へ">↑</button><button type="button" class="inv-action-btn" data-step-down aria-label="${targetEsc(step.name)}を下へ">↓</button><button type="button" class="inv-action-btn" data-remove-target-step aria-label="${targetEsc(step.name)}を削除">削除</button></td></tr>`;}
+function targetProcessSection(p,b){const steps=BrewTargets.expandedSteps(p);return targetSection('工程ごとの目標',`<p class="target-note">必要なセルだけ入力します。空欄は未設定です。予定時刻は時間割や通知へ自動転記しません。</p><div class="target-table-scroll"><table class="target-process-table"><thead><tr><th>順</th><th>工程</th><th>予定時刻</th><th>時間（分）</th><th>温度（℃）</th><th>液量（L）</th><th>比重・糖度</th><th>pH</th><th>流量・圧力・条件</th><th>操作</th></tr></thead><tbody id="targetSteps">${steps.map((s,i)=>targetStepHtml(s,b,i)).join('')}</tbody></table></div><button type="button" class="add-row-btn" data-add-target-step>＋ 工程を追加（デコクション等）</button>`);}
 function renderBrewTargetSheet(b){
   const p=BrewTargets.waterPlan(b.brewTargets,b.waterVolume);
   const extra=keys=>`<div class="target-field-grid">${keys.map(k=>targetExtra(k,p)).join('')}</div>`;
@@ -73,15 +88,26 @@ function renderBrewTargetSheet(b){
   const water=targetSection('水量・目標ミネラル',extra(['mashWater1','mashWater2','spargeWater1','spargeWater2'])+targetBound('waterVolume',b)+`<p><output id="target-water-total"></output></p><div class="target-field-grid target-ions">${['mCa','mMg','mNa','mCl','mSO4','mHCO3'].map(k=>targetBound(k,b)).join('')}</div>`+extra(['sulfateChlorideRatio','residualAlkalinity']));
   const yeast=targetSection('酵母の投入計画',`<div class="target-field-grid">${['yeast','yeastAmount','yeastUnit'].map(k=>targetBound(k,b)).join('')}</div>`+extra(['yeastSource','yeastGeneration','yeastHarvestDate','pitchRate','pitchRateUnit','cellDensity']));
   const results=targetSection('仕上がり・原価の目標',extra(['targetFG','targetABV','targetIBU','targetLoss','targetCost','planNotes']));
-  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">すべて予定・目標の入力欄です。実測値・発酵記録・在庫消費は変更しません。Batch 1/2は同じバッチにまとめる2回分の予定量で、合計が仕込みの原材料量に連動します。</p><datalist id="targetAdditiveNames">${['石膏（CaSO4）','エプソム塩（MgSO4）','食塩（NaCl）','重曹（NaHCO3）','塩化カルシウム（CaCl2）','炭酸カルシウム（CaCO3）','水酸化カルシウム（Ca(OH)2）','リン酸（H3PO4）','乳酸'].map(n=>`<option value="${targetEsc(n)}"></option>`).join('')}</datalist><div class="target-sheet-columns"><div>${identities}${targetRowsSection('fermentable',b)}${water}${targetRowsSection('hop',b)}${targetRowsSection('adjunct',b)}${targetRowsSection('mineral',b)}<p class="target-note">水質調整剤はgで入力し、投入先ごとに行を分けます。濃度は計画記録用で、既存の酸添加量計算には自動反映しません。推奨量を示す機能ではありません。</p>${yeast}${results}</div><div>${targetSection('工程ごとの目標',`<p class="target-note">時刻・温度・液量など必要な欄だけ入力します。空欄は未設定です。比重のSGと°P、IBU・ABV・pHは自動換算・予測しません。予定時刻は計画記録で、時間割や通知への自動転記は行いません。</p><div id="targetSteps">${BrewTargets.expandedSteps(p).map(s=>targetStepHtml(s,b)).join('')}</div><button type="button" class="add-row-btn" data-add-target-step>＋ 工程を追加（デコクション等）</button>`)}</div></div>`;
+  const hasSecond=p.fields.doubleBrew===true||['mashWater2','spargeWater2'].some(k=>p.fields[k]!==''&&p.fields[k]!=null)||Object.values(BrewTargets.rowTypes).some(([key])=>(b[key]||[]).some(r=>r.targetMeta?.batch2!==''&&r.targetMeta?.batch2!=null));
+  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">PCでは3つのシートに分けて入力します。すべて予定・目標で、実測値・発酵記録・在庫消費は変更しません。</p><nav class="target-sheet-tabs" role="tablist" aria-label="仕込み計画の入力シート"><button type="button" role="tab" data-target-sheet-tab="basic">① 基本計画</button><button type="button" role="tab" data-target-sheet-tab="materials">② 原材料・水</button><button type="button" role="tab" data-target-sheet-tab="process">③ 仕込み工程</button></nav><div class="target-plan-status" id="targetPlanSummary" role="status"></div><datalist id="targetAdditiveNames">${['石膏（CaSO4）','エプソム塩（MgSO4）','食塩（NaCl）','重曹（NaHCO3）','塩化カルシウム（CaCl2）','炭酸カルシウム（CaCO3）','水酸化カルシウム（Ca(OH)2）','リン酸（H3PO4）','乳酸'].map(n=>`<option value="${targetEsc(n)}"></option>`).join('')}</datalist><div class="target-sheet-panes"><div data-target-sheet-pane="basic"><div class="target-basic-grid"><div>${identities}</div><div>${yeast}${results}</div></div></div><div data-target-sheet-pane="materials"><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、仕込み1回目だけ入力します。</span></div>${targetRowsSection('fermentable',b)}${water}${targetRowsSection('hop',b)}${targetRowsSection('adjunct',b)}${targetRowsSection('mineral',b)}<p class="target-note">水質調整剤はgで入力し、投入先ごとに行を分けます。濃度は計画記録用で、酸添加量計算には自動反映しません。</p></div><div data-target-sheet-pane="process">${targetProcessSection(p,b)}</div></div>`;
   document.getElementById('targetSheetTitle').textContent=targetSheetReadOnly?'目標仕込み表（保存済み）':'目標仕込み表を入力';
   document.getElementById('targetSheetApply').hidden=targetSheetReadOnly;
   document.getElementById('target-bound-waterVolume').readOnly=true;
-  document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの予定・目標です。変更する場合は記録の「編集」から仕込み表を開いてください。':'「仕込みへ反映」の後、仕込み画面下部の「保存する」で確定します。';
-  if(targetSheetReadOnly)document.querySelectorAll('#targetSheetBody input,#targetSheetBody select,#targetSheetBody button').forEach(e=>{e.disabled=true;if(e.tagName==='BUTTON')e.hidden=true;else if(e.tagName==='INPUT'&&!e.value)e.placeholder='未設定';});
+  document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの予定・目標です。変更する場合は記録の「編集」から仕込み表を開いてください。':'3シートの入力内容をまとめて保存します。';
+  if(targetSheetReadOnly)document.querySelectorAll('#targetSheetBody input,#targetSheetBody select,#targetSheetBody button:not([data-target-sheet-tab])').forEach(e=>{e.disabled=true;if(e.tagName==='BUTTON')e.hidden=true;else if(e.tagName==='INPUT'&&!e.value)e.placeholder='未設定';});
   updateTargetSheetTotals();
+  selectTargetSheet('basic',false);
+  updateSecondBrewView();
   document.getElementById('targetSheetBody').scrollTop=0;
 }
+function selectTargetSheet(name,focus=true){
+  const body=document.getElementById('targetSheetBody');if(!body)return;
+  body.dataset.activeTargetSheet=name;
+  body.querySelectorAll('[data-target-sheet-tab]').forEach(button=>{const active=button.dataset.targetSheetTab===name;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;if(active&&focus)button.focus();});
+  body.querySelectorAll('[data-target-sheet-pane]').forEach(pane=>pane.dataset.active=String(pane.dataset.targetSheetPane===name));
+  body.scrollTop=0;
+}
+function updateSecondBrewView(){const body=document.getElementById('targetSheetBody'),checked=document.getElementById('targetDoubleBrew')?.checked===true;if(body)body.dataset.doubleBrew=String(checked);}
 function targetCurrentForm(){return buildBatchFromForm(editingId||'target-draft');}
 function openBrewTargetSheet(savedId){
   const dialog=document.getElementById('targetSheetDialog');if(dialog.open)return;
@@ -107,6 +133,7 @@ function readTargetRows(type){return [...document.querySelectorAll(`#target-rows
 function readTargetPlan(){
   const original=JSON.parse(targetSheetBefore),p=BrewTargets.normalize(original.brewTargets);
   document.querySelectorAll('#targetSheetBody [data-extra]').forEach(e=>p.fields[e.dataset.extra]=e.value);
+  p.fields.doubleBrew=document.getElementById('targetDoubleBrew')?.checked===true;
   p.steps=[...document.querySelectorAll('#targetSteps [data-step]')].map(el=>{
     const s=JSON.parse(el.dataset.step);s.name=el.querySelector('[data-step-name]').value;
     el.querySelectorAll('[data-metric]').forEach(e=>s.values[e.dataset.metric]=e.value);
@@ -117,7 +144,7 @@ function readTargetPlan(){
   return BrewTargets.normalize(p);
 }
 function applyBrewTargetSheet(event){
-  event.preventDefault();if(targetSheetReadOnly)return;
+  event.preventDefault();if(targetSheetReadOnly)return false;
   const error=document.getElementById('targetSheetError');error.textContent='';
   try{
     if(JSON.stringify(targetCurrentForm())!==targetSheetBefore||JSON.stringify(window.fermentCloudData.getSnapshot())!==targetSheetSnapshot)throw Error('入力中に元の仕込み・クラウドデータが変わりました。変更内容を控え、閉じてから開き直してください。');
@@ -136,9 +163,22 @@ function applyBrewTargetSheet(event){
     document.getElementById('ph_waterVolume').value=bounds.waterVolume;
     for(const type of Object.keys(rows)){const container={fermentable:'fermentableRows',hop:'hopRows',adjunct:'adjunctRows',mineral:'mineralRows'}[type];document.getElementById(container).innerHTML='';rows[type].forEach(r=>addRow(container,type,r));}
     brewTargetDraft=p;markEditorDirty();updateAbvDisplay();updateMineralContributionSummary();updateBatchIconSuggestion();
-    document.getElementById('targetPlanStatus').textContent='目標仕込み表を反映しました。画面下部の「保存する」で確定してください。';
+    document.getElementById('targetPlanStatus').textContent='仕込み計画を保存しました。';
     targetSheetDirty=false;document.getElementById('targetSheetDialog').close();
-  }catch(e){error.textContent=e.message;error.focus();}
+    return true;
+  }catch(e){error.textContent=e.message;error.focus();return false;}
+}
+async function saveBrewTargetSheet(event){
+  event.preventDefault();if(targetSheetReadOnly)return;
+  const error=document.getElementById('targetSheetError'),button=document.getElementById('targetSheetApply');
+  if(!document.getElementById('target-bound-batchName').value.trim()){selectTargetSheet('basic');error.textContent='バッチ名を入力してください。';error.focus();return;}
+  button.disabled=true;button.textContent='保存中…';
+  try{
+    const applied=applyBrewTargetSheet({preventDefault(){}});
+    if(applied)await saveBatch();
+  }finally{
+    button.disabled=false;button.textContent='仕込み計画を保存';
+  }
 }
 function updateTargetRowUnits(tr,type){
   const unit=type==='adjunct'?(tr.querySelector('[data-row=unit]')?.value||'').trim():BrewTargets.rowTypes[type][1];
@@ -156,24 +196,28 @@ function updateTargetSheetTotals(){
   const water=['[data-extra=mashWater1]','[data-extra=mashWater2]','[data-extra=spargeWater1]','[data-extra=spargeWater2]'].map(s=>document.querySelector('#targetSheetBody '+s)?.value||'');
   const mashTotal=document.getElementById('target-bound-waterVolume');if(mashTotal)try{mashTotal.value=BrewTargets.sum(BrewTargets.numeric(water[0],'糖化用水'),BrewTargets.numeric(water[1],'糖化用水'));}catch(e){mashTotal.value='';}
   const out=document.getElementById('target-water-total');if(out)try{out.textContent=water.every(v=>v==='')?'予定総水量 未設定':'予定総水量 '+water.map(v=>Number(BrewTargets.numeric(v,'水量'))).reduce((a,b)=>a+b,0).toFixed(2)+' L（糖化用水＋スパージ水）';}catch(e){out.textContent='水量を確認してください。';}
+  const summary=document.getElementById('targetPlanSummary');if(summary){const batch=document.getElementById('target-bound-batchName')?.value.trim(),materials=[...document.querySelectorAll('[data-target-row] [data-row=name]')].filter(e=>e.value.trim()).length,goals=[...document.querySelectorAll('#targetSteps [data-metric]')].filter(e=>e.value!==''),filledSteps=new Set(goals.map(e=>e.closest('[data-step]'))).size;summary.textContent=`バッチ名：${batch?'入力済み':'未入力'}　原材料：${materials}品目　目標入力済み工程：${filledSteps}件`;}
 }
 document.addEventListener('DOMContentLoaded',()=>{
   const dialog=document.getElementById('targetSheetDialog'),body=document.getElementById('targetSheetBody');
-  document.getElementById('targetSheetForm').addEventListener('submit',applyBrewTargetSheet);
+  document.getElementById('targetSheetForm').addEventListener('submit',saveBrewTargetSheet);
   document.addEventListener('click',e=>{const button=e.target.closest('[data-view-brew-targets]');if(button)openBrewTargetSheet(button.dataset.viewBrewTargets);});
   dialog.addEventListener('cancel',e=>{e.preventDefault();closeBrewTargetSheet();});
   dialog.addEventListener('close',()=>{syncModalState();targetSheetFocus?.focus();});
   body.addEventListener('input',()=>{targetSheetDirty=true;updateTargetSheetTotals();});
   body.addEventListener('change',e=>{
-    targetSheetDirty=true;const select=e.target;if(select.matches('[data-row=invId]')&&select.value){const item=inventory.find(i=>i.id===select.value),tr=select.closest('tr');if(item){tr.querySelector('[data-row=name]').value=item.name;tr.querySelector('[data-meta=manufacturer]').value=item.manufacturer||'';tr.querySelector('[data-meta=lot]').value=item.lotCode||'';const unit=tr.querySelector('[data-row=unit]');if(unit)unit.value=item.unit;}}
+    targetSheetDirty=true;const select=e.target;if(select.id==='targetDoubleBrew'&&!select.checked){const second=[...body.querySelectorAll('[data-meta=batch2],[data-extra=mashWater2],[data-extra=spargeWater2]')].filter(i=>i.value!=='');if(second.length&&!confirm('仕込み2回目に入力済みの値があります。値を消して1回仕込みへ戻しますか？')){select.checked=true;}else second.forEach(i=>i.value='');updateSecondBrewView();}else if(select.id==='targetDoubleBrew')updateSecondBrewView();if(select.matches('[data-row=invId]')&&select.value){const item=inventory.find(i=>i.id===select.value),tr=select.closest('tr');if(item){tr.querySelector('[data-row=name]').value=item.name;tr.querySelector('[data-meta=manufacturer]').value=item.manufacturer||'';tr.querySelector('[data-meta=lot]').value=item.lotCode||'';const unit=tr.querySelector('[data-row=unit]');if(unit)unit.value=item.unit;}}
     updateTargetSheetTotals();
   });
   body.addEventListener('click',e=>{
-    const button=e.target.closest('button');if(!button||targetSheetReadOnly)return;
+    const button=e.target.closest('button');if(!button)return;
+    if(button.hasAttribute('data-target-sheet-tab')){selectTargetSheet(button.dataset.targetSheetTab);return;}
+    if(targetSheetReadOnly)return;
     if(button.hasAttribute('data-add-target-row')){const type=button.dataset.addTargetRow,tb=document.getElementById('target-rows-'+type);tb.insertAdjacentHTML('beforeend',targetRowHtml(type,{name:'',amount:'',timingType:'boil'},tb.children.length));targetSheetDirty=true;}
-    if(button.hasAttribute('data-remove-target-row')){const tr=button.closest('tr');if(!confirm('この予定行を仕込み表から削除しますか？「仕込みへ反映」するまでは元の入力は変わりません。'))return;tr.remove();targetSheetDirty=true;}
-    if(button.hasAttribute('data-add-target-step')){const container=document.getElementById('targetSteps');if(container.children.length>=100){alert('工程は100行以内です。');return;}container.insertAdjacentHTML('beforeend',targetStepHtml({id:uid(),name:'追加工程',slots:['time','duration','temp','gravity','ph','volume','note'],values:{},gravityUnit:'SG',comparisons:{}},{}));targetSheetDirty=true;}
-    if(button.hasAttribute('data-step-up')||button.hasAttribute('data-step-down')){const step=button.closest('[data-step]');if(button.hasAttribute('data-step-up')&&step.previousElementSibling)step.previousElementSibling.before(step);else if(button.hasAttribute('data-step-down')&&step.nextElementSibling)step.nextElementSibling.after(step);targetSheetDirty=true;button.focus();}
+    if(button.hasAttribute('data-remove-target-row')){const tr=button.closest('tr');if(!confirm('この予定行を仕込み計画から削除しますか？「仕込み計画を保存」するまでは記録に反映されません。'))return;tr.remove();targetSheetDirty=true;}
+    if(button.hasAttribute('data-add-target-step')){const container=document.getElementById('targetSteps');if(container.children.length>=100){alert('工程は100行以内です。');return;}container.insertAdjacentHTML('beforeend',targetStepHtml({id:uid(),name:'追加工程',slots:['time','duration','temp','gravity','ph','volume','note'],values:{},gravityUnit:'SG',comparisons:{}},container.children.length));targetSheetDirty=true;}
+    if(button.hasAttribute('data-remove-target-step')){if(!confirm('この工程を仕込み計画から削除しますか？'))return;button.closest('[data-step]').remove();targetSheetDirty=true;}
+    if(button.hasAttribute('data-step-up')||button.hasAttribute('data-step-down')){const step=button.closest('[data-step]');if(button.hasAttribute('data-step-up')&&step.previousElementSibling)step.previousElementSibling.before(step);else if(button.hasAttribute('data-step-down')&&step.nextElementSibling)step.nextElementSibling.after(step);[...document.querySelectorAll('#targetSteps .target-step-number')].forEach((e,i)=>e.textContent=i+1);targetSheetDirty=true;button.focus();}
     updateTargetSheetTotals();
   });
 });
