@@ -1,4 +1,4 @@
-let brewTargetDraft=null,targetSheetBefore='',targetSheetSnapshot='',targetSheetReadOnly=false,targetSheetDirty=false,targetSheetFocus=null;
+let brewTargetDraft=null,targetSheetBefore='',targetSheetSnapshot='',targetSheetReadOnly=false,targetSheetDirty=false,targetSheetFocus=null,pendingBrewTargetImport=null;
 const TARGET_BINDINGS=[
   ['batchName','バッチ名','text'],['style','スタイル','text'],['brewDate','仕込み予定日','date'],['brewer','担当者','text'],['batchSize','予定仕込み量','number','L'],
   ['waterVolume','糖化用水 合計（仕込み水量へ連動）','number','L'],['targetOG','目標OG','number','SG'],['mashTemp','目標糖化温度','number','℃'],['mashTime','目標糖化時間','number','分'],['boilTime','目標煮沸時間','number','分'],
@@ -115,7 +115,7 @@ function openBrewTargetSheet(savedId){
   try{
     targetSheetReadOnly=!!savedId;targetSheetFocus=document.activeElement;
     targetSheetBefore=JSON.stringify(b);targetSheetSnapshot=JSON.stringify(window.fermentCloudData.getSnapshot());
-    renderBrewTargetSheet(b);targetSheetDirty=false;document.getElementById('targetSheetError').textContent='';
+    renderBrewTargetSheet(b);targetSheetDirty=false;pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetSheetError').textContent='';
     dialog.showModal();dialog.querySelector('.menu-close').focus({preventScroll:true});document.getElementById('targetSheetBody').scrollTop=0;syncModalState();
   }catch(e){alert(e.message);}
 }
@@ -143,30 +143,54 @@ function readTargetPlan(){
   });
   return BrewTargets.normalize(p);
 }
+function readBrewTargetSheetBatch(){
+  const original=JSON.parse(targetSheetBefore),p=readTargetPlan(),bounds={};
+  document.querySelectorAll('#targetSheetBody [data-bound]').forEach(e=>{
+    const def=TARGET_BINDINGS.find(x=>x[0]===e.dataset.bound);
+    bounds[e.dataset.bound]=def[2]==='number'?BrewTargets.numeric(e.value,def[1],def[0]==='targetOG'?1:def[0]==='mashTemp'?-50:0,def[0]==='targetOG'?1.3:1e9):e.value;
+  });
+  const rows={};for(const type of Object.keys(BrewTargets.rowTypes))rows[type]=readTargetRows(type);
+  for(const type of ['fermentable','hop','adjunct'])for(const row of rows[type])if(row.invId){const item=inventory.find(i=>i.id===row.invId);if(!item||item.category!==type)throw Error(`${row.name}の在庫連携先を選び直してください。`);if(type==='adjunct'&&row.unit!==item.unit)throw Error(`${row.name}の単位を在庫の${item.unit}に合わせてください。`);}
+  const yeastId=targetSheetReadOnly?(original.yeastInvId||''):document.getElementById('f_yeastInv').value,yeastItem=inventory.find(i=>i.id===yeastId);
+  if(yeastItem&&bounds.yeastUnit!==yeastItem.unit)throw Error(`酵母の単位は連携在庫の${yeastItem.unit}に合わせてください。`);
+  if(![...document.getElementById('f_yeastUnit').options].some(o=>o.value===bounds.yeastUnit))throw Error('酵母の単位はg・包・パック・ml・個など、仕込み画面の選択肢に合わせてください。');
+  return {...original,...bounds,brewTargets:p,fermentables:rows.fermentable,hops:rows.hop,adjuncts:rows.adjunct,minerals:rows.mineral,yeastInvId:yeastId||undefined};
+}
 function applyBrewTargetSheet(event){
   event.preventDefault();if(targetSheetReadOnly)return false;
   const error=document.getElementById('targetSheetError');error.textContent='';
   try{
     if(JSON.stringify(targetCurrentForm())!==targetSheetBefore||JSON.stringify(window.fermentCloudData.getSnapshot())!==targetSheetSnapshot)throw Error('入力中に元の仕込み・クラウドデータが変わりました。変更内容を控え、閉じてから開き直してください。');
-    const p=readTargetPlan(),bounds={};
-    document.querySelectorAll('#targetSheetBody [data-bound]').forEach(e=>{
-      const def=TARGET_BINDINGS.find(x=>x[0]===e.dataset.bound);
-      bounds[e.dataset.bound]=def[2]==='number'?BrewTargets.numeric(e.value,def[1],def[0]==='targetOG'?1:def[0]==='mashTemp'?-50:0,def[0]==='targetOG'?1.3:1e9):e.value;
-    });
-    const rows={};for(const type of Object.keys(BrewTargets.rowTypes))rows[type]=readTargetRows(type);
-    // Validate everything before changing the underlying form. No storage writes here.
-    for(const type of ['fermentable','hop','adjunct'])for(const row of rows[type])if(row.invId){const item=inventory.find(i=>i.id===row.invId);if(!item||item.category!==type)throw Error(`${row.name}の在庫連携先を選び直してください。`);if(type==='adjunct'&&row.unit!==item.unit)throw Error(`${row.name}の単位を在庫の${item.unit}に合わせてください。`);}
-    const yeastId=document.getElementById('f_yeastInv').value,yeastItem=inventory.find(i=>i.id===yeastId);
-    if(yeastItem&&bounds.yeastUnit!==yeastItem.unit)throw Error(`酵母の単位は連携在庫の${yeastItem.unit}に合わせてください。`);
-    if(![...document.getElementById('f_yeastUnit').options].some(o=>o.value===bounds.yeastUnit))throw Error('酵母の単位はg・包・パック・ml・個など、仕込み画面の選択肢に合わせてください。');
-    for(const [k,v] of Object.entries(bounds))document.getElementById('f_'+k).value=v;
-    document.getElementById('ph_waterVolume').value=bounds.waterVolume;
-    for(const type of Object.keys(rows)){const container={fermentable:'fermentableRows',hop:'hopRows',adjunct:'adjunctRows',mineral:'mineralRows'}[type];document.getElementById(container).innerHTML='';rows[type].forEach(r=>addRow(container,type,r));}
-    brewTargetDraft=p;markEditorDirty();updateAbvDisplay();updateMineralContributionSummary();updateBatchIconSuggestion();
+    const target=readBrewTargetSheetBatch();
+    document.querySelectorAll('#targetSheetBody [data-bound]').forEach(control=>{document.getElementById('f_'+control.dataset.bound).value=target[control.dataset.bound]??'';});
+    document.getElementById('ph_waterVolume').value=target.waterVolume;
+    for(const [type,[arrayKey]] of Object.entries(BrewTargets.rowTypes)){const container={fermentable:'fermentableRows',hop:'hopRows',adjunct:'adjunctRows',mineral:'mineralRows'}[type];document.getElementById(container).innerHTML='';target[arrayKey].forEach(row=>addRow(container,type,row));}
+    brewTargetDraft=target.brewTargets;markEditorDirty();updateAbvDisplay();updateMineralContributionSummary();updateBatchIconSuggestion();
     document.getElementById('targetPlanStatus').textContent='仕込み計画を保存しました。';
     targetSheetDirty=false;document.getElementById('targetSheetDialog').close();
     return true;
   }catch(e){error.textContent=e.message;error.focus();return false;}
+}
+function exportBrewTargetWorkbook(){
+  const error=document.getElementById('targetSheetError');error.textContent='';
+  try{const filename=BrewTargetWorkbook.exportWorkbook(readBrewTargetSheetBatch(),inventory,{appVersion:APP_VERSION});document.getElementById('targetSheetFooterNote').textContent=`「${filename}」を書き出しました。`;}
+  catch(e){error.textContent=e.message;error.focus();}
+}
+function renderBrewTargetImportPreview(result){
+  pendingBrewTargetImport=result;const s=result.summary,preview=document.getElementById('targetExcelImportPreview');
+  document.getElementById('targetExcelImportSummary').innerHTML=`<div class="target-import-summary"><span>バッチ：${targetEsc(s.batchName)}</span><span>予定日：${targetEsc(s.brewDate)}</span><span>原材料：${s.materialCount}品目</span><span>目標工程：${s.targetStepCount}件</span><span>${s.doubleBrew?'2回仕込み':'1回仕込み'}</span></div>`;
+  document.getElementById('targetExcelImportWarnings').innerHTML=result.warnings.length?`<strong>確認してください</strong><ul>${result.warnings.map(message=>`<li>${targetEsc(message)}</li>`).join('')}</ul>`:'<p>現在の在庫と照合できた品目は連携済みで読み込みます。</p>';
+  preview.hidden=false;preview.scrollIntoView({block:'nearest'});document.getElementById('targetExcelImportApply').focus();
+}
+async function importBrewTargetWorkbookFile(file){
+  const error=document.getElementById('targetSheetError');error.textContent='';pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;
+  try{if(!file)return;if(file.size>5*1024*1024)throw Error('Excelファイルは5MB以内にしてください。');const result=BrewTargetWorkbook.parseWorkbook(await file.arrayBuffer(),inventory);renderBrewTargetImportPreview(result);}
+  catch(e){error.textContent=`Excelを読み込めませんでした。${e.message}`;error.focus();}
+}
+function cancelBrewTargetImport(){pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetExcelImport').focus();}
+function applyBrewTargetImport(){
+  if(!pendingBrewTargetImport)return;const imported=JSON.parse(JSON.stringify(pendingBrewTargetImport.batch));pendingBrewTargetImport=null;targetSheetDirty=false;targetSheetFocus=null;document.getElementById('targetSheetDialog').close();
+  openNewForm();populateFormFields(imported);renderFormInvDeductArea(null);markEditorDirty();document.getElementById('targetPlanStatus').textContent='Excelから新しい仕込みの下書きを読み込みました。内容を確認して「保存する」を押してください。';showView('form',false);document.getElementById('f_batchName').focus();
 }
 async function saveBrewTargetSheet(event){
   event.preventDefault();if(targetSheetReadOnly)return;
@@ -201,6 +225,11 @@ function updateTargetSheetTotals(){
 document.addEventListener('DOMContentLoaded',()=>{
   const dialog=document.getElementById('targetSheetDialog'),body=document.getElementById('targetSheetBody');
   document.getElementById('targetSheetForm').addEventListener('submit',saveBrewTargetSheet);
+  document.getElementById('targetExcelExport').addEventListener('click',exportBrewTargetWorkbook);
+  document.getElementById('targetExcelImport').addEventListener('click',()=>document.getElementById('targetExcelFile').click());
+  document.getElementById('targetExcelFile').addEventListener('change',event=>{const file=event.target.files?.[0];event.target.value='';importBrewTargetWorkbookFile(file);});
+  document.getElementById('targetExcelImportCancel').addEventListener('click',cancelBrewTargetImport);
+  document.getElementById('targetExcelImportApply').addEventListener('click',applyBrewTargetImport);
   document.addEventListener('click',e=>{const button=e.target.closest('[data-view-brew-targets]');if(button)openBrewTargetSheet(button.dataset.viewBrewTargets);});
   dialog.addEventListener('cancel',e=>{e.preventDefault();closeBrewTargetSheet();});
   dialog.addEventListener('close',()=>{syncModalState();targetSheetFocus?.focus();});

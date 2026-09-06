@@ -1,5 +1,5 @@
 {
-"version": 81,
+"version": 82,
   "releasedAt": "2026-09-06",
-  "summary": "PC仕込み計画を3シートの表形式へ再構成"
+  "summary": "目標仕込み表のExcel書き出し・安全な取り込みを追加"
 }

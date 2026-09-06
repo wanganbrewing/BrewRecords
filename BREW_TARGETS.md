@@ -1,6 +1,6 @@
-# PC target brew sheet — v81
+# PC target brew sheet — v82
 
-Entry: 仕込み → 仕込み表で目標を設定（PC向け）. Desktop uses three spreadsheet-style sheets: basic plan, materials/water, and process. The second-brew columns are hidden unless the user explicitly enables a two-brew combined batch. One “仕込み計画を保存” action applies and persists the entire plan. Smaller screens retain a card-oriented layout with horizontally scrollable material tables.
+Entry: 仕込み → 仕込み表で目標を設定（PC向け）. Desktop uses three spreadsheet-style sheets: basic plan, materials/water, and process. The second-brew columns are hidden unless the user explicitly enables a two-brew combined batch. One “仕込み計画を保存” action applies and persists the entire plan. Smaller screens retain a card-oriented layout with horizontally scrollable material tables. The toolbar exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
 
 ## Data and boundaries
 
@@ -12,11 +12,12 @@ Entry: 仕込み → 仕込み表で目標を設定（PC向け）. Desktop uses 
 - The sheet is a draft until “仕込み計画を保存”. That action applies the targets to the ordinary form and completes persistence in one flow. Closing a dirty, unsaved sheet asks before discarding. A changed underlying form/cloud snapshot blocks application. All validation precedes form mutations.
 - Existing actual OG/FG, process measurements, fermentation, shipments and stock consumption are not changed by applying the sheet. Planned times are not automatically copied to the schedule or calendar notifications.
 - This is target entry, not a new chemical or recipe prediction engine. No SG/°P conversion or IBU/ABV/pH predictions are introduced. Chemical concentrations are metadata only; additive quantities remain grams.
-- Saved record details offer a read-only target sheet whose three tabs remain navigable. Backup and cloud snapshots retain the entire batch, including the new fields. Brewing CSV includes target-sheet and recipe-metadata JSON columns. All editing devices must use v81 or later.
+- Saved record details offer a read-only target sheet whose three tabs remain navigable. Backup and cloud snapshots retain the entire batch, including the new fields. Brewing CSV includes target-sheet and recipe-metadata JSON columns. All editing devices must use v82 or later.
+- Excel import is preview-first and creates a new unsaved draft. It never imports actual measurements, fermentation logs, packages, expenses, inventory-consumption state or the source record ID. Inventory IDs in the workbook are informational; current inventory is linked only after an exact category/name/manufacturer/lot match (and unit match where required). Unmatched items remain unlinked and appear in the preview warning.
 
 ## Verification
 
-- Automated tests cover blank/zero, numeric bounds, invalid pH/SG, dates/times, schema and duplicates, optional second-brew quantities, custom steps, escaping, stale apply, actual-value preservation, the three-sheet UI and offline assets.
+- Automated tests cover blank/zero, numeric bounds, invalid pH/SG, dates/times, schema and duplicates, optional second-brew quantities, custom steps, escaping, stale apply, actual-value preservation, the three-sheet UI, four-sheet XLSX round trips, safe new-draft imports, inventory reconciliation and offline assets.
 - Isolated browser UAT at desktop 1440×1000 covers the three sheets, material/water sums, alpha and lot, invalid pH rejection, custom step insertion/reorder, one-action save/read-only reopen and ordinary quantity edits preserving metadata.
 - Mobile-width 390×844: dialog and content stay within the viewport. This is browser viewport testing, not physical iPhone testing.
 - Production user records were not used for write tests. Test entries were confined to local demo origins.
