@@ -87,7 +87,7 @@ test('unified target plan may assign the clearly labelled actual OG but never ot
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(dir,'brew-targets.js'),'utf8'));
   assert.ok(new RegExp("\\['actualOG',").test(ui));
   for(const field of ['fermentStart','fermentTemp','fermentStartPh','gravityLog','packages'])assert.ok(!new RegExp("\\['"+field+"',").test(ui));
-  assert.match(ui,/ここだけ実測値です/);
+  assert.match(ui,/左側で目標を設定/);assert.match(ui,/実測値は目標仕込み表のExcelには書き出しません/);
   assert.ok(!ui.includes('storage.set'));assert.ok(!ui.includes('deductInventoryForBatch('));
   assert.match(html,/brewTargets: typeof collectBrewTargets/);assert.match(html,/data-view-brew-targets/);assert.match(html,/目標仕込み表\(JSON\)/);
 });
@@ -121,11 +121,20 @@ test('unified plan exposes the requested current fields and omits retired input 
   for(const key of ['taxCategory','actualOG'])assert.match(ui,new RegExp("\\['"+key+"',"));
   assert.ok(ui.includes("'targetSRM'"));
   for(const key of ['batchIcon','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.doesNotMatch(ui,new RegExp("\\['"+key+"',"));
-  for(const text of ['仕込み後の実測（任意）','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力'])assert.ok(ui.includes(text));
+  for(const text of ['仕込みの目標と実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','FV1〜FV8'])assert.ok(ui.includes(text));
   for(const text of ['原水とpH調整','酸の添加量を計算','水質調整剤の予定量'])assert.ok(!ui.includes(text));
   assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
   assert.ok(html.includes('class="form-batch-name brew-batch-visible"'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
+});
+test('selection helpers keep reference values separate and calculate target ABV',()=>{
+  const c=context();
+  assert.equal(c.computedAbv('1.050','1.010'),'5.3');assert.equal(c.computedAbv('1.010','1.050'),'');assert.equal(c.computedAbv('','1.010'),'');
+  const tax=c.targetTaxField({taxCategory:'ビール'});assert.match(tax,/<select[^>]+data-bound="taxCategory"/);assert.match(tax,/value="ビール" selected/);
+  const tank=c.targetTankField({fields:{tank:'FV3'}});assert.match(tank,/FV3/);assert.match(tank,/data-extra="tank"[^>]+hidden/);
+  const srm=c.targetSrmField({fields:{targetSRM:'8'}});assert.match(srm,/SRM 8/);assert.match(srm,/data-extra="targetSRM"[^>]+hidden/);
+  assert.match(c.targetRowHtml('hop',{name:'Cascade',targetMeta:{}},0),/data-label="α酸（%）"/);
+  assert.match(ui,/スタイルガイド参考値（入力値ではありません）/);assert.doesNotMatch(ui,/\$\{targetEsc\(style\.id\)\} \$\{targetEsc\(style\.name\)\}/);
 });
 test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{
   const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 仕込み1回目'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 仕込み2回目'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};

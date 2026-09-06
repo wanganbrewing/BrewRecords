@@ -14,7 +14,7 @@
     ['基本','batchName','バッチ名','text',''],['基本','style','スタイル','text',''],['基本','taxCategory','酒税法上の品目区分','text',''],['基本','brewDate','仕込み予定日','date',''],['基本','brewer','担当者','text',''],['基本','batchSize','予定仕込み量','number','L'],
     ['仕込み目標','targetOG','目標OG','number','SG'],['仕込み目標','mashTemp','目標糖化温度','number','℃'],['仕込み目標','mashTime','目標糖化時間','number','分'],['仕込み目標','boilTime','目標煮沸時間','number','分'],
     ['設備','batchNumber','バッチ番号','text',''],['設備','tradeName','帳簿・取引先向け名称','text',''],['設備','productName','商品名','text',''],['設備','tank','使用予定タンク','text',''],['設備','sanitizeDate','洗浄・殺菌の予定日','date',''],['設備','sanitizeBy','洗浄・殺菌の予定担当','text',''],['設備','millGap','ミルギャップ','number','mm'],
-    ['仕上がり','targetFG','目標FG','number','SG'],['仕上がり','targetABV','目標ABV','number','%'],['仕上がり','targetIBU','目標合計IBU','number','IBU'],['仕上がり','targetSRM','目標SRM','number','SRM'],['仕上がり','planNotes','仕込み計画メモ','text',''],
+    ['仕上がり','targetFG','目標FG','number','SG'],['仕上がり','targetABV','目標ABV（自動計算）','number','%'],['仕上がり','targetIBU','目標合計IBU','number','IBU'],['仕上がり','targetSRM','目標SRM','number','SRM'],['仕上がり','planNotes','仕込み計画メモ','text',''],
     ['酵母','yeastSource','酵母の由来','text',''],['酵母','yeastHarvestDate','酵母回収予定日','date',''],['酵母','cellDensity','細胞密度 目標','number','×10⁶ cells/mL']
   ];
   const WATER_DEFS=[
@@ -30,8 +30,9 @@
   const xlsxFrom=options=>options?.xlsx||(typeof XLSX!=='undefined'?XLSX:null);
   const asExcelValue=(value,type)=>type==='number'&&trim(value)!==''&&Number.isFinite(Number(value))?Number(value):value??'';
   const safeFilename=name=>trim(name).replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,70)||'名称未設定';
+  const calculatedTargetAbv=(og,fg)=>{const start=Number(og),finish=Number(fg);return Number.isFinite(start)&&Number.isFinite(finish)&&start>=1&&finish>=1&&start>=finish?((start-finish)*131.25).toFixed(1):'';};
   function assertReady(){if(!BrewTargets)throw Error('仕込み計画の処理を読み込めませんでした。画面を再読み込みしてください。');}
-  function planFrom(batch){assertReady();return BrewTargets.normalize(batch?.brewTargets);}
+  function planFrom(batch){assertReady();const plan=BrewTargets.normalize(batch?.brewTargets);plan.fields.targetABV=calculatedTargetAbv(batch?.targetOG,plan.fields.targetFG);return plan;}
   function findInventory(inventory,id){return (inventory||[]).find(item=>item.id===id);}
   function inventoryMeta(inventory,row){const item=findInventory(inventory,row?.invId);return {name:item?.name||'',manufacturer:row?.targetMeta?.manufacturer||item?.manufacturer||'',lot:row?.targetMeta?.lot||item?.lotCode||'',id:row?.invId||''};}
   function fieldRows(batch,plan){return FIELD_DEFS.map(([group,key,label,type,unit])=>[group,label,asExcelValue(plan.fields[key]!==undefined?plan.fields[key]:batch?.[key],type),unit,key]);}
@@ -138,7 +139,7 @@
     const basic=sheetObjects(xlsx,wb,'基本計画',BASIC_HEADERS),materials=sheetObjects(xlsx,wb,'原材料・水',MATERIAL_HEADERS),process=sheetObjects(xlsx,wb,'仕込み工程',PROCESS_HEADERS);
     if(materials.length>1000)throw Error('原材料・水の行数が多すぎます。1000行以内にしてください。');
     const batch={id:'',batchName:'',style:'',brewDate:'',brewer:'',batchSize:'',actualOG:'',fermentStart:'',fermentTemp:'',fermentStartPh:'',gravityLog:[],fg:'',packageDate:'',packages:[],completed:false,inventoryDeducted:false,customScheduleSteps:[],processMeasurements:[],otherCosts:[],otherCostsReviewed:false,otherCostHistory:[]};
-    const plan=BrewTargets.empty(),warnings=[];importFieldRows(basic,batch,plan,xlsx);importMaterials(materials,batch,plan,inventory,xlsx,warnings);importProcess(process,batch,plan);plan.fields.doubleBrew=materials.some(row=>trim(row['仕込み2回目'])!=='');batch.brewTargets=BrewTargets.waterPlan(BrewTargets.normalize(plan),batch.waterVolume);
+    const plan=BrewTargets.empty(),warnings=[];importFieldRows(basic,batch,plan,xlsx);importMaterials(materials,batch,plan,inventory,xlsx,warnings);importProcess(process,batch,plan);plan.fields.doubleBrew=materials.some(row=>trim(row['仕込み2回目'])!=='');plan.fields.targetABV=calculatedTargetAbv(batch.targetOG,plan.fields.targetFG);batch.brewTargets=BrewTargets.waterPlan(BrewTargets.normalize(plan),batch.waterVolume);
     for(const [key,label,type] of [['batchName','バッチ名','text'],['batchSize','予定仕込み量','number'],['targetOG','目標OG','number'],['mashTemp','目標糖化温度','number'],['mashTime','目標糖化時間','number'],['boilTime','目標煮沸時間','number'],['waterVolume','糖化用水合計','number'],['waterPh','原水pH','number'],['waterAlkalinity','原水アルカリ度','number'],['targetWaterPh','目標仕込み水pH','number'],['sCa','原水Ca','number'],['sMg','原水Mg','number'],['sNa','原水Na','number'],['sCl','原水Cl','number'],['sSO4','原水SO4','number'],['sHCO3','原水HCO3','number'],['mCa','Ca','number'],['mMg','Mg','number'],['mNa','Na','number'],['mCl','Cl','number'],['mSO4','SO4','number'],['mHCO3','HCO3','number']])if(batch[key]!==''&&type==='number')batch[key]=BrewTargets.numeric(batch[key],label,key==='targetOG'?1:0,key==='targetOG'?1.3:1e9);
     batch.batchIcon='auto';batch.yeastUnit='g';
     const materialCount=Object.values(BrewTargets.rowTypes).reduce((sum,[key])=>sum+(batch[key]?.length||0),0)+(batch.yeast?1:0),targetSteps=batch.brewTargets.steps.filter(step=>Object.values(step.values).some(v=>trim(v)!=='')||step.slots.some(slot=>BrewTargets.metrics[slot]?.[2]==='bound'&&trim(batch[slot])!=='')).length;

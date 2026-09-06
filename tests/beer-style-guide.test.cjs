@@ -31,6 +31,7 @@ test('style guide and mobile process actual entry ship in the current release',(
   assert.ok(ui.includes("metric('ABV',style.abv)"));
   assert.ok(ui.includes("metric('IBU',style.ibu)"));
   assert.ok(ui.includes("metric('SRM',style.srm)"));
+  assert.ok(ui.includes('スタイルガイド参考値（入力値ではありません）'));
+  assert.ok(ui.includes('入力枠とは連携せず'));
   assert.ok(ui.includes('data-target-process-actual'));
 });
-

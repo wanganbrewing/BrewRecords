@@ -36,13 +36,14 @@ test('workbook has the four documented editable sheets and typed target cells',(
   const basic=X.utils.sheet_to_json(wb.Sheets['基本計画'],{defval:''});
   assert.equal(basic.find(row=>row['管理キー']==='batchSize')['値'],280);
   assert.equal(basic.find(row=>row['管理キー']==='targetOG')['値'],1.05);
+  assert.equal(basic.find(row=>row['管理キー']==='targetABV')['値'],5.3);
   assert.equal(X.utils.sheet_to_json(wb.Sheets['管理情報'],{defval:''}).find(row=>row['項目']==='formatId')['値'],M.FORMAT_ID);
 });
 
 test('round trip preserves all planned sheets while clearing actuals and ledger effects',()=>{
   const {result}=roundTrip(),b=result.batch;
   assert.equal(b.batchName,'Excel 試験');assert.equal(b.batchIcon,'auto');assert.equal(b.taxCategory,'ビール・発泡酒等(発泡性酒類)');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');assert.equal(b.phAcidType,undefined);assert.equal(b.sCa,'');assert.equal(b.sHCO3,'');
-  assert.equal(b.brewTargets.fields.targetSRM,'8');assert.equal(b.brewTargets.fields.yeastSource,'fresh pitch');
+  assert.equal(b.brewTargets.fields.targetSRM,'8');assert.equal(b.brewTargets.fields.targetABV,'5.3');assert.equal(b.brewTargets.fields.yeastSource,'fresh pitch');
   assert.equal(b.brewTargets.fields.batchNumber,'WB-82');assert.equal(b.brewTargets.fields.doubleBrew,true);assert.equal(b.brewTargets.steps[1].values.ph,'5.2');
   assert.equal(b.fermentables[0].amount,'80');assert.equal(b.fermentables[0].invId,'m1');assert.equal(b.hops[0].targetMeta.alpha,'6.2');assert.equal(b.yeastInvId,'y1');
   assert.equal(b.actualOG,'');assert.equal(b.fermentStart,'');assert.deepEqual(b.gravityLog,[]);assert.deepEqual(b.packages,[]);assert.equal(b.inventoryDeducted,false);assert.deepEqual(b.processMeasurements,[]);
@@ -52,9 +53,9 @@ test('round trip preserves all planned sheets while clearing actuals and ledger 
 test('edited Excel values are imported by stable keys and not by row position',()=>{
   const wb=M.buildWorkbook(fixture(),inventory,{xlsx:X,appVersion:82});
   const rows=X.utils.sheet_to_json(wb.Sheets['基本計画'],{defval:''});
-  rows.reverse();rows.find(row=>row['管理キー']==='batchName')['値']='Excelで変更';rows.find(row=>row['管理キー']==='targetOG')['値']=1.062;
+  rows.reverse();rows.find(row=>row['管理キー']==='batchName')['値']='Excelで変更';rows.find(row=>row['管理キー']==='targetOG')['値']=1.062;rows.find(row=>row['管理キー']==='targetABV')['値']=99;
   wb.Sheets['基本計画']=X.utils.json_to_sheet(rows,{header:M.FIELD_DEFS.length?['区分','項目','値','単位','管理キー']:[]});
-  const result=M.parseWorkbook(X.write(wb,{type:'array',bookType:'xlsx'}),inventory,{xlsx:X});assert.equal(result.batch.batchName,'Excelで変更');assert.equal(result.batch.targetOG,'1.062');
+  const result=M.parseWorkbook(X.write(wb,{type:'array',bookType:'xlsx'}),inventory,{xlsx:X});assert.equal(result.batch.batchName,'Excelで変更');assert.equal(result.batch.targetOG,'1.062');assert.equal(result.batch.brewTargets.fields.targetABV,'6.8');
 });
 
 test('inventory IDs are never trusted and unmatched rows become unlinked with warnings',()=>{
