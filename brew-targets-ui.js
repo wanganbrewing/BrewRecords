@@ -160,7 +160,7 @@ function renderBrewTargetSheet(b){
   const results=targetSection('スタイル・目標・実績',`${targetStyleField(b)}<p class="target-note">上の参考範囲を見ながら、今回の仕込み目標を設定します。参考値が入力欄へ自動転記されることはありません。</p><div class="target-goal-actual"><div class="target-result-card"><h4>今回の目標</h4><div class="target-field-grid">${targetBound('targetOG',b)}${targetExtra('targetFG',p)}${targetAbvField(p)}${targetIbuField(p)}${targetSrmField(p)}</div></div><div class="target-result-card"><h4>実績</h4><div class="target-field-grid">${targetBound('actualOG',b)}${targetActualReference('実測FG',b.fg,'発酵管理の最新値')}${targetActualReference('実績ABV（%・自動計算）',actualAbv,'実測OGと実測FGから算出')}</div><p class="target-note">仕込み前は空欄でかまいません。実測値は目標仕込み表のExcelには書き出しません。</p></div></div>`);
   const hasSecond=p.fields.doubleBrew===true||['mashWater2','spargeWater2'].some(k=>p.fields[k]!==''&&p.fields[k]!=null)||Object.values(BrewTargets.rowTypes).some(([key])=>(b[key]||[]).some(r=>r.targetMeta?.batch2!==''&&r.targetMeta?.batch2!=null));
   document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">基本情報・原材料・水量と、仕込み工程の目標／実績を1つの仕込み表で管理します。</p><nav class="target-sheet-tabs" role="tablist" aria-label="仕込み計画の入力シート"><button type="button" role="tab" data-target-sheet-tab="basic">① 仕込み計画</button><button type="button" role="tab" data-target-sheet-tab="process">② 仕込み工程（目標／実績）</button></nav><div class="target-plan-status" id="targetPlanSummary" role="status"></div><div class="target-sheet-panes"><div data-target-sheet-pane="basic"><div class="target-basic-grid"><div class="target-basic-wide">${results}</div><div>${identities}</div><div><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、1回分の重さだけ入力します。</span></div>${water}</div></div>${targetRowsSection('fermentable',b)}${targetRowsSection('hop',b)}${targetRowsSection('adjunct',b)}${yeast}</div><div data-target-sheet-pane="process">${targetProcessSection(p,b)}</div></div>`;
-  document.getElementById('targetSheetTitle').textContent=targetSheetReadOnly?'仕込み計画（保存済み）':'仕込み計画を入力';
+  document.getElementById('targetSheetTitle').textContent=targetSheetReadOnly?'仕込み計画（保存済み）':'仕込み計画';
   document.getElementById('targetSheetApply').hidden=targetSheetReadOnly;
   document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの仕込み計画です。スマートフォンでは工程カードから実績を入力できます。':'2つのシートの入力内容をまとめて保存します。';
   if(targetSheetReadOnly)document.querySelectorAll('#targetSheetBody input,#targetSheetBody select,#targetSheetBody button:not([data-target-sheet-tab]):not([data-target-process-actual])').forEach(e=>{e.disabled=true;if(e.tagName==='BUTTON')e.hidden=true;else if(e.tagName==='INPUT'&&!e.value)e.placeholder='未設定';});
@@ -187,10 +187,32 @@ function updateBrewPlanHubSummary(){
   summary.textContent=hasPlan?`バッチ：${name||'名称未設定'}　スタイル：${style||'未設定'}　予定日：${date||'未設定'}　原材料：${materials}品目`:'仕込み計画はまだ入力されていません。';
   button.textContent=hasPlan?'仕込み計画を確認・編集':'仕込み計画を入力';
 }
+function targetSheetIsInline(){return document.getElementById('targetSheetForm')?.dataset.presentation==='inline';}
+function resetInlineBrewTargetSheet(){targetSheetDirty=false;targetSheetBefore='';targetSheetSnapshot='';pendingBrewTargetImport=null;}
+function mountBrewTargetSheet(presentation){
+  const form=document.getElementById('targetSheetForm'),host=presentation==='inline'?document.getElementById('targetSheetInline'):document.getElementById('targetSheetDialog');
+  if(!form||!host)return false;
+  if(form.parentElement!==host)host.appendChild(form);
+  form.dataset.presentation=presentation;
+  const cancel=document.getElementById('targetSheetCancel');
+  if(cancel)cancel.textContent=presentation==='inline'?'キャンセル':'閉じる';
+  return true;
+}
+function showInlineBrewTargetSheet(){
+  if(targetSheetIsInline()&&targetSheetDirty)return;
+  const b=targetCurrentForm();if(!b||!mountBrewTargetSheet('inline'))return;
+  try{
+    targetSheetReadOnly=false;targetSheetBatchId=editingId||'';targetSheetFocus=null;
+    targetSheetBefore=JSON.stringify(b);targetSheetSnapshot=JSON.stringify(window.fermentCloudData.getSnapshot());
+    renderBrewTargetSheet(b);targetSheetDirty=false;pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetSheetError').textContent='';
+  }catch(e){document.getElementById('targetSheetError').textContent=e.message;}
+}
 function openBrewTargetSheet(savedId){
+  if(!savedId){showInlineBrewTargetSheet();document.getElementById('targetSheetInline')?.scrollIntoView({block:'start'});return;}
   const dialog=document.getElementById('targetSheetDialog');if(dialog.open)return;
   const b=savedId?batches.find(x=>x.id===savedId):targetCurrentForm();if(!b)return;
   try{
+    mountBrewTargetSheet('dialog');
     targetSheetReadOnly=!!savedId;targetSheetBatchId=savedId||editingId||'';targetSheetFocus=document.activeElement;
     targetSheetBefore=JSON.stringify(b);targetSheetSnapshot=JSON.stringify(window.fermentCloudData.getSnapshot());
     renderBrewTargetSheet(b);targetSheetDirty=false;pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetSheetError').textContent='';
@@ -198,9 +220,11 @@ function openBrewTargetSheet(savedId){
   }catch(e){alert(e.message);}
 }
 function closeBrewTargetSheet(){
+  const dialog=document.getElementById('targetSheetDialog');if(!dialog?.open)return;
   if(!targetSheetReadOnly&&targetSheetDirty&&!confirm('仕込み計画で入力した未反映の変更を破棄しますか？'))return;
-  document.getElementById('targetSheetDialog').close();
+  dialog.close();
 }
+function cancelBrewTargetSheet(){if(targetSheetIsInline())cancelFromEditor();else closeBrewTargetSheet();}
 function readTargetRows(type){return [...document.querySelectorAll(`#target-rows-${type} tr`)].map(tr=>{
   const row=JSON.parse(tr.dataset.base),meta={...row.targetMeta};
   tr.querySelectorAll('[data-row]').forEach(e=>row[e.dataset.row]=e.value);
@@ -245,7 +269,7 @@ function applyBrewTargetSheet(event){
   event.preventDefault();if(targetSheetReadOnly)return false;
   const error=document.getElementById('targetSheetError');error.textContent='';
   try{
-    if(JSON.stringify(targetCurrentForm())!==targetSheetBefore||JSON.stringify(window.fermentCloudData.getSnapshot())!==targetSheetSnapshot)throw Error('入力中に元の仕込み・クラウドデータが変わりました。変更内容を控え、閉じてから開き直してください。');
+    if((!targetSheetIsInline()&&JSON.stringify(targetCurrentForm())!==targetSheetBefore)||JSON.stringify(window.fermentCloudData.getSnapshot())!==targetSheetSnapshot)throw Error('入力中に元の仕込み・クラウドデータが変わりました。変更内容を控え、開き直してください。');
     const target=readBrewTargetSheetBatch();
     document.querySelectorAll('#targetSheetBody [data-bound]').forEach(control=>{const key=control.dataset.bound,field=document.getElementById('f_'+key);if(field)field.value=target[key]??'';});
     document.getElementById('f_yeastUnit').value='g';
@@ -253,7 +277,7 @@ function applyBrewTargetSheet(event){
     for(const [type,[arrayKey]] of Object.entries(BrewTargets.rowTypes)){const container={fermentable:'fermentableRows',hop:'hopRows',adjunct:'adjunctRows',mineral:'mineralRows'}[type];document.getElementById(container).innerHTML='';target[arrayKey].forEach(row=>addRow(container,type,row));}
     brewTargetDraft=target.brewTargets;markEditorDirty();updateAbvDisplay();updateMineralContributionSummary();updateBrewPlanHubSummary();
     document.getElementById('targetPlanStatus').textContent='仕込み計画を保存しました。';
-    targetSheetDirty=false;document.getElementById('targetSheetDialog').close();
+    targetSheetDirty=false;if(!targetSheetIsInline())document.getElementById('targetSheetDialog').close();
     return true;
   }catch(e){error.textContent=e.message;error.focus();return false;}
 }
@@ -275,13 +299,13 @@ async function importBrewTargetWorkbookFile(file){
 }
 function cancelBrewTargetImport(){pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetExcelImport').focus();}
 function applyBrewTargetImport(){
-  if(!pendingBrewTargetImport)return;const imported=JSON.parse(JSON.stringify(pendingBrewTargetImport.batch));pendingBrewTargetImport=null;targetSheetDirty=false;targetSheetFocus=null;document.getElementById('targetSheetDialog').close();
-  openNewForm();populateFormFields(imported);renderFormInvDeductArea(null);markEditorDirty();document.getElementById('targetPlanStatus').textContent='Excelから新しい仕込み計画を読み込みました。内容を確認して保存してください。';showView('form',false);document.getElementById('brewPlanOpen').focus();
+  if(!pendingBrewTargetImport)return;const imported=JSON.parse(JSON.stringify(pendingBrewTargetImport.batch));pendingBrewTargetImport=null;targetSheetDirty=false;targetSheetFocus=null;if(document.getElementById('targetSheetDialog').open)document.getElementById('targetSheetDialog').close();
+  openNewForm();populateFormFields(imported);renderFormInvDeductArea(null);markEditorDirty();document.getElementById('targetPlanStatus').textContent='Excelから新しい仕込み計画を読み込みました。内容を確認して保存してください。';showView('form',false);document.getElementById('targetSheetTitle').focus({preventScroll:true});
 }
 async function saveBrewTargetSheet(event){
   event.preventDefault();if(targetSheetReadOnly)return;
   const error=document.getElementById('targetSheetError'),button=document.getElementById('targetSheetApply');
-  if(!document.getElementById('f_batchName').value.trim()){selectTargetSheet('basic');error.textContent='仕込み計画を閉じ、仕込みメニュー上部の「バッチ名」を入力してください。';error.focus();return;}
+  if(!document.getElementById('f_batchName').value.trim()){selectTargetSheet('basic');error.textContent='仕込みメニュー上部の「バッチ名」を入力してください。';error.focus();return;}
   button.disabled=true;button.textContent='保存中…';
   try{
     const applied=applyBrewTargetSheet({preventDefault(){}});
@@ -358,7 +382,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const button=e.target.closest('button');if(!button)return;
     if(button.hasAttribute('data-target-sheet-tab')){selectTargetSheet(button.dataset.targetSheetTab);return;}
     if(button.hasAttribute('data-auto-batch-number')){document.getElementById('target-extra-batchNumber').value=suggestedBatchNumber();targetSheetDirty=true;updateTargetSheetTotals();return;}
-    if(button.hasAttribute('data-target-process-actual')){if(targetSheetDirty){alert('先に仕込み計画を保存してください。');return;}const batchId=button.dataset.targetProcessActual,stage=button.dataset.targetProcessStage;document.getElementById('targetSheetDialog').close();openProcessEditor(batchId,null,stage);return;}
+    if(button.hasAttribute('data-target-process-actual')){if(targetSheetDirty){alert('先に仕込み計画を保存してください。');return;}const batchId=button.dataset.targetProcessActual,stage=button.dataset.targetProcessStage;if(document.getElementById('targetSheetDialog').open)document.getElementById('targetSheetDialog').close();openProcessEditor(batchId,null,stage);return;}
     if(targetSheetReadOnly)return;
     if(button.hasAttribute('data-add-target-row')){const type=button.dataset.addTargetRow,tb=document.getElementById('target-rows-'+type);tb.insertAdjacentHTML('beforeend',targetRowHtml(type,{name:'',amount:'',timingType:'boil'},tb.children.length));targetSheetDirty=true;}
     if(button.hasAttribute('data-remove-target-row')){const tr=button.closest('tr');if(!confirm('この予定行を仕込み計画から削除しますか？「仕込み計画を保存」するまでは記録に反映されません。'))return;tr.remove();targetSheetDirty=true;}

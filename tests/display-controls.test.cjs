@@ -1,10 +1,10 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../display-controls.js'),'utf8');
-test('consumable reference prices appear last after month-end valuation',()=>{
+test('consumable reference price UI is removed',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  assert.equal((html.match(/id="costCatalogPanel"/g)||[]).length,1);
-  assert.ok(html.indexOf('id="costCatalogPanel"')>html.indexOf('id="valuationPanel"'));
-  assert.ok(html.indexOf('id="costCatalogPanel"')<html.indexOf('<!-- inventoryCards / viewInventory -->'));
+  assert.ok(!html.includes('id="costCatalogPanel"'));
+  assert.ok(!html.includes('id="catalogDialog"'));
+  assert.ok(!html.includes('id="expenseCatalogSelect"'));
 });
 test('item categories use desktop spreadsheet tables in the wide inventory layout',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -26,12 +26,13 @@ test('mobile inputs include wide phones and month/search controls with adequate 
   assert.ok(html.includes('input[type=month],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;min-height:44px;}'));
   assert.ok(html.includes('.icon-btn{width:44px;min-width:44px;height:44px;}'));
   assert.ok(html.includes('.dyn-row,.dyn-subrow{flex-wrap:wrap;gap:8px;}'));
-  assert.ok(html.includes('id="brewPlanOpen"'));
+  assert.ok(html.includes('id="targetSheetInline"'));
+  assert.ok(!html.includes('id="brewPlanOpen"'));
   assert.ok(!html.includes('id="entryModeSimple"'));
 });
 test('guide matches unified brewing plan and current menu labels',()=>{
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
-  assert.ok(help.includes('仕込み画面の「消耗品・参考費用」は廃止しました'));
+  assert.ok(!help.includes('消耗品・参考単価'));
   assert.ok(help.includes('発酵管理からの参照値'));
   assert.ok(help.includes('スマホで工程実績を入力'));
   assert.ok(help.includes('日本地ビール協会の2024年4月ガイドライン'));
@@ -55,7 +56,12 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
 });
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
+  const css=fs.readFileSync(path.join(__dirname,'../brew-targets.css'),'utf8');
+  assert.ok(html.includes('id="targetSheetInline" class="target-sheet-inline"'));
+  assert.ok(!html.includes('id="brewPlanHubTitle"'));
+  assert.ok(css.includes('.target-material-table{display:table;min-width:1120px'));
+  assert.ok(css.includes('.target-material-table tr{display:table-row'));
+  assert.ok(css.includes('.target-material-table thead{display:table-header-group;}'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
   assert.ok(html.includes('id="viewPackaging" hidden'));
   assert.ok(html.includes('id="packagingEntryPanel"'));

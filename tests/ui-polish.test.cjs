@@ -8,16 +8,18 @@ test('cancel leaves dirty form intact when discard is declined',()=>{const {c}=h
 test('UI assets are versioned and cached',()=>{const v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;for(const file of ['index.html','sw.js'])for(const asset of ['ui-polish.css','ui-polish.js'])assert.ok(fs.readFileSync(path.join(dir,file),'utf8').includes(`${asset}?v=${v}`));});
 
 test('unsaved status appears on edit, survives navigation and clears on form reset or cancel',()=>{
-  const {c,els}=harness();c.markEditorDirty();assert.equal(els.editorStatus.hidden,false);assert.match(els.editorStatus.textContent,/下部の「保存する」/);
+  const {c,els}=harness();c.markEditorDirty();assert.equal(els.editorStatus.hidden,false);assert.match(els.editorStatus.textContent,/下部の「仕込み計画を保存」/);
   c.updateScreenChrome('inventory');c.updateScreenChrome('form');assert.equal(els.editorStatus.hidden,false);
   c.resetEditorState();assert.equal(els.editorStatus.hidden,true);assert.equal(vm.runInContext('uiFormDirty',c),false);
   c.markEditorDirty();c.confirm=()=>true;c.cancelFromEditor();assert.equal(els.editorStatus.hidden,true);
 });
-test('form has only bottom actions and no toolbar; clean status is hidden',()=>{
+test('form uses the inline plan footer actions and no separate toolbar',()=>{
   const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),form=html.slice(html.indexOf('<div id="viewForm"'),html.indexOf('<div id="viewDetail"'));
   assert.ok(!html.includes('editorToolbar'));assert.ok(!form.includes('editor-toolbar'));
-  assert.equal((form.match(/onclick="saveFromEditor\(\)"/g)||[]).length,1);assert.equal((form.match(/onclick="cancelFromEditor\(\)"/g)||[]).length,1);
-  assert.ok(form.lastIndexOf('saveFromEditor()')>form.indexOf('id="formInvDeductArea"'));
+  assert.ok(form.includes('id="targetSheetInline"'));
+  assert.equal((form.match(/onclick="saveFromEditor\(\)"/g)||[]).length,0);
+  assert.ok(html.includes('id="targetSheetCancel" onclick="cancelBrewTargetSheet()"'));
+  assert.ok(html.includes('id="targetSheetApply">仕込み計画を保存'));
   assert.match(form,/id="editorStatus" role="status" hidden><\/p>/);
   assert.match(html,/function resetForm\(\)\{\s*resetEditorState\(\)/);
 });

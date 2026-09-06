@@ -30,7 +30,8 @@ function openExpenseEditor(batchId,origin='detail',draft=null){
   const batch=draft||batches.find(b=>b.id===batchId);if(!batch)return;
   if(batch.otherCosts!=null&&!Array.isArray(batch.otherCosts)){alert('保存された費用の形式が不正です。バックアップを確認してください。');return;}
   expenseEditorState={batchId,origin,batchSnapshot:batch,before:JSON.stringify(window.fermentCloudData.getSnapshot()),removed:[]};
-  $('expenseCatalogSelect').innerHTML='<option value="">消耗品を選択</option>'+costCatalog.items.filter(p=>!p.archived).map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}（${p.rate} 円 / ${escapeHtml(p.unit)}）</option>`).join('');
+  const catalogSelect=$('expenseCatalogSelect');
+  if(catalogSelect)catalogSelect.innerHTML='<option value="">消耗品を選択</option>'+costCatalog.items.filter(p=>!p.archived).map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}（${p.rate} 円 / ${escapeHtml(p.unit)}）</option>`).join('');
   $('expenseBatchName').textContent=batch.batchName||'名称未設定';$('expenseError').textContent='';$('expenseReason').value='';$('expenseReviewed').checked=batch.otherCostsReviewed===true;
   renderExpenseDraft(JSON.parse(JSON.stringify(batch.otherCosts||[])));
   const dialog=$('expenseDialog');
