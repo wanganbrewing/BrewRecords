@@ -1,5 +1,5 @@
 {
-"version": 92,
+"version": 93,
   "releasedAt": "2026-09-07",
-  "summary": "在庫分類の重複見出しを削除"
+  "summary": "工程目標・実績表をノートPC幅へ最適化"
 }

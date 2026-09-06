@@ -98,6 +98,15 @@ test('desktop parallel panels preserve hidden empty states and span timelines an
   for(const id of ['scheduleBatchPanel','scheduleStepsPanel','fermentationMeasurementsPanel'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
   assert.equal((html.match(/id="fermentationInfoPanel"/g)||[]).length,0);
 });
+test('desktop process targets fit the notebook width without horizontal scrolling',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'../brew-targets.css'),'utf8');
+  const ui=fs.readFileSync(path.join(__dirname,'../brew-targets-ui.js'),'utf8');
+  assert.ok(ui.includes('class="target-table-scroll target-process-scroll"'));
+  assert.ok(css.includes('.target-process-scroll{overflow-x:visible;}'));
+  assert.ok(css.includes('.target-process-table{table-layout:fixed;min-width:0;}'));
+  assert.ok(css.includes('.target-process-table th:nth-child(11){width:9%;}'));
+  assert.ok(css.includes('.target-process-table .target-metric-input{flex-wrap:wrap;gap:3px;}'));
+});
 test('brewing, schedule, fermentation and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   for(const view of ['form','schedule','fermentation','packaging'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
