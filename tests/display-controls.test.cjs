@@ -58,6 +58,15 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
 });
+test('fermentation combines daily measurements and finishing values without a separate info panel',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(!html.includes('id="fermentationInfoPanel"'));
+  assert.ok(!html.includes('<div class="section-title">発酵情報</div>'));
+  assert.ok(html.includes('<span class="fermentation-summary-label">OG</span>'));
+  assert.ok(html.includes('id="fermentationMeasurementsPanel"'));
+  assert.ok(html.indexOf('id="fm_co2vol"')>html.indexOf('id="fermentationMeasurementsPanel"'));
+  assert.ok(html.includes('#fermentationMeasurementsPanel{grid-column:1/-1;grid-row:2;}'));
+});
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   const css=fs.readFileSync(path.join(__dirname,'../brew-targets.css'),'utf8');
@@ -79,7 +88,8 @@ test('desktop parallel panels preserve hidden empty states and span timelines an
   assert.ok(html.includes('@media(min-width:1200px)'));
   assert.ok(html.includes('.desktop-workspace:not([hidden]){display:grid;'));
   assert.ok(html.includes('.desktop-workspace>*{grid-column:1/-1;min-width:0;}'));
-  for(const id of ['scheduleBatchPanel','scheduleStepsPanel','fermentationInfoPanel','fermentationMeasurementsPanel'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
+  for(const id of ['scheduleBatchPanel','scheduleStepsPanel','fermentationMeasurementsPanel'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
+  assert.equal((html.match(/id="fermentationInfoPanel"/g)||[]).length,0);
 });
 test('brewing, schedule, fermentation and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');

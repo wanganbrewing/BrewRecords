@@ -57,7 +57,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-seri
       <div class="step"><span class="step-num">1</span><div><strong>原材料を入力</strong><span>「原材料管理」でモルト、ホップ、酵母、副原料の品目と入荷を登録します。</span></div></div>
       <div class="step"><span class="step-num">2</span><div><strong>PCで仕込み計画を入力</strong><span>「仕込み」でバッチ名、スタイル、原材料、水量、工程ごとの目標を入力して保存します。保存後は同じ表で最新実績も確認できます。</span></div></div>
       <div class="step"><span class="step-num">3</span><div><strong>スマホで工程実績を入力</strong><span>保存した仕込み計画を開き、各工程のカードから比重・pH・温度・液量を記録します。</span></div></div>
-      <div class="step"><span class="step-num">4</span><div><strong>発酵と仕上がりを記録</strong><span>「発酵管理」で日々の比重・pH・温度と、FG・CO₂ボリュームを保存します。ABVは自動計算されます。</span></div></div>
+      <div class="step"><span class="step-num">4</span><div><strong>発酵と仕上がりを記録</strong><span>「発酵管理」で日々の比重・pH・温度と、FG・CO₂ボリュームを保存します。上部でOGを確認でき、ABVは自動計算されます。</span></div></div>
       <div class="step"><span class="step-num">5</span><div><strong>パッケージングを記録</strong><span>「パッケージング」で発酵管理のFG・ABV・CO₂を確認し、充填日と容器内訳を保存します。</span></div></div>
     </div>
     <div class="note">過去と同じ内容を仕込む場合は、「記録一覧」で過去の記録を開き、<strong>「コピーして新規仕込み」</strong>を使うと入力の手間を減らせます。</div>
@@ -89,7 +89,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-seri
   </details>
   <details>
     <summary>発酵管理</summary>
-    <div class="content"><p>画面上部の「対象バッチ」で仕込みを選び、発酵開始日、発酵開始時pH、発酵温度、日々の比重・pH・温度に加えて、FGとCO₂ボリュームを記録します。ABVは実測OGとFGから自動計算され、パッケージング画面へ引き継がれます。</p><div class="note">温度・比重・pHは、数値の左右にある＋／−で調整できます。ボタンを押し続けると連続して変化します。最後に「発酵記録を保存する」を押してください。</div></div>
+    <div class="content"><p>画面上部の「対象バッチ」で仕込みを選び、日々の比重・pH・温度を測定日ごとに追加します。最初の測定日が発酵開始日になります。上部の要約でOGと最新値を確認し、同じ画面でFGとCO₂ボリュームを入力します。ABVはOGとFGから自動計算され、パッケージング画面へ引き継がれます。</p><div class="note">温度・比重・pHは、数値の左右にある＋／−で調整できます。ボタンを押し続けると連続して変化します。最後に「発酵記録を保存する」を押してください。</div></div>
   </details>
   <details>
     <summary>パッケージング</summary>
@@ -136,7 +136,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-seri
   <div class="section-label">データ管理</div>
   <details>
     <summary>使用中のバージョン・最新版の確認</summary>
-<div class="content"><p>画面上部の<strong>v89</strong>のような番号が、この画面で使用中のバージョンです。通常版・デモ版の両方で表示されます。</p><p>☰メニューの「バージョン」で公開版と比較できます。「最新版を確認」は通信できた時点の公開版を確認します。通信できない場合は最新版とは判定しません。</p><p>新しい版がある場合は、入力中の内容を保存してから再読み込みしてください。自動で画面を再読み込みすることはありません。PCとスマートフォンの両方で番号を確認してください。</p></div>
+<div class="content"><p>画面上部の<strong>v90</strong>のような番号が、この画面で使用中のバージョンです。通常版・デモ版の両方で表示されます。</p><p>☰メニューの「バージョン」で公開版と比較できます。「最新版を確認」は通信できた時点の公開版を確認します。通信できない場合は最新版とは判定しません。</p><p>新しい版がある場合は、入力中の内容を保存してから再読み込みしてください。自動で画面を再読み込みすることはありません。PCとスマートフォンの両方で番号を確認してください。</p></div>
   </details>
   <details>
     <summary>バックアップと復元</summary>
@@ -180,7 +180,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-seri
 
   <details>
     <summary>PCで複数の情報を確認する</summary>
-    <div class="content"><p>広いPC画面では、仕込み計画を表形式の2シートで表示します。発酵管理は「発酵情報」と「日々の比重・pH・温度」、パッケージングは「発酵管理からの参照値」と「充填内容」を横並びで確認できます。狭い画面やスマートフォンでは同じ入力項目を縦に並べます。</p></div>
+    <div class="content"><p>広いPC画面では、仕込み計画を表形式の2シートで表示します。発酵管理は、対象バッチの要約と「日々の比重・pH・温度」を横幅いっぱいに表示します。パッケージングは「発酵管理からの参照値」と「充填内容」を横並びで確認できます。狭い画面やスマートフォンでは同じ入力項目を縦に並べます。</p></div>
   </details>
   <a class="home" href="./">アプリへ戻る</a>
   <div class="footer">FERMENTER'S LEDGER · USER GUIDE</div>
