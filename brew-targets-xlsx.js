@@ -15,7 +15,7 @@
     ['仕込み目標','targetOG','目標OG','number','SG'],
     ['設備','batchNumber','バッチ番号','text',''],['設備','tradeName','帳簿・取引先向け名称','text',''],['設備','productName','商品名','text',''],['設備','tank','使用予定タンク','text',''],
     ['仕上がり','targetFG','目標FG','number','SG'],['仕上がり','targetABV','目標ABV（自動計算）','number','%'],['仕上がり','targetIBU','目標合計IBU（自動計算）','number','IBU'],['仕上がり','targetSRM','目標SRM','number','SRM'],
-    ['酵母','yeastSource','酵母の由来','text',''],['酵母','yeastHarvestDate','酵母回収予定日','date',''],['酵母','cellDensity','細胞密度 目標','number','×10⁶ cells/mL']
+    ['酵母','yeastSource','酵母の由来','text',''],['酵母','yeastHarvestDate','酵母回収予定日','date','']
   ];
   const WATER_DEFS=[
     ['水量','mashWater1','糖化用水 1回目','number','L','extra'],['水量','mashWater2','糖化用水 2回目','number','L','extra'],['水量','spargeWater1','スパージ水 1回目','number','L','extra'],['水量','spargeWater2','スパージ水 2回目','number','L','extra']

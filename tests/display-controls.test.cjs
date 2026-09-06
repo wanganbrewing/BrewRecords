@@ -13,6 +13,7 @@ test('item categories use desktop spreadsheet tables in the wide inventory layou
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',name==='inventory');"));
   assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:block;}'));
   assert.ok(html.includes('class="inventory-table-scroll inventory-category-sheet"'));
+  assert.equal((html.match(/<details class="inventory-group" open>/g)||[]).length,4);
   assert.ok(html.includes('<td class="inventory-action-cell"><div class="inv-card-actions inventory-sheet-actions">'));
   assert.ok(css.includes('.inventory-sheet-actions{margin:0;min-width:max-content;flex-wrap:nowrap;}'));
   assert.ok(css.includes('.inventory-sheet-actions .inv-action-danger{margin-left:0;}'));
@@ -63,8 +64,12 @@ test('fermentation combines daily measurements and finishing values without a se
   assert.ok(!html.includes('id="fermentationInfoPanel"'));
   assert.ok(!html.includes('<div class="section-title">発酵情報</div>'));
   assert.ok(html.includes('<span class="fermentation-summary-label">OG</span>'));
+  assert.ok(!html.includes('<span class="fermentation-summary-label">FG</span>'));
   assert.ok(html.includes('id="fermentationMeasurementsPanel"'));
-  assert.ok(html.indexOf('id="fm_co2vol"')>html.indexOf('id="fermentationMeasurementsPanel"'));
+  assert.ok(!html.includes('id="fm_fg"'));
+  assert.ok(!html.includes('id="fm_co2vol"'));
+  assert.ok(html.includes('class="rg-co2"'));
+  assert.ok(html.includes('b.fg = latestGravity;'));
   assert.ok(html.includes('#fermentationMeasurementsPanel{grid-column:1/-1;grid-row:2;}'));
 });
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
@@ -114,6 +119,6 @@ test('legacy form controls remain as one hidden data adapter and are never disab
   assert.ok(!source.includes('.disabled='));
 });
 function harness(wide=true,value=null){const els=new Map(),cards=[{dataset:{batchId:'a'}},{dataset:{batchId:'b'}}];let saved=value;const c=vm.createContext({localStorage:{getItem:()=>saved,setItem:(key,v)=>saved=v},matchMedia:()=>({matches:wide}),document:{addEventListener(){},querySelectorAll:()=>cards},$:id=>{if(!els.has(id))els.set(id,{});return els.get(id);},statusOf:b=>b.status,escapeHtml:s=>String(s).replaceAll('"','&quot;'),batches:[{id:'a',batchName:'湾岸 IPA',style:'IPA',status:'発酵中'},{id:'b',batchName:'Porter',status:'完了'}]});vm.runInContext(source,c);c.run=s=>vm.runInContext(s,c);c.cards=cards;c.saved=()=>saved;return c;}
-test('initial inventory view uses width only without a valid saved choice; errors fall back safely',()=>{assert.equal(harness().preferredInventoryMode(),'stock');assert.equal(harness(false).preferredInventoryMode(),'cards');for(const mode of ['cards','stock','ledger'])assert.equal(harness(true,mode).preferredInventoryMode(),mode);const c=harness(false,'bad');assert.equal(c.preferredInventoryMode(),'cards');c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredInventoryMode(),'cards');c.rememberInventoryMode('ledger');assert.equal(c.saved(),'ledger');c.localStorage.setItem=()=>{throw Error('quota');};assert.doesNotThrow(()=>c.rememberInventoryMode('cards'));});
+test('inventory opens category tables by default and remembers a later selection',()=>{assert.equal(harness().preferredInventoryMode(),'cards');assert.equal(harness(false).preferredInventoryMode(),'cards');for(const mode of ['cards','stock','ledger'])assert.equal(harness(true,mode).preferredInventoryMode(),mode);const c=harness(false,'bad');assert.equal(c.preferredInventoryMode(),'cards');c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredInventoryMode(),'cards');c.rememberInventoryMode('ledger');assert.equal(c.saved(),'ledger');c.localStorage.setItem=()=>{throw Error('quota');};assert.doesNotThrow(()=>c.rememberInventoryMode('cards'));assert.ok(source.includes("ferment-inventory-view-v2"));});
 test('record filtering normalizes width/case, matches all terms and status, without changing records',()=>{const c=harness(),before=JSON.stringify(c.batches);assert.equal(c.recordMatches(c.batches[0],'湾岸 ＩＰＡ','発酵中'),true);assert.equal(c.recordMatches(c.batches[0],'ipa','完了'),false);c.run('recordSearch="IPA"');c.applyRecordFilters();assert.equal(c.cards[0].hidden,false);assert.equal(c.cards[1].hidden,true);assert.equal(c.$('recordFilterCount').textContent,'1件 / 全2件');c.run('recordSearch="missing"');c.applyRecordFilters();assert.equal(c.$('recordNoMatches').hidden,false);c.clearRecordFilters();assert.equal(c.cards[1].hidden,false);assert.equal(JSON.stringify(c.batches),before);});
 test('search form preserves escaped input and release caches its script',()=>{const c=harness();c.run('recordSearch=\'" onfocus="bad\'');assert.match(c.recordFiltersHtml(),/&quot;/);const dir=path.join(__dirname,'..'),v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;for(const file of ['index.html','sw.js'])assert.ok(fs.readFileSync(path.join(dir,file),'utf8').includes(`display-controls.js?v=${v}`));});

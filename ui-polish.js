@@ -44,7 +44,7 @@ function updateEditorStatus(message=''){
   if(status){status.textContent=message;status.hidden=!message;}
 }
 function resetEditorState(){uiFormDirty=false;updateEditorStatus();}
-function markEditorDirty(){uiFormDirty=true;updateEditorStatus('未保存の変更があります。下部の「仕込み計画を保存」で確定してください。');}
+function markEditorDirty(){uiFormDirty=true;updateEditorStatus('未保存の変更があります。下部の「保存」で確定してください。');}
 async function saveFromEditor(){
   if(uiSaving)return;
   uiSaving=true;updateEditorStatus('保存しています…');

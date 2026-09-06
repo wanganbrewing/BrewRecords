@@ -117,7 +117,7 @@ test('PC target entry uses a merged plan and a process sheet with one save actio
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
   for(const sheet of ['① 仕込み計画','② 仕込み工程'])assert.ok(source.includes(sheet));
   assert.ok(!source.includes('③ 仕込み工程'));
-  assert.match(html,/id="targetSheetApply">仕込み計画を保存</);
+  assert.match(html,/id="targetSheetApply">保存</);
   assert.doesNotMatch(source,/画面下部の「保存する」で確定/);
   assert.match(c.targetExtra('mashWater2',B.empty()),/data-second-brew/);
   assert.doesNotMatch(c.targetExtra('mashWater1',B.empty()),/data-second-brew/);
@@ -126,6 +126,7 @@ test('unified plan exposes the requested current fields and omits retired input 
   for(const key of ['taxCategory','actualOG'])assert.match(ui,new RegExp("\\['"+key+"',"));
   assert.ok(ui.includes("'targetSRM'"));
   for(const key of ['batchIcon','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.doesNotMatch(ui,new RegExp("\\['"+key+"',"));
+  assert.doesNotMatch(ui,/cellDensity|細胞密度/);
   for(const text of ['スタイル・目標・実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','FV1〜FV8','目標IBU（自動計算）'])assert.ok(ui.includes(text));
   for(const text of ['原水とpH調整','酸の添加量を計算','水質調整剤の予定量'])assert.ok(!ui.includes(text));
   assert.ok(html.includes('id="targetSheetInline" class="target-sheet-inline"'));

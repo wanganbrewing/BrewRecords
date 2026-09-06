@@ -1,10 +1,10 @@
 let recordSearch='',recordStatus='';
 function preferredInventoryMode(){
-  try{const value=localStorage.getItem('ferment-inventory-view-v1');if(['cards','stock','ledger'].includes(value))return value;}catch(error){}
-  return typeof matchMedia==='function'&&matchMedia('(min-width:1000px)').matches?'stock':'cards';
+  try{const value=localStorage.getItem('ferment-inventory-view-v2');if(['cards','stock','ledger'].includes(value))return value;}catch(error){}
+  return 'cards';
 }
 function rememberInventoryMode(mode){
-  try{localStorage.setItem('ferment-inventory-view-v1',mode);}catch(error){}
+  try{localStorage.setItem('ferment-inventory-view-v2',mode);}catch(error){}
 }
 function recordMatches(batch,query,status){
   const text=[batch.batchName,batch.style,batch.brewDate].filter(Boolean).join(' ').normalize('NFKC').toLocaleLowerCase();
