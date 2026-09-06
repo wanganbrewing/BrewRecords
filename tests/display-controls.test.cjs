@@ -30,7 +30,8 @@ test('mobile inputs include wide phones and month/search controls with adequate 
 test('guide matches unified brewing plan and current menu labels',()=>{
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(help.includes('仕込み → 仕込み後に追記する情報 → 消耗品・参考費用'));
-  assert.ok(help.includes('基本情報・仕込み工程・原材料・水質調整は「仕込み → 仕込み計画を入力」に統合'));
+  assert.ok(help.includes('スマホで工程実績を入力'));
+  assert.ok(help.includes('日本地ビール協会の2024年4月ガイドライン'));
   assert.ok(help.includes('クラウド同期の設定・状態確認'));
   assert.ok(help.includes('メニューや詳細項目が見つからない'));
   assert.ok(!help.includes('「クラウド同期を設定」'));
@@ -71,11 +72,11 @@ test('brewing, schedule and fermentation use wide layout only on desktop and in 
   for(const view of ['form','schedule','fermentation'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
   assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap{max-width:1400px;}}'));
 });
-test('optional navigation defaults off, remembers independent choices and redirects hidden active view',()=>{
-  const tabs={schedule:{hidden:true},fermentation:{hidden:true}},fields={},store=new Map();let count,redirect;
-  const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:s=>tabs[s.includes('schedule')?'schedule':'fermentation'],documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
-  assert.equal(c.preferredOptionalNavigation().schedule,false);c.setOptionalNavigation('schedule',true);assert.equal(count,'4');assert.equal(tabs.fermentation.hidden,true);assert.equal(c.preferredOptionalNavigation().schedule,true);
-  c.setOptionalNavigation('fermentation',true);assert.equal(count,'5');c.currentTab='schedule';c.setOptionalNavigation('schedule',false);assert.equal(redirect[0],'inventory');assert.equal(count,'4');c.setOptionalNavigation('fermentation',false);assert.equal(count,'3');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().schedule,false);
+test('optional fermentation navigation defaults off, remembers its choice and redirects when hidden',()=>{
+  const tab={hidden:true},fields={},store=new Map();let count,redirect;
+  const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:()=>tab,documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
+  assert.equal(c.preferredOptionalNavigation().fermentation,false);c.setOptionalNavigation('schedule',true);assert.equal(tab.hidden,true);
+  c.setOptionalNavigation('fermentation',true);assert.equal(count,'4');assert.equal(c.preferredOptionalNavigation().fermentation,true);c.currentTab='fermentation';c.setOptionalNavigation('fermentation',false);assert.equal(redirect[0],'inventory');assert.equal(count,'3');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().fermentation,false);
 });
 test('obsolete entry-mode preference and controls are removed',()=>{
   assert.ok(!source.includes('ferment-entry-mode-v2'));

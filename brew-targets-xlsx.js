@@ -8,19 +8,17 @@
   const FORMAT_ID='FermentersLedgerTargetPlan';
   const SCHEMA_VERSION=1;
   const SHEETS=['基本計画','原材料・水','仕込み工程','管理情報'];
-  const CATEGORY_LABELS={fermentable:'モルト',hop:'ホップ',adjunct:'副原料',mineral:'水質調整剤',yeast:'酵母'};
+  const CATEGORY_LABELS={fermentable:'モルト',hop:'ホップ',adjunct:'副原料',yeast:'酵母'};
   const LABEL_CATEGORIES=Object.fromEntries(Object.entries(CATEGORY_LABELS).map(([key,value])=>[value,key]));
   const FIELD_DEFS=[
-    ['基本','batchName','バッチ名','text',''],['基本','style','スタイル','text',''],['基本','batchIcon','仕込みアイコン（auto / beer / wine / sake / cider / mead / other）','text',''],['基本','taxCategory','酒税法上の品目区分','text',''],['基本','brewDate','仕込み予定日','date',''],['基本','brewer','担当者','text',''],['基本','batchSize','予定仕込み量','number','L'],
+    ['基本','batchName','バッチ名','text',''],['基本','style','スタイル','text',''],['基本','taxCategory','酒税法上の品目区分','text',''],['基本','brewDate','仕込み予定日','date',''],['基本','brewer','担当者','text',''],['基本','batchSize','予定仕込み量','number','L'],
     ['仕込み目標','targetOG','目標OG','number','SG'],['仕込み目標','mashTemp','目標糖化温度','number','℃'],['仕込み目標','mashTime','目標糖化時間','number','分'],['仕込み目標','boilTime','目標煮沸時間','number','分'],
     ['設備','batchNumber','バッチ番号','text',''],['設備','tradeName','帳簿・取引先向け名称','text',''],['設備','productName','商品名','text',''],['設備','tank','使用予定タンク','text',''],['設備','sanitizeDate','洗浄・殺菌の予定日','date',''],['設備','sanitizeBy','洗浄・殺菌の予定担当','text',''],['設備','millGap','ミルギャップ','number','mm'],
-    ['仕上がり','targetFG','目標FG','number','SG'],['仕上がり','targetABV','目標ABV','number','%'],['仕上がり','targetIBU','目標合計IBU','number','IBU'],['仕上がり','targetLoss','目標欠減量','number','L'],['仕上がり','targetCost','目標原価/L','number','円/L'],['仕上がり','planNotes','仕込み計画メモ','text',''],
-    ['酵母','yeastSource','酵母の由来','text',''],['酵母','yeastGeneration','酵母の世代','text',''],['酵母','yeastHarvestDate','酵母回収予定日','date',''],['酵母','pitchRate','酵母投入率 目標','number',''],['酵母','pitchRateUnit','投入率の単位','text',''],['酵母','cellDensity','細胞密度 目標','number','×10⁶ cells/mL']
+    ['仕上がり','targetFG','目標FG','number','SG'],['仕上がり','targetABV','目標ABV','number','%'],['仕上がり','targetIBU','目標合計IBU','number','IBU'],['仕上がり','targetSRM','目標SRM','number','SRM'],['仕上がり','planNotes','仕込み計画メモ','text',''],
+    ['酵母','yeastSource','酵母の由来','text',''],['酵母','yeastHarvestDate','酵母回収予定日','date',''],['酵母','cellDensity','細胞密度 目標','number','×10⁶ cells/mL']
   ];
   const WATER_DEFS=[
     ['水量','mashWater1','糖化用水 仕込み1回目','number','L','extra'],['水量','mashWater2','糖化用水 仕込み2回目','number','L','extra'],['水量','spargeWater1','スパージ水 仕込み1回目','number','L','extra'],['水量','spargeWater2','スパージ水 仕込み2回目','number','L','extra'],['水量','waterVolume','糖化用水 合計','number','L','bound'],
-    ['原水','waterSource','水源','text','','bound'],['原水','waterPh','原水pH','number','','bound'],['原水','waterAlkalinity','原水アルカリ度','number','mg/L as CaCO₃','bound'],['原水','targetWaterPh','目標仕込み水pH','number','','bound'],['原水','phAcidType','pH調整に使用する酸（管理キー）','text','','bound'],
-    ['原水ミネラル','sCa','原水 Ca²⁺','number','ppm','bound'],['原水ミネラル','sMg','原水 Mg²⁺','number','ppm','bound'],['原水ミネラル','sNa','原水 Na⁺','number','ppm','bound'],['原水ミネラル','sCl','原水 Cl⁻','number','ppm','bound'],['原水ミネラル','sSO4','原水 SO₄²⁻','number','ppm','bound'],['原水ミネラル','sHCO3','原水 HCO₃⁻','number','ppm','bound'],
     ['目標ミネラル','mCa','Ca²⁺','number','ppm','bound'],['目標ミネラル','mMg','Mg²⁺','number','ppm','bound'],['目標ミネラル','mNa','Na⁺','number','ppm','bound'],['目標ミネラル','mCl','Cl⁻','number','ppm','bound'],['目標ミネラル','mSO4','SO₄²⁻','number','ppm','bound'],['目標ミネラル','mHCO3','HCO₃⁻','number','ppm','bound'],
     ['目標ミネラル','sulfateChlorideRatio','SO₄ / Cl 目標比','number','','extra'],['目標ミネラル','residualAlkalinity','残留アルカリ度 目標','number','mg/L as CaCO₃','extra']
   ];
@@ -39,13 +37,13 @@
   function fieldRows(batch,plan){return FIELD_DEFS.map(([group,key,label,type,unit])=>[group,label,asExcelValue(plan.fields[key]!==undefined?plan.fields[key]:batch?.[key],type),unit,key]);}
   function materialRows(batch,plan,inventory){
     const rows=WATER_DEFS.map(([group,key,label,type,unit,scope])=>['水質・水量',group,label,asExcelValue(scope==='extra'?plan.fields[key]:batch?.[key],type),'',unit,'','','','','','','','','',key,'']);
-    for(const [type,[arrayKey,defaultUnit]] of Object.entries(BrewTargets.rowTypes))for(const row of batch?.[arrayKey]||[]){
+    for(const type of ['fermentable','hop','adjunct']){const [arrayKey,defaultUnit]=BrewTargets.rowTypes[type];for(const row of batch?.[arrayKey]||[]){
       const meta=BrewTargets.rowMeta(row),inv=inventoryMeta(inventory,row),unit=type==='adjunct'?(row.unit||defaultUnit):defaultUnit;
       rows.push(['原材料',CATEGORY_LABELS[type],row.name||'',asExcelValue(meta.batch1,'number'),asExcelValue(meta.batch2,'number'),unit,inv.name,inv.manufacturer,inv.lot,asExcelValue(meta.alpha,'number'),row.timingType||row.timing||'',asExcelValue(row.timingValue,'number'),asExcelValue(meta.ibu,'number'),meta.timingNote||'',asExcelValue(meta.concentration,'number'),type,row.invId||'']);
-    }
+    }}
     if(trim(batch?.yeast)||trim(batch?.yeastAmount)){
       const row={name:batch.yeast,invId:batch.yeastInvId,targetMeta:{}},inv=inventoryMeta(inventory,row);
-      rows.push(['原材料',CATEGORY_LABELS.yeast,batch.yeast||'',asExcelValue(batch.yeastAmount,'number'),'',batch.yeastUnit||'g',inv.name,inv.manufacturer,inv.lot,'','','','','','','yeast',batch.yeastInvId||'']);
+      rows.push(['原材料',CATEGORY_LABELS.yeast,batch.yeast||'',asExcelValue(batch.yeastAmount,'number'),'','g',inv.name,inv.manufacturer,inv.lot,'','','','','','','yeast',batch.yeastInvId||'']);
     }
     return rows;
   }
@@ -106,12 +104,12 @@
     importFieldRows(waterRows,batch,plan,xlsx);
     const arrays={fermentable:[],hop:[],adjunct:[],mineral:[]};let yeastCount=0;
     for(const row of rows.filter(item=>trim(item['行種別'])==='原材料')){
-      const label=trim(row['分類・区分']),type=LABEL_CATEGORIES[label]||trim(row['管理キー']);if(!CATEGORY_LABELS[type])throw Error(`原材料の分類「${label}」を確認してください。`);
+      const label=trim(row['分類・区分']),type=LABEL_CATEGORIES[label]||trim(row['管理キー']);if(!CATEGORY_LABELS[type])continue;
       const name=trim(row['名称・項目']),manufacturer=trim(row['メーカー']),lot=trim(row['ロット']),unit=trim(row['単位']);
       const batch1=valueFor(row['仕込み1回目・値'],'number',xlsx,`${name||label}の量`),batch2=valueFor(row['仕込み2回目'],'number',xlsx,`${name||label}の量`);
       if(type==='yeast'){
         if(++yeastCount>1)throw Error('酵母はExcel内で1行にまとめてください。');
-        batch.yeast=name;batch.yeastAmount=BrewTargets.numeric(batch1,'酵母の量');batch.yeastUnit=unit||'g';
+        batch.yeast=name;batch.yeastAmount=BrewTargets.numeric(batch1,'酵母の量');batch.yeastUnit='g';
         const inventoryName=trim(row['在庫品目']);if(inventoryName){const matches=exactInventoryMatch(inventory,'yeast',inventoryName,manufacturer,lot);if(matches.length===1&&matches[0].unit===batch.yeastUnit)batch.yeastInvId=matches[0].id;else warnings.push(`酵母「${name}」は在庫と未連携で読み込みます。`);}
         continue;
       }
@@ -120,7 +118,7 @@
       if(type!=='mineral'&&name&&trim(row['在庫品目'])){const inventoryName=trim(row['在庫品目']),matches=exactInventoryMatch(inventory,type,inventoryName,manufacturer,lot);if(matches.length===1&&(type!=='adjunct'||matches[0].unit===material.unit))material.invId=matches[0].id;else warnings.push(`${label}「${name}」は在庫と未連携で読み込みます。`);}
       arrays[type].push(BrewTargets.validateRow(type,material));
     }
-    for(const [type,[arrayKey]] of Object.entries(BrewTargets.rowTypes))batch[arrayKey]=arrays[type];
+    for(const [type,[arrayKey]] of Object.entries(BrewTargets.rowTypes))batch[arrayKey]=arrays[type]||[];
   }
   function parseSlots(text,id){const known=new Set(Object.keys(BrewTargets.metrics)),slots=trim(text).split(',').map(v=>v.trim()).filter(v=>known.has(v));if(slots.length)return slots;const template=BrewTargets.steps.find(step=>step[0]===id);return template?template[2].split(','):[];}
   function importProcess(rows,batch,plan){
@@ -142,8 +140,7 @@
     const batch={id:'',batchName:'',style:'',brewDate:'',brewer:'',batchSize:'',actualOG:'',fermentStart:'',fermentTemp:'',fermentStartPh:'',gravityLog:[],fg:'',packageDate:'',packages:[],completed:false,inventoryDeducted:false,customScheduleSteps:[],processMeasurements:[],otherCosts:[],otherCostsReviewed:false,otherCostHistory:[]};
     const plan=BrewTargets.empty(),warnings=[];importFieldRows(basic,batch,plan,xlsx);importMaterials(materials,batch,plan,inventory,xlsx,warnings);importProcess(process,batch,plan);plan.fields.doubleBrew=materials.some(row=>trim(row['仕込み2回目'])!=='');batch.brewTargets=BrewTargets.waterPlan(BrewTargets.normalize(plan),batch.waterVolume);
     for(const [key,label,type] of [['batchName','バッチ名','text'],['batchSize','予定仕込み量','number'],['targetOG','目標OG','number'],['mashTemp','目標糖化温度','number'],['mashTime','目標糖化時間','number'],['boilTime','目標煮沸時間','number'],['waterVolume','糖化用水合計','number'],['waterPh','原水pH','number'],['waterAlkalinity','原水アルカリ度','number'],['targetWaterPh','目標仕込み水pH','number'],['sCa','原水Ca','number'],['sMg','原水Mg','number'],['sNa','原水Na','number'],['sCl','原水Cl','number'],['sSO4','原水SO4','number'],['sHCO3','原水HCO3','number'],['mCa','Ca','number'],['mMg','Mg','number'],['mNa','Na','number'],['mCl','Cl','number'],['mSO4','SO4','number'],['mHCO3','HCO3','number']])if(batch[key]!==''&&type==='number')batch[key]=BrewTargets.numeric(batch[key],label,key==='targetOG'?1:0,key==='targetOG'?1.3:1e9);
-    if(!['auto','beer','wine','sake','cider','mead','other'].includes(batch.batchIcon))batch.batchIcon='auto';
-    if(!['lactic88','lactic80','phosphoric10','phosphoric75'].includes(batch.phAcidType))batch.phAcidType='lactic88';
+    batch.batchIcon='auto';batch.yeastUnit='g';
     const materialCount=Object.values(BrewTargets.rowTypes).reduce((sum,[key])=>sum+(batch[key]?.length||0),0)+(batch.yeast?1:0),targetSteps=batch.brewTargets.steps.filter(step=>Object.values(step.values).some(v=>trim(v)!=='')||step.slots.some(slot=>BrewTargets.metrics[slot]?.[2]==='bound'&&trim(batch[slot])!=='')).length;
     return {batch,warnings:[...new Set(warnings)],summary:{batchName:batch.batchName||'名称未設定',brewDate:batch.brewDate||'未設定',materialCount,targetStepCount:targetSteps,doubleBrew:batch.brewTargets.fields.doubleBrew,sourceAppVersion:trim(info.appVersion)}};
   }

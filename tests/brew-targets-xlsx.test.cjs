@@ -9,7 +9,7 @@ const dir=path.join(__dirname,'..');
 
 function fixture(){
   const plan=B.empty();
-  Object.assign(plan.fields,{batchNumber:'WB-82',tradeName:'試験醸造',mashWater1:'100',mashWater2:'20',spargeWater1:'180',targetFG:'1.010',targetABV:'5.2',doubleBrew:true});
+  Object.assign(plan.fields,{batchNumber:'WB-82',tradeName:'試験醸造',mashWater1:'100',mashWater2:'20',spargeWater1:'180',targetFG:'1.010',targetABV:'5.2',targetSRM:'8',yeastSource:'fresh pitch',doubleBrew:true});
   plan.steps=[
     {id:'rest1',name:'糖化休止 1',slots:['mashTemp','mashTime'],values:{},gravityUnit:'SG',comparisons:{}},
     {id:'originalGravity',name:'発酵前の比重・pH',slots:['targetOG','plato','ph'],values:{plato:'12.4',ph:'5.2'},gravityUnit:'SG',comparisons:{ph:'='}}
@@ -41,11 +41,12 @@ test('workbook has the four documented editable sheets and typed target cells',(
 
 test('round trip preserves all planned sheets while clearing actuals and ledger effects',()=>{
   const {result}=roundTrip(),b=result.batch;
-  assert.equal(b.batchName,'Excel 試験');assert.equal(b.batchIcon,'beer');assert.equal(b.taxCategory,'ビール・発泡酒等(発泡性酒類)');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');assert.equal(b.phAcidType,'phosphoric75');assert.equal(b.sCa,'18');assert.equal(b.sHCO3,'42');
+  assert.equal(b.batchName,'Excel 試験');assert.equal(b.batchIcon,'auto');assert.equal(b.taxCategory,'ビール・発泡酒等(発泡性酒類)');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');assert.equal(b.phAcidType,undefined);assert.equal(b.sCa,'');assert.equal(b.sHCO3,'');
+  assert.equal(b.brewTargets.fields.targetSRM,'8');assert.equal(b.brewTargets.fields.yeastSource,'fresh pitch');
   assert.equal(b.brewTargets.fields.batchNumber,'WB-82');assert.equal(b.brewTargets.fields.doubleBrew,true);assert.equal(b.brewTargets.steps[1].values.ph,'5.2');
   assert.equal(b.fermentables[0].amount,'80');assert.equal(b.fermentables[0].invId,'m1');assert.equal(b.hops[0].targetMeta.alpha,'6.2');assert.equal(b.yeastInvId,'y1');
   assert.equal(b.actualOG,'');assert.equal(b.fermentStart,'');assert.deepEqual(b.gravityLog,[]);assert.deepEqual(b.packages,[]);assert.equal(b.inventoryDeducted,false);assert.deepEqual(b.processMeasurements,[]);
-  assert.equal(result.summary.materialCount,5);assert.equal(result.summary.targetStepCount,2);assert.equal(result.summary.sourceAppVersion,'82');assert.deepEqual(result.warnings,[]);
+  assert.equal(result.summary.materialCount,4);assert.equal(result.summary.targetStepCount,2);assert.equal(result.summary.sourceAppVersion,'82');assert.deepEqual(result.warnings,[]);
 });
 
 test('edited Excel values are imported by stable keys and not by row position',()=>{

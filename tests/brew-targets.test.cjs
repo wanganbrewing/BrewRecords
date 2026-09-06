@@ -59,11 +59,11 @@ test('a metadata-only material cannot be silently discarded on ordinary form col
 test('valid apply modifies only planned form fields and stages a plan until the ordinary save',()=>{
   const c=context(),source={id:'target-draft',batchName:'Before'},controls={targetSheetError:{focus(){}},f_yeastInv:{value:''},f_yeastUnit:{value:'g',options:[{value:'g'}]},f_batchName:{value:'Before'},f_waterVolume:{value:''},f_actualOG:{value:'1.051'},f_fg:{value:'1.010'},ph_waterVolume:{value:''},targetPlanStatus:{},targetSheetDialog:{close(){this.closed=true;}}};
   for(const id of ['fermentableRows','hopRows','adjunctRows','mineralRows'])controls[id]={innerHTML:'original'};
-  c.document.getElementById=id=>controls[id];c.document.querySelectorAll=()=>[{dataset:{bound:'batchName'},value:'After'},{dataset:{bound:'yeastUnit'},value:'g'},{dataset:{bound:'waterVolume'},value:'20'}];
+  c.document.getElementById=id=>controls[id];c.document.querySelectorAll=()=>[{dataset:{bound:'waterVolume'},value:'20'}];
   c.targetCurrentForm=()=>source;c.window={fermentCloudData:{getSnapshot:()=>({})}};c.readTargetPlan=()=>({version:1,fields:{tank:'FV2'},steps:[]});c.readTargetRows=()=>[];c.addRow=()=>{};
   let dirty=0;c.markEditorDirty=()=>dirty++;c.updateAbvDisplay=()=>{};c.updateMineralContributionSummary=()=>{};c.updateBatchIconSuggestion=()=>{};
   vm.runInContext('targetSheetBefore=JSON.stringify({id:"target-draft",batchName:"Before"});targetSheetSnapshot="{}";',c);
-  c.applyBrewTargetSheet({preventDefault(){}});assert.equal(controls.targetSheetError.textContent,'');assert.equal(controls.f_batchName.value,'After');assert.equal(controls.f_waterVolume.value,'20');assert.equal(controls.f_actualOG.value,'1.051');assert.equal(controls.f_fg.value,'1.010');assert.equal(controls.targetSheetDialog.closed,true);assert.equal(dirty,1);assert.equal(c.collectBrewTargets(null).fields.tank,'FV2');
+  c.applyBrewTargetSheet({preventDefault(){}});assert.equal(controls.targetSheetError.textContent,'');assert.equal(controls.f_batchName.value,'Before');assert.equal(controls.f_waterVolume.value,'20');assert.equal(controls.f_actualOG.value,'1.051');assert.equal(controls.f_fg.value,'1.010');assert.equal(controls.targetSheetDialog.closed,true);assert.equal(dirty,1);assert.equal(c.collectBrewTargets(null).fields.tank,'FV2');
 });
 test('scale copy changes volume goals and quantity splits but not source or pH/temperature',()=>{
   const c=context(),plan={version:1,fields:{spargeWater1:'25'},steps:[{id:'s',name:'Transfer',slots:['volume','temp','ph'],values:{volume:'20',temp:'14',ph:'5.3'}}]};
@@ -87,7 +87,7 @@ test('unified target plan may assign the clearly labelled actual OG but never ot
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(dir,'brew-targets.js'),'utf8'));
   assert.ok(new RegExp("\\['actualOG',").test(ui));
   for(const field of ['fermentStart','fermentTemp','fermentStartPh','gravityLog','packages'])assert.ok(!new RegExp("\\['"+field+"',").test(ui));
-  assert.match(ui,/実測OGだけは仕込み後の実測欄/);
+  assert.match(ui,/ここだけ実測値です/);
   assert.ok(!ui.includes('storage.set'));assert.ok(!ui.includes('deductInventoryForBatch('));
   assert.match(html,/brewTargets: typeof collectBrewTargets/);assert.match(html,/data-view-brew-targets/);assert.match(html,/目標仕込み表\(JSON\)/);
 });
@@ -108,18 +108,23 @@ test('planned quantity inputs display permanent units for both batches without c
   assert.match(c.targetRowsSection('hop',{}),/仕込み1回目（g）/);
   assert.match(c.targetRowsSection('hop',{}),/data-second-brew>仕込み2回目（g）/);
 });
-test('PC target entry is split into three sheets with one save action',()=>{
+test('PC target entry uses a merged plan and a process sheet with one save action',()=>{
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
-  for(const sheet of ['① 基本計画','② 原材料・水','③ 仕込み工程'])assert.ok(source.includes(sheet));
+  for(const sheet of ['① 仕込み計画','② 仕込み工程'])assert.ok(source.includes(sheet));
+  assert.ok(!source.includes('③ 仕込み工程'));
   assert.match(html,/id="targetSheetApply">仕込み計画を保存</);
   assert.doesNotMatch(source,/画面下部の「保存する」で確定/);
   assert.match(c.targetExtra('mashWater2',B.empty()),/data-second-brew/);
   assert.doesNotMatch(c.targetExtra('mashWater1',B.empty()),/data-second-brew/);
 });
-test('unified plan contains fields that previously existed only in basic, process and water detail sections',()=>{
-  for(const key of ['batchIcon','taxCategory','actualOG','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.match(ui,new RegExp("\\['"+key+"',"));
-  for(const text of ['仕込み後の実測（任意）','原水とpH調整','酸の添加量を計算','原水のミネラル（ppm・任意）','作りたい水質：目標ミネラル（ppm）'])assert.ok(ui.includes(text));
+test('unified plan exposes the requested current fields and omits retired input controls',()=>{
+  for(const key of ['taxCategory','actualOG'])assert.match(ui,new RegExp("\\['"+key+"',"));
+  assert.ok(ui.includes("'targetSRM'"));
+  for(const key of ['batchIcon','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.doesNotMatch(ui,new RegExp("\\['"+key+"',"));
+  for(const text of ['仕込み後の実測（任意）','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力'])assert.ok(ui.includes(text));
+  for(const text of ['原水とpH調整','酸の添加量を計算','水質調整剤の予定量'])assert.ok(!ui.includes(text));
   assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
+  assert.ok(html.includes('class="form-batch-name brew-batch-visible"'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
 });
 test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{

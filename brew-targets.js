@@ -13,10 +13,9 @@
     ['sanitizeDate','洗浄・殺菌の予定日','date'],['sanitizeBy','洗浄・殺菌の予定担当','text'],['millGap','ミルギャップ','number','mm'],
     ['mashWater1','糖化用水 仕込み1回目','number','L'],['mashWater2','糖化用水 仕込み2回目','number','L'],['spargeWater1','スパージ水 仕込み1回目','number','L'],['spargeWater2','スパージ水 仕込み2回目','number','L'],
     ['sulfateChlorideRatio','SO₄ / Cl 目標比','number',''],['residualAlkalinity','残留アルカリ度 目標','number','mg/L as CaCO₃',-1000,1000],
-    ['yeastSource','酵母の由来（fresh pitch等）','text'],['yeastGeneration','酵母の世代','text'],['yeastHarvestDate','酵母回収予定日','date'],
-    ['pitchRate','酵母投入率 目標','number',''],['pitchRateUnit','投入率の単位','text'],['cellDensity','細胞密度 目標','number','×10⁶ cells/mL'],
-    ['targetFG','目標 FG','number','SG',1,1.3],['targetABV','目標 ABV','number','%',0,100],['targetIBU','目標 合計IBU','number','IBU'],
-    ['targetLoss','目標 欠減量','number','L'],['targetCost','目標 原価/L','number','円/L'],['planNotes','仕込み計画メモ','text']
+    ['yeastSource','酵母の由来（fresh pitch等）','text'],['yeastHarvestDate','酵母回収予定日','date'],['cellDensity','細胞密度 目標','number','×10⁶ cells/mL'],
+    ['targetFG','目標 FG','number','SG',1,1.3],['targetABV','目標 ABV','number','%',0,100],['targetIBU','目標 合計IBU','number','IBU'],['targetSRM','目標 SRM','number','SRM',0,1000],
+    ['planNotes','仕込み計画メモ','text']
   ];
   // These are empty target templates, not a recipe or recommended operating values.
   const steps=[

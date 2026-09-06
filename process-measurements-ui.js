@@ -11,7 +11,7 @@ function processMeasurementsHtml(batch){
 function renderProcessMeasurements(batch){
   if($('sch_measurements'))$('sch_measurements').innerHTML=processMeasurementsHtml(batch);
 }
-function openProcessEditor(batchId,recordId){
+function openProcessEditor(batchId,recordId,presetStage){
   if(processSaving||$('processDialog').open)return;
   const batch=batches.find(b=>b.id===batchId);if(!batch)return;
   const rows=batch.processMeasurements??[];
@@ -20,7 +20,7 @@ function openProcessEditor(batchId,recordId){
   processEditor={batchId,recordId:recordId||null,before:JSON.stringify(window.fermentCloudData.getSnapshot())};
   $('processReasonField').hidden=!row;
   $('processBatch').textContent=batch.batchName||'名称未設定';$('processError').textContent='';
-  $('processStage').value=row?.stage||'';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
+  $('processStage').value=row?.stage||presetStage||'';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
   const labels=[...computeScheduleSteps(batch).map(s=>s.label),...(batch.customScheduleSteps||[]).map(s=>s.label),...rows.map(r=>r.stage)].filter(Boolean);
   $('processStages').innerHTML=[...new Set(labels)].map(s=>`<option value="${escapeHtml(s)}"></option>`).join('');
   $('processFields').innerHTML=Object.entries(ProcessMeasurements.fields).map(([key,f])=>`<div class="field"><label for="pm_${key}">${f.label}（任意）</label><input id="pm_${key}" type="number" min="${f.min}" max="${f.max}" step="${f.step}" value="${escapeHtml(row?.[key]??'')}" placeholder="未入力"></div>`).join('');
