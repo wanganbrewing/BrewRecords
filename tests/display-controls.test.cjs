@@ -6,11 +6,13 @@ test('consumable reference prices appear last after month-end valuation',()=>{
   assert.ok(html.indexOf('id="costCatalogPanel"')>html.indexOf('id="valuationPanel"'));
   assert.ok(html.indexOf('id="costCatalogPanel"')<html.indexOf('<!-- inventoryCards / viewInventory -->'));
 });
-test('item cards use desktop wide layout in every inventory mode',()=>{
+test('item categories use desktop spreadsheet tables in the wide inventory layout',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',!$('viewInventory').hidden);"));
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',name==='inventory');"));
-  assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));'));
+  assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:block;}'));
+  assert.ok(html.includes('class="inventory-table-scroll inventory-category-sheet"'));
+  assert.ok(html.includes('id="inventoryViewMode"'));
 });
 test('month-end valuation follows all inventory views without duplicating the panel',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -29,7 +31,8 @@ test('mobile inputs include wide phones and month/search controls with adequate 
 });
 test('guide matches unified brewing plan and current menu labels',()=>{
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
-  assert.ok(help.includes('仕込み → 仕込み後に追記する情報 → 消耗品・参考費用'));
+  assert.ok(help.includes('仕込み画面の「消耗品・参考費用」は廃止しました'));
+  assert.ok(help.includes('発酵管理からの参照値'));
   assert.ok(help.includes('スマホで工程実績を入力'));
   assert.ok(help.includes('日本地ビール協会の2024年4月ガイドライン'));
   assert.ok(help.includes('クラウド同期の設定・状態確認'));
@@ -50,12 +53,13 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
 });
-test('brewing plan replaces the basic/detail split while follow-up editing stays visible',()=>{
+test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
-  assert.ok(html.includes('仕込み後に追記する情報'));
-  assert.ok(html.includes('data-icon="📦">パッケージング'));
+  assert.ok(html.includes('id="viewPackaging" hidden'));
+  assert.ok(html.includes('id="packagingEntryPanel"'));
+  assert.ok(!html.includes('仕込み後に追記する情報'));
   assert.ok(!html.includes('data-entry-mode='));
   assert.ok(!html.includes('id="entryModeDetail"'));
   assert.ok(!source.includes('setEntryMode'));
@@ -67,16 +71,16 @@ test('desktop parallel panels preserve hidden empty states and span timelines an
   assert.ok(html.includes('.desktop-workspace>*{grid-column:1/-1;min-width:0;}'));
   for(const id of ['scheduleBatchPanel','scheduleStepsPanel','fermentationInfoPanel','fermentationMeasurementsPanel'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
 });
-test('brewing, schedule and fermentation use wide layout only on desktop and in their own views',()=>{
+test('brewing, schedule, fermentation and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  for(const view of ['form','schedule','fermentation'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
-  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap{max-width:1400px;}}'));
+  for(const view of ['form','schedule','fermentation','packaging'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
+  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap,body.packaging-wide .wrap{max-width:1400px;}}'));
 });
-test('optional fermentation navigation defaults off, remembers its choice and redirects when hidden',()=>{
-  const tab={hidden:true},fields={},store=new Map();let count,redirect;
-  const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:()=>tab,documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
-  assert.equal(c.preferredOptionalNavigation().fermentation,false);c.setOptionalNavigation('schedule',true);assert.equal(tab.hidden,true);
-  c.setOptionalNavigation('fermentation',true);assert.equal(count,'4');assert.equal(c.preferredOptionalNavigation().fermentation,true);c.currentTab='fermentation';c.setOptionalNavigation('fermentation',false);assert.equal(redirect[0],'inventory');assert.equal(count,'3');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().fermentation,false);
+test('optional fermentation and packaging navigation default off and remember independently',()=>{
+  const tabs={fermentation:{hidden:true},packaging:{hidden:true}},fields={},store=new Map();let count,redirect;
+  const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:s=>tabs[s.match(/data-tab="([^"]+)/)?.[1]],documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
+  assert.equal(c.preferredOptionalNavigation().fermentation,false);assert.equal(c.preferredOptionalNavigation().packaging,false);c.setOptionalNavigation('schedule',true);assert.equal(tabs.fermentation.hidden,true);
+  c.setOptionalNavigation('fermentation',true);assert.equal(count,'4');c.setOptionalNavigation('packaging',true);assert.equal(count,'5');assert.equal(c.preferredOptionalNavigation().packaging,true);c.currentTab='packaging';c.setOptionalNavigation('packaging',false);assert.equal(redirect[0],'inventory');assert.equal(count,'4');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().fermentation,false);
 });
 test('obsolete entry-mode preference and controls are removed',()=>{
   assert.ok(!source.includes('ferment-entry-mode-v2'));

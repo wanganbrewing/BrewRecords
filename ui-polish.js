@@ -37,7 +37,7 @@ function openExportDialog(){
 function closeExportDialog(){document.getElementById('exportDialog')?.close();}
 function updateScreenChrome(name){
   const heading=document.getElementById('screenHeading');
-  if(heading)heading.textContent=({inventory:'在庫と入荷・使用を管理する',form:'仕込みの内容を入力する',list:'保存した仕込みを確認する',detail:'仕込みの詳細',schedule:'工程の予定と実績を記録する',fermentation:'日々の発酵を記録する'})[name]||"Fermenter's Ledger";
+  if(heading)heading.textContent=({inventory:'在庫と入荷・使用を管理する',form:'仕込みの内容を入力する',list:'保存した仕込みを確認する',detail:'仕込みの詳細',schedule:'工程の予定と実績を記録する',fermentation:'日々の発酵を記録する',packaging:'充填内容を記録する'})[name]||"Fermenter's Ledger";
 }
 function updateEditorStatus(message=''){
   const status=document.getElementById('editorStatus');
