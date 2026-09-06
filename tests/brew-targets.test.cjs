@@ -83,9 +83,11 @@ test('apply rejects stale form or cloud data before touching controls or saving'
   vm.runInContext('targetSheetBefore=JSON.stringify({batchName:"Original"});targetSheetSnapshot="{}";',c);
   c.applyBrewTargetSheet({preventDefault(){}});assert.match(els.targetSheetError.textContent,/元の仕込み・クラウドデータが変わりました/);
 });
-test('target implementation and integration parse and never assign actual fermentation or stock',()=>{
+test('unified target plan may assign the clearly labelled actual OG but never other fermentation or stock',()=>{
   new vm.Script(ui);new vm.Script(fs.readFileSync(path.join(dir,'brew-targets.js'),'utf8'));
-  for(const field of ['actualOG','fermentStart','fermentTemp','fermentStartPh','gravityLog','packages'])assert.ok(!new RegExp("\\['"+field+"',").test(ui));
+  assert.ok(new RegExp("\\['actualOG',").test(ui));
+  for(const field of ['fermentStart','fermentTemp','fermentStartPh','gravityLog','packages'])assert.ok(!new RegExp("\\['"+field+"',").test(ui));
+  assert.match(ui,/実測OGだけは仕込み後の実測欄/);
   assert.ok(!ui.includes('storage.set'));assert.ok(!ui.includes('deductInventoryForBatch('));
   assert.match(html,/brewTargets: typeof collectBrewTargets/);assert.match(html,/data-view-brew-targets/);assert.match(html,/目標仕込み表\(JSON\)/);
 });
@@ -113,6 +115,12 @@ test('PC target entry is split into three sheets with one save action',()=>{
   assert.doesNotMatch(source,/画面下部の「保存する」で確定/);
   assert.match(c.targetExtra('mashWater2',B.empty()),/data-second-brew/);
   assert.doesNotMatch(c.targetExtra('mashWater1',B.empty()),/data-second-brew/);
+});
+test('unified plan contains fields that previously existed only in basic, process and water detail sections',()=>{
+  for(const key of ['batchIcon','taxCategory','actualOG','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.match(ui,new RegExp("\\['"+key+"',"));
+  for(const text of ['仕込み後の実測（任意）','原水とpH調整','酸の添加量を計算','原水のミネラル（ppm・任意）','作りたい水質：目標ミネラル（ppm）'])assert.ok(ui.includes(text));
+  assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
+  assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
 });
 test('changing an adjunct unit updates both visible and accessible units without converting quantities',()=>{
   const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 仕込み1回目'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 仕込み2回目'},setAttribute(k,v){this[k]=v;}}],unit={value:'mg'};

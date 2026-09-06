@@ -24,11 +24,13 @@ test('mobile inputs include wide phones and month/search controls with adequate 
   assert.ok(html.includes('input[type=month],input[type=number],input[type=time],input[type=datetime-local],textarea,select{font-size:16px;min-height:44px;}'));
   assert.ok(html.includes('.icon-btn{width:44px;min-width:44px;height:44px;}'));
   assert.ok(html.includes('.dyn-row,.dyn-subrow{flex-wrap:wrap;gap:8px;}'));
-  assert.ok(html.includes('#viewForm[data-entry-mode="detail"] #basicEntryGuide{display:none;}'));
+  assert.ok(html.includes('id="brewPlanOpen"'));
+  assert.ok(!html.includes('id="entryModeSimple"'));
 });
-test('guide matches separated detail navigation and current menu labels',()=>{
+test('guide matches unified brewing plan and current menu labels',()=>{
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
-  assert.ok(help.includes('仕込み → 詳細 → 消耗品・参考費用'));
+  assert.ok(help.includes('仕込み → 仕込み後に追記する情報 → 消耗品・参考費用'));
+  assert.ok(help.includes('基本情報・仕込み工程・原材料・水質調整は「仕込み → 仕込み計画を入力」に統合'));
   assert.ok(help.includes('クラウド同期の設定・状態確認'));
   assert.ok(help.includes('メニューや詳細項目が見つからない'));
   assert.ok(!help.includes('「クラウド同期を設定」'));
@@ -47,13 +49,15 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
 });
-test('basic and detail sections are mutually exclusive while shared identity and save remain visible',()=>{
+test('brewing plan replaces the basic/detail split while follow-up editing stays visible',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes('#viewForm[data-entry-mode="detail"]>details.section:not([data-entry-advanced])'));
-  assert.ok(html.includes('#viewForm[data-entry-mode="detail"]>#formInvDeductArea{display:none!important;}'));
-  assert.ok(html.includes('#viewForm[data-entry-mode="simple"]>[data-entry-advanced]{display:none!important;}'));
-  assert.ok(!source.split('function setEntryMode(')[1].split("document.addEventListener")[0].includes('.value='));
-  assert.ok(source.includes('基本・詳細をまとめて保存'));
+  assert.ok(html.includes('id="brewPlanHubTitle">仕込み計画'));
+  assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
+  assert.ok(html.includes('仕込み後に追記する情報'));
+  assert.ok(html.includes('data-icon="📦">パッケージング'));
+  assert.ok(!html.includes('data-entry-mode='));
+  assert.ok(!html.includes('id="entryModeDetail"'));
+  assert.ok(!source.includes('setEntryMode'));
 });
 test('desktop parallel panels preserve hidden empty states and span timelines and save actions',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -73,14 +77,16 @@ test('optional navigation defaults off, remembers independent choices and redire
   assert.equal(c.preferredOptionalNavigation().schedule,false);c.setOptionalNavigation('schedule',true);assert.equal(count,'4');assert.equal(tabs.fermentation.hidden,true);assert.equal(c.preferredOptionalNavigation().schedule,true);
   c.setOptionalNavigation('fermentation',true);assert.equal(count,'5');c.currentTab='schedule';c.setOptionalNavigation('schedule',false);assert.equal(redirect[0],'inventory');assert.equal(count,'4');c.setOptionalNavigation('fermentation',false);assert.equal(count,'3');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().schedule,false);
 });
-test('entry mode changes presentation only, preserves values and remembers choice safely',()=>{
-  const fields=new Map(),store=new Map();const c=vm.createContext({document:{addEventListener(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},$:id=>{if(!fields.has(id))fields.set(id,{dataset:{},value:'keep',open:true,setAttribute(k,v){this[k]=v;}});return fields.get(id);}});vm.runInContext(source,c);
-  assert.equal(c.preferredEntryMode(),'simple');c.setEntryMode('simple');assert.equal(c.preferredEntryMode(),'simple');assert.equal(c.$('viewForm').dataset.entryMode,'simple');assert.equal(c.$('entryModeSimple')['aria-pressed'],'true');assert.match(c.$('entryModeNote').textContent,/保持/);
-  c.setEntryMode('detail');assert.equal(c.$('viewForm').dataset.entryMode,'detail');for(const field of fields.values()){assert.equal(field.value,'keep');assert.equal(field.open,true);}
-  c.setEntryMode('invalid');assert.equal(c.$('viewForm').dataset.entryMode,'detail');c.localStorage.setItem=()=>{throw Error('blocked');};assert.doesNotThrow(()=>c.setEntryMode('simple'));c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredEntryMode(),'simple');
+test('obsolete entry-mode preference and controls are removed',()=>{
+  assert.ok(!source.includes('ferment-entry-mode-v2'));
+  assert.ok(!source.includes('preferredEntryMode'));
+  assert.ok(!source.includes('setEntryMode'));
 });
-test('only the three optional brewing sections are hidden and never disabled',()=>{
-  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');assert.equal((html.match(/<details class="section" data-entry-advanced>/g)||[]).length,3);for(const title of ['水質調整','パッケージング','消耗品・参考費用'])assert.ok(new RegExp('<details class="section" data-entry-advanced>\\s*<summary[^>]*>'+title).test(html));assert.ok(html.includes('#viewForm[data-entry-mode="simple"]>[data-entry-advanced]'));assert.ok(!source.includes('.disabled='));
+test('legacy form controls remain as one hidden data adapter and are never disabled',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  for(const id of ['f_batchName','f_taxCategory','f_actualOG','f_waterSource','f_targetWaterPh','fermentableRows','hopRows','yeastEntry'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
+  assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
+  assert.ok(!source.includes('.disabled='));
 });
 function harness(wide=true,value=null){const els=new Map(),cards=[{dataset:{batchId:'a'}},{dataset:{batchId:'b'}}];let saved=value;const c=vm.createContext({localStorage:{getItem:()=>saved,setItem:(key,v)=>saved=v},matchMedia:()=>({matches:wide}),document:{addEventListener(){},querySelectorAll:()=>cards},$:id=>{if(!els.has(id))els.set(id,{});return els.get(id);},statusOf:b=>b.status,escapeHtml:s=>String(s).replaceAll('"','&quot;'),batches:[{id:'a',batchName:'湾岸 IPA',style:'IPA',status:'発酵中'},{id:'b',batchName:'Porter',status:'完了'}]});vm.runInContext(source,c);c.run=s=>vm.runInContext(s,c);c.cards=cards;c.saved=()=>saved;return c;}
 test('initial inventory view uses width only without a valid saved choice; errors fall back safely',()=>{assert.equal(harness().preferredInventoryMode(),'stock');assert.equal(harness(false).preferredInventoryMode(),'cards');for(const mode of ['cards','stock','ledger'])assert.equal(harness(true,mode).preferredInventoryMode(),mode);const c=harness(false,'bad');assert.equal(c.preferredInventoryMode(),'cards');c.localStorage.getItem=()=>{throw Error('blocked');};assert.equal(c.preferredInventoryMode(),'cards');c.rememberInventoryMode('ledger');assert.equal(c.saved(),'ledger');c.localStorage.setItem=()=>{throw Error('quota');};assert.doesNotThrow(()=>c.rememberInventoryMode('cards'));});

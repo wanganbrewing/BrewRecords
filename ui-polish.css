@@ -12,9 +12,9 @@ header{padding-bottom:12px;margin-bottom:12px;}
 .screen-heading{margin:0 0 16px;font-size:1.75rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere;}
 .record-list-title,.record-list-kicker,.inventory-ledger-title,.inventory-ledger-kicker{display:none;}
 .editor-status{margin:0 0 16px;font-size:.875rem;line-height:1.6;color:var(--text-muted);}
-.entry-mode-buttons,.inventory-display-buttons{gap:2px;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;}
-.entry-mode-buttons .btn,.inventory-display-buttons .inv-action-btn{border-color:transparent;box-shadow:none;border-radius:8px;}
-.entry-mode-buttons .btn[aria-pressed=true],.inventory-display-buttons .inv-action-btn[aria-pressed=true]{background:#e4dccf;color:#201c17;}
+.inventory-display-buttons{gap:2px;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;}
+.inventory-display-buttons .inv-action-btn{border-color:transparent;box-shadow:none;border-radius:8px;}
+.inventory-display-buttons .inv-action-btn[aria-pressed=true]{background:#e4dccf;color:#201c17;}
 .has-help{gap:16px;}
 .has-help .help-button{margin-left:auto;flex:0 0 44px;width:44px;height:44px;min-width:44px;}
 summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px solid var(--border);text-align:center;}

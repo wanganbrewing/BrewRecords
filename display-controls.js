@@ -24,19 +24,6 @@ function clearRecordFilters(){
   recordSearch='';recordStatus='';if($('recordSearch'))$('recordSearch').value='';if($('recordStatus'))$('recordStatus').value='';applyRecordFilters();
 }
 document.addEventListener('DOMContentLoaded',()=>setInventoryMode(preferredInventoryMode(),false));
-function preferredEntryMode(){
-  try{return localStorage.getItem('ferment-entry-mode-v2')==='detail'?'detail':'simple';}catch(error){return 'simple';}
-}
-function setEntryMode(mode,remember=true){
-  if(!['simple','detail'].includes(mode))return;
-  const form=$('viewForm');if(!form)return;
-  form.dataset.entryMode=mode;
-  $('entryModeSimple').setAttribute('aria-pressed',String(mode==='simple'));
-  $('entryModeDetail').setAttribute('aria-pressed',String(mode==='detail'));
-  $('entryModeNote').textContent=(mode==='simple'?'基本：基本情報・仕込み工程・原材料・メモを表示。':'詳細：水質調整・パッケージング・参考費用を表示。')+' 非表示の入力値も保持し、基本・詳細をまとめて保存します。';
-  if(remember)try{localStorage.setItem('ferment-entry-mode-v2',mode);}catch(error){}
-}
-document.addEventListener('DOMContentLoaded',()=>setEntryMode(preferredEntryMode(),false));
 function preferredOptionalNavigation(){
   try{const value=JSON.parse(localStorage.getItem('ferment-optional-navigation-v1')||'{}');return {schedule:value?.schedule===true,fermentation:value?.fermentation===true};}catch(error){return {schedule:false,fermentation:false};}
 }

@@ -1,6 +1,6 @@
-# PC target brew sheet — v82
+# Unified brew plan — v83
 
-Entry: 仕込み → 仕込み表で目標を設定（PC向け）. Desktop uses three spreadsheet-style sheets: basic plan, materials/water, and process. The second-brew columns are hidden unless the user explicitly enables a two-brew combined batch. One “仕込み計画を保存” action applies and persists the entire plan. Smaller screens retain a card-oriented layout with horizontally scrollable material tables. The toolbar exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
+Entry: 仕込み → 仕込み計画を入力. The former basic/detail switch and separate identity/process/material/water forms are replaced by this single entry surface. Desktop uses three spreadsheet-style sheets: basic plan, materials/water, and process. Smaller screens expose the same fields in stacked sections with horizontally scrollable material tables. The second-brew columns are hidden unless the user explicitly enables a two-brew combined batch. One “仕込み計画を保存” action applies and persists the entire plan. The toolbar exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
 
 ## Data and boundaries
 
@@ -10,9 +10,9 @@ Entry: 仕込み → 仕込み表で目標を設定（PC向け）. Desktop uses 
 - First/second mash-water quantities sum to the canonical `waterVolume`. Sparge water is separate. Ordinary edits to a canonical total reset its stale split to the first brew without dropping the other metadata.
 - Scaling copies adjusts amounts and volume targets, not temperature, pH, concentration, alpha acid, IBU or ABV. Copying does not add actual fermentation observations.
 - The sheet is a draft until “仕込み計画を保存”. That action applies the targets to the ordinary form and completes persistence in one flow. Closing a dirty, unsaved sheet asks before discarding. A changed underlying form/cloud snapshot blocks application. All validation precedes form mutations.
-- Existing actual OG/FG, process measurements, fermentation, shipments and stock consumption are not changed by applying the sheet. Planned times are not automatically copied to the schedule or calendar notifications.
-- This is target entry, not a new chemical or recipe prediction engine. No SG/°P conversion or IBU/ABV/pH predictions are introduced. Chemical concentrations are metadata only; additive quantities remain grams.
-- Saved record details offer a read-only target sheet whose three tabs remain navigable. Backup and cloud snapshots retain the entire batch, including the new fields. Brewing CSV includes target-sheet and recipe-metadata JSON columns. All editing devices must use v82 or later.
+- Actual OG is the only actual value in the unified surface and is clearly separated as post-brew data. It is excluded from Excel export/import. Existing FG, process measurements, fermentation, shipments and stock consumption are not changed by applying an imported plan. Planned times are not automatically copied to the schedule or calendar notifications.
+- Tax category, batch icon, source-water identity/pH/alkalinity/minerals, target-water pH, acid choice, and target minerals live in the unified plan. The water sheet provides an acid-dose estimate and before/after mineral guidance. No SG/°P conversion or IBU/ABV prediction is introduced. Chemical concentrations are metadata only; additive quantities remain grams.
+- Saved record details offer a read-only plan whose three tabs remain navigable. Backup and cloud snapshots retain the entire batch, including the new fields. Brewing CSV includes target-sheet and recipe-metadata JSON columns. All editing devices must use v83 or later.
 - Excel import is preview-first and creates a new unsaved draft. It never imports actual measurements, fermentation logs, packages, expenses, inventory-consumption state or the source record ID. Inventory IDs in the workbook are informational; current inventory is linked only after an exact category/name/manufacturer/lot match (and unit match where required). Unmatched items remain unlinked and appear in the preview warning.
 
 ## Verification

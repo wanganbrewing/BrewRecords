@@ -1,5 +1,5 @@
 {
-"version": 82,
+"version": 83,
   "releasedAt": "2026-09-06",
-  "summary": "目標仕込み表のExcel書き出し・安全な取り込みを追加"
+  "summary": "仕込み入力を1つの仕込み計画へ統合"
 }

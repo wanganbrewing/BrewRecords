@@ -15,7 +15,7 @@ function fixture(){
     {id:'originalGravity',name:'発酵前の比重・pH',slots:['targetOG','plato','ph'],values:{plato:'12.4',ph:'5.2'},gravityUnit:'SG',comparisons:{ph:'='}}
   ];
   return {
-    id:'saved-record',batchName:'Excel 試験',style:'Pale Ale',brewDate:'2026-09-06',brewer:'担当A',batchSize:'280',targetOG:'1.050',actualOG:'1.047',mashTemp:'66',mashTime:'60',boilTime:'75',waterVolume:'120',waterSource:'水道水',waterPh:'7.2',waterAlkalinity:'58',targetWaterPh:'5.4',mCa:'75',mMg:'5',mNa:'10',mCl:'70',mSO4:'120',mHCO3:'25',
+    id:'saved-record',batchName:'Excel 試験',style:'Pale Ale',batchIcon:'beer',taxCategory:'ビール・発泡酒等（発泡性酒類）',brewDate:'2026-09-06',brewer:'担当A',batchSize:'280',targetOG:'1.050',actualOG:'1.047',mashTemp:'66',mashTime:'60',boilTime:'75',waterVolume:'120',waterSource:'水道水',waterPh:'7.2',waterAlkalinity:'58',targetWaterPh:'5.4',phAcidType:'phosphoric75',sCa:'18',sMg:'4',sNa:'9',sCl:'22',sSO4:'28',sHCO3:'42',mCa:'75',mMg:'5',mNa:'10',mCl:'70',mSO4:'120',mHCO3:'25',
     fermentables:[{name:'Pale Malt',amount:'80',invId:'m1',targetMeta:{batch1:'70',batch2:'10',manufacturer:'Maltster',lot:'LOT-M'}}],
     hops:[{name:'Cascade',amount:'900',invId:'h1',timingType:'boil',timingValue:'60',targetMeta:{batch1:'800',batch2:'100',manufacturer:'Hop Farm',lot:'2026-A',alpha:'6.2',ibu:'28'}}],
     adjuncts:[{name:'FermAid K',amount:'320',unit:'g',timing:'煮沸中',targetMeta:{batch1:'320',batch2:'',manufacturer:'Maker',lot:'A1',timingNote:'終了1分前'}}],
@@ -41,7 +41,7 @@ test('workbook has the four documented editable sheets and typed target cells',(
 
 test('round trip preserves all planned sheets while clearing actuals and ledger effects',()=>{
   const {result}=roundTrip(),b=result.batch;
-  assert.equal(b.batchName,'Excel 試験');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');
+  assert.equal(b.batchName,'Excel 試験');assert.equal(b.batchIcon,'beer');assert.equal(b.taxCategory,'ビール・発泡酒等(発泡性酒類)');assert.equal(b.targetOG,'1.05');assert.equal(b.mashTemp,'66');assert.equal(b.waterVolume,'120');assert.equal(b.phAcidType,'phosphoric75');assert.equal(b.sCa,'18');assert.equal(b.sHCO3,'42');
   assert.equal(b.brewTargets.fields.batchNumber,'WB-82');assert.equal(b.brewTargets.fields.doubleBrew,true);assert.equal(b.brewTargets.steps[1].values.ph,'5.2');
   assert.equal(b.fermentables[0].amount,'80');assert.equal(b.fermentables[0].invId,'m1');assert.equal(b.hops[0].targetMeta.alpha,'6.2');assert.equal(b.yeastInvId,'y1');
   assert.equal(b.actualOG,'');assert.equal(b.fermentStart,'');assert.deepEqual(b.gravityLog,[]);assert.deepEqual(b.packages,[]);assert.equal(b.inventoryDeducted,false);assert.deepEqual(b.processMeasurements,[]);
@@ -75,5 +75,5 @@ test('formula-like user text stays a text cell and survives a round trip',()=>{
 
 test('browser app loads the vendored pinned library and workbook module',()=>{
   const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),vendor=fs.readFileSync(path.join(dir,'xlsx.full.min.js'));
-  assert.match(html,/xlsx\.full\.min\.js\?v=82/);assert.match(html,/brew-targets-xlsx\.js\?v=82/);assert.ok(vendor.length>900000);assert.equal(X.version,'0.20.3');
+  const v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;assert.ok(html.includes(`xlsx.full.min.js?v=${v}`));assert.ok(html.includes(`brew-targets-xlsx.js?v=${v}`));assert.ok(vendor.length>900000);assert.equal(X.version,'0.20.3');
 });
