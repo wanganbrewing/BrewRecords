@@ -13,6 +13,8 @@ test('item categories use desktop spreadsheet tables in the wide inventory layou
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',name==='inventory');"));
   assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:block;}'));
   assert.ok(html.includes('class="inventory-table-scroll inventory-category-sheet"'));
+  assert.ok(html.includes('<table class="inventory-table" aria-label="${escapeHtml(INV_CATEGORY_LABEL[cat])}の品目一覧"><thead>'));
+  assert.ok(!html.includes('<caption>${escapeHtml(INV_CATEGORY_LABEL[cat])}在庫</caption>'));
   assert.equal((html.match(/<details class="inventory-group" open>/g)||[]).length,4);
   assert.ok(html.includes('<td class="inventory-action-cell"><div class="inv-card-actions inventory-sheet-actions">'));
   assert.ok(css.includes('.inventory-sheet-actions{margin:0;min-width:max-content;flex-wrap:nowrap;}'));
