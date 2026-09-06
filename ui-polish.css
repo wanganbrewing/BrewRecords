@@ -16,8 +16,10 @@ header{padding-bottom:12px;margin-bottom:12px;}
 .inventory-view-selector{flex:1;margin:0;}.inventory-view-selector label{margin-bottom:6px;}.inventory-view-selector select{min-height:44px;}
 .inventory-display-buttons .help-button{flex:0 0 44px;}
 .inventory-category-sheet{max-height:none;margin-bottom:12px;}
-.inventory-category-sheet .inventory-table{min-width:880px;}
-.inventory-sheet-actions{margin:0;min-width:420px;}
+.inventory-category-sheet .inventory-table{min-width:1180px;}
+.inventory-category-sheet .inventory-action-cell{max-width:none;white-space:nowrap;}
+.inventory-sheet-actions{margin:0;min-width:max-content;flex-wrap:nowrap;}
+.inventory-sheet-actions .inv-action-danger{margin-left:0;}
 .inventory-sheet-history>td{padding:14px!important;background:var(--surface-2);}
 .has-help{gap:16px;}
 .has-help .help-button{margin-left:auto;flex:0 0 44px;width:44px;height:44px;min-width:44px;}

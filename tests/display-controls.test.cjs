@@ -8,10 +8,14 @@ test('consumable reference price UI is removed',()=>{
 });
 test('item categories use desktop spreadsheet tables in the wide inventory layout',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  const css=fs.readFileSync(path.join(__dirname,'../ui-polish.css'),'utf8');
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',!$('viewInventory').hidden);"));
   assert.ok(html.includes("document.body.classList.toggle('inventory-wide',name==='inventory');"));
   assert.ok(html.includes('#inv_fermentable,#inv_hop,#inv_yeast,#inv_adjunct{display:block;}'));
   assert.ok(html.includes('class="inventory-table-scroll inventory-category-sheet"'));
+  assert.ok(html.includes('<td class="inventory-action-cell"><div class="inv-card-actions inventory-sheet-actions">'));
+  assert.ok(css.includes('.inventory-sheet-actions{margin:0;min-width:max-content;flex-wrap:nowrap;}'));
+  assert.ok(css.includes('.inventory-sheet-actions .inv-action-danger{margin-left:0;}'));
   assert.ok(html.includes('id="inventoryViewMode"'));
 });
 test('month-end valuation follows all inventory views without duplicating the panel',()=>{
