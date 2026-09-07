@@ -80,3 +80,16 @@ test('demo yeast inventory and recipe quantities consistently use grams',()=>{
     assert.ok(Number(batch.yeastAmount)>0);
   }
 });
+
+test('demo initial settings are prefilled with clearly fictional sample values',()=>{
+  const data=demoData();
+  assert.equal(data.appSettings.breweryName,'サンプル醸造所');
+  assert.equal(data.appSettings.tankCount,8);
+  assert.equal(data.appSettings.defaultBatchSize,'850');
+  assert.ok(data.appSettings.staff.length>=3);
+  assert.ok(data.appSettings.suppliers.every(name=>name.includes('サンプル')));
+  assert.ok(data.appSettings.materialMasters.fermentable.length>=3);
+  assert.ok(data.appSettings.materialMasters.hop.length>=3);
+  assert.ok(data.appSettings.materialMasters.yeast.length>=2);
+  assert.ok(data.appSettings.materialMasters.adjunct.length>=2);
+});

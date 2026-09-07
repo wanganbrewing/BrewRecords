@@ -383,7 +383,7 @@
     const id=(byId('appLoginId').value||'').trim(),password=byId('appLoginPassword').value||'',errorEl=byId('appLoginError'),button=byId('appLoginSubmit');
     errorEl.textContent='';
     if(id==='デモ'&&password==='password'){
-      location.href=`${location.pathname}?demo=1&uat=v109`;
+      location.href=`${location.pathname}?demo=1&uat=v110`;
       return;
     }
     button.disabled=true;button.textContent='ログイン中…';

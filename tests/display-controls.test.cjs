@@ -174,6 +174,9 @@ test('desktop process targets fit the notebook width without horizontal scrollin
   assert.ok(css.includes('.target-process-table .target-step-head::before{content:"";display:block;height:.86rem;margin-bottom:6px;}'));
   assert.ok(ui.includes("class=\"${fields?'':'target-empty-table-cell'}\""));
   assert.ok(css.includes('.target-process-table td.target-empty-table-cell{vertical-align:middle;text-align:center;}'));
+  assert.ok(css.includes('.target-process-table input[type="number"]{text-align:right;font-variant-numeric:tabular-nums;}'));
+  assert.ok(css.includes('.target-process-table input[type="time"]{text-align:left;font-variant-numeric:tabular-nums;}'));
+  assert.ok(css.includes('.action-dialog #processFields .number-control input[type="number"]{text-align:right;font-variant-numeric:tabular-nums;}'));
 });
 test('brewing, schedule, fermentation, tanks and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');

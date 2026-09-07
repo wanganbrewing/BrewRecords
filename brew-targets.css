@@ -72,6 +72,9 @@
 .target-process-table th:first-child{width:45px}.target-process-table th:nth-child(2){min-width:190px}.target-process-table th:last-child{min-width:145px}
 .target-process-table td{min-width:120px}.target-process-table td:first-child{min-width:45px}.target-process-table td:nth-child(2){min-width:190px}.target-process-table td:last-child{min-width:145px}
 .target-process-table .target-field{margin-bottom:6px}.target-process-table .target-field:last-child{margin-bottom:0}.target-process-table .target-field>label{font-size:.7rem;}
+.target-process-table input[type="number"]{text-align:right;font-variant-numeric:tabular-nums;}
+.target-process-table input[type="time"]{text-align:left;font-variant-numeric:tabular-nums;}
+.action-dialog #processFields .number-control input[type="number"]{text-align:right;font-variant-numeric:tabular-nums;}
 .target-step-number{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border-radius:50%;background:var(--surface-2);color:var(--text-muted);font-weight:600;}
 .target-step-actions{display:flex;gap:5px;}.target-step-actions button{min-width:40px;}
 .target-mobile-actual{min-width:220px;background:rgba(201,123,19,.06)!important;}.target-mobile-actual span{display:block;margin-bottom:8px;line-height:1.5;}.target-mobile-actual .btn{width:100%;min-height:40px;padding:8px;}
