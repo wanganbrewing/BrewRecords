@@ -88,10 +88,14 @@ test('demo initial settings use the supplied supplier names and sample operating
   assert.equal(data.appSettings.defaultBatchSize,'850');
   assert.ok(data.appSettings.staff.length>=3);
   assert.deepEqual(Array.from(data.appSettings.suppliers),['大西商事','片岡物産','E.A.T.','BET','きた産業','セティ','有希化学','ホクセイプロダクツ','昭和貿易']);
-  assert.ok(data.appSettings.materialMasters.fermentable.length>=3);
-  assert.ok(data.appSettings.materialMasters.hop.length>=3);
-  assert.ok(data.appSettings.materialMasters.yeast.length>=2);
-  assert.ok(data.appSettings.materialMasters.adjunct.length>=2);
+  assert.equal(data.appSettings.materialMasters.fermentable.length,22);
+  assert.equal(data.appSettings.materialMasters.hop.length,20);
+  assert.equal(data.appSettings.materialMasters.yeast.length,26);
+  assert.equal(data.appSettings.materialMasters.adjunct.length,18);
+  for(const name of ['Weyermann® Pilsner Malt','Weyermann® CARAMUNICH® Type 2'])assert.ok(data.appSettings.materialMasters.fermentable.includes(name));
+  for(const name of ['Cascade','Citra®','Hallertauer Mittelfrüh','Saaz'])assert.ok(data.appSettings.materialMasters.hop.includes(name));
+  for(const name of ['Fermentis SafAle™ US-05','Fermentis SafLager™ W-34/70','LalBrew® Nottingham™','LalBrew® NovaLager™'])assert.ok(data.appSettings.materialMasters.yeast.includes(name));
+  for(const name of ['Weyermann® LME SINAMAR®','Oregon Fruit Passion Fruit Aseptic Puree'])assert.ok(data.appSettings.materialMasters.adjunct.includes(name));
   const suppliers=new Set(data.appSettings.suppliers);
   assert.ok(data.inventory.flatMap(item=>item.receipts||[]).every(receipt=>suppliers.has(receipt.supplier)));
 });
