@@ -84,6 +84,11 @@ test('fermentation combines daily measurements and finishing values without a se
   assert.ok(html.includes('class="rg-co2"'));
   assert.ok(html.includes('b.fg = latestGravity;'));
   assert.ok(html.includes('#fermentationMeasurementsPanel{grid-column:1/-1;grid-row:2;}'));
+  assert.ok(html.includes('id="fm_tankName"'));
+  assert.ok(html.includes("`タンク名：${tank||'未設定'}`"));
+  assert.ok(html.indexOf('onclick="addFermentationMeasurement()"')<html.indexOf('id="fm_gravityRows"'));
+  assert.ok(html.includes('id="ferm_sortOrder"'));
+  assert.ok(html.includes("localStorage.setItem('ferment-fermentation-sort-order'"));
 });
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -135,7 +140,8 @@ test('brewing process has separate desktop plan and one-step mobile input',()=>{
   assert.ok(css.includes('@media(max-width:999px){.brew-process-desktop{display:none;}.brew-process-mobile{display:block;'));
   assert.ok(ui.includes('id="brewProcessStepSelect"'));
   assert.ok(ui.includes('今回の入力対象'));
-  assert.ok(ui.includes('fieldKeys:brewProcessMeasurementKeys(step),lockStage:true'));
+  assert.ok(ui.includes("fieldKeys:brewProcessMeasurementKeys(step),lockStage:true,targetSummary:brewProcessTargetSummary(step,b),advanceToStepId:nextStep?.id||''"));
+  assert.ok(ui.includes('function advanceBrewProcessActual(stepId)'));
 });
 test('desktop process targets fit the notebook width without horizontal scrolling',()=>{
   const css=fs.readFileSync(path.join(__dirname,'../brew-targets.css'),'utf8');

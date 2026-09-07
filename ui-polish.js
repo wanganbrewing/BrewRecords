@@ -38,6 +38,9 @@ function closeExportDialog(){document.getElementById('exportDialog')?.close();}
 function updateScreenChrome(name){
   const heading=document.getElementById('screenHeading');
   if(heading)heading.textContent=({inventory:'在庫と入荷・使用を管理する',form:'仕込みの内容を入力する',list:'保存した仕込みを確認する',detail:'仕込みの詳細',schedule:'工程の予定と実績を記録する',fermentation:'日々の発酵を記録する',packaging:'充填内容を記録する'})[name]||"Fermenter's Ledger";
+  const usage={inventory:['pc','▣','PCでの登録・一覧入力に最適'],form:['pc','▣','PCでの仕込み計画入力に最適'],schedule:['hybrid','▣／▯','工程目標はPC向き・実績入力はスマホ向き'],fermentation:['mobile','▯','現場での日々のスマホ入力に最適']}[name];
+  const hint=document.getElementById('workflowDeviceHint');
+  if(hint){hint.hidden=!usage;if(usage){hint.dataset.mode=usage[0];const icon=document.getElementById('workflowDeviceIcon'),text=document.getElementById('workflowDeviceText');if(icon)icon.textContent=usage[1];if(text)text.textContent=usage[2];}}
 }
 function updateEditorStatus(message=''){
   const status=document.getElementById('editorStatus');

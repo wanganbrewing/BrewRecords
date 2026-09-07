@@ -153,17 +153,18 @@ test('selection helpers keep reference values separate and calculate target ABV'
   const tank=c.targetTankField({fields:{tank:'FV3'}});assert.match(tank,/FV3/);assert.match(tank,/data-extra="tank"[^>]+hidden/);
   const srm=c.targetSrmField({fields:{targetSRM:'8'}});assert.match(srm,/SRM 8/);assert.match(srm,/data-extra="targetSRM"[^>]+hidden/);
   assert.match(c.targetRowHtml('hop',{name:'Cascade',targetMeta:{}},0),/data-label="α酸（%）"/);
-  assert.match(ui,/スタイルガイド参考値（入力値ではありません）/);assert.doesNotMatch(ui,/\$\{targetEsc\(style\.id\)\} \$\{targetEsc\(style\.name\)\}/);
+  assert.match(ui,/スタイルガイド参考値（入力値ではありません）/);assert.match(ui,/aria-label="選択したスタイルの説明を表示"/);assert.match(ui,/スタイルの説明を見る/);assert.doesNotMatch(ui,/\$\{targetEsc\(style\.id\)\} \$\{targetEsc\(style\.name\)\}/);
 });
-test('style selection retains entered targets and reset is a separate confirmed action',()=>{
-  const c=context(),styleInput={value:'自由入力',hidden:false},og={value:'1.050'},fg={value:'1.010'},srm={value:'8'},preset={value:'ピルスナー'},reference={};
+test('style selection retains entered targets and the target clear action can be undone',()=>{
+  const c=context(),styleInput={id:'target-bound-style',value:'自由入力',hidden:false},og={id:'target-bound-targetOG',value:'1.050',type:'text'},fg={id:'target-extra-targetFG',value:'1.010',type:'text'},srm={id:'target-extra-targetSRM',value:'8',type:'text'},doubleBrew={id:'targetDoubleBrew',type:'checkbox',checked:true,value:'on'},preset={id:'target-bound-style-preset',value:'ピルスナー'},reference={},undo={hidden:true};
   c.document.querySelector=selector=>selector.includes('[data-bound="style"]')?styleInput:null;
   c.syncTargetChoice({dataset:{targetChoice:'style'},value:'ピルスナー',options:[]});
   assert.equal(styleInput.value,'ピルスナー');assert.equal(og.value,'1.050');assert.equal(fg.value,'1.010');assert.equal(srm.value,'8');
   const elements={'target-bound-style-preset':preset,'target-bound-style':styleInput,'target-bound-targetOG':og,'target-extra-targetFG':fg,'target-extra-targetSRM':srm,targetStyleReference:reference};
-  c.document.getElementById=id=>elements[id];c.confirm=()=>true;c.updateTargetSheetTotals=()=>{};c.BEER_STYLE_GUIDE=[];
-  assert.equal(c.resetTargetStyleTargets(),true);assert.equal(preset.value,'');assert.equal(styleInput.value,'');assert.equal(styleInput.hidden,true);assert.equal(og.value,'');assert.equal(fg.value,'');assert.equal(srm.value,'');
-  assert.match(c.targetStyleField({style:''}),/data-reset-style-targets>スタイル・目標値をリセット/);
+  c.document.getElementById=id=>elements[id];c.document.querySelectorAll=()=>[preset,styleInput,og,fg,srm,doubleBrew];c.document.querySelector=selector=>selector==='[data-undo-target-clear]'?undo:selector.includes('[data-bound="style"]')?styleInput:null;c.updateTargetSheetTotals=()=>{};c.updateSecondBrewView=()=>{};
+  assert.equal(c.clearTargetInputs(),4);assert.equal(preset.value,'ピルスナー');assert.equal(styleInput.value,'ピルスナー');assert.equal(og.value,'');assert.equal(fg.value,'');assert.equal(srm.value,'');assert.equal(doubleBrew.checked,false);assert.equal(undo.hidden,false);
+  assert.equal(c.undoTargetInputsClear(),true);assert.equal(og.value,'1.050');assert.equal(fg.value,'1.010');assert.equal(srm.value,'8');assert.equal(doubleBrew.checked,true);assert.equal(undo.hidden,true);
+  assert.match(c.targetStyleField({style:''}),/data-clear-target-inputs>今回の目標以下をクリア/);assert.match(c.targetStyleField({style:''}),/data-undo-target-clear hidden>クリアを取り消す/);
 });
 test('adjunct quantities use a fixed gram weight without a separate unit input',()=>{
   const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 重さ'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 2回目の重さ'},setAttribute(k,v){this[k]=v;}}];

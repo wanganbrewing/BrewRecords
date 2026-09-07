@@ -50,6 +50,23 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
 .export-dialog .footer-link{width:100%;min-height:48px;white-space:normal;font-size:.95rem;}
 .sched-col-header-planned,.sched-col-header-actual{white-space:normal;}
 .sync-status-badge{font-size:.8rem;}
+.workflow-device-hint{display:inline-flex;align-items:center;gap:7px;margin:-8px 0 14px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;color:var(--text-muted);background:var(--surface);font-size:.8rem;font-weight:600;}
+.workflow-device-hint[data-mode="mobile"]{border-color:rgba(201,123,19,.55);color:var(--copper-bright);}
+.workflow-device-hint[data-mode="hybrid"]{border-color:rgba(201,123,19,.4);color:var(--text);}
+.process-target-hint{margin:10px 0;padding:10px 12px;border-left:3px solid var(--copper);border-radius:0 8px 8px 0;background:rgba(201,123,19,.09);font-size:.9rem;font-weight:600;}
+.fermentation-entry-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:10px 0;}
+.fermentation-entry-toolbar .add-row-btn{margin:0;min-height:44px;}
+.fermentation-sort-field{min-width:210px;margin:0;}
+.fermentation-sort-field label{margin-bottom:4px;}
+.fermentation-sort-field select{min-height:44px;}
+.fermentation-tank-hint{margin:8px 0;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--copper-bright);font-weight:600;}
+.style-reference-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.style-reference-help{position:relative;margin-left:auto;}
+.style-reference-help>summary{list-style:none;cursor:pointer;display:grid;place-items:center;}
+.style-reference-help>summary::-webkit-details-marker{display:none;}
+.style-reference-help>div{position:absolute;z-index:20;right:0;top:calc(100% + 8px);width:min(360px,calc(100vw - 48px));padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);box-shadow:0 10px 28px rgba(0,0,0,.35);font-size:.85rem;line-height:1.6;}
+.style-reference-help>div p{margin:0 0 8px;}
+.style-reference-help>div a{color:var(--copper-bright);font-weight:700;}
 @media(max-width:700px){
   .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom));}
   .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:100;display:grid;grid-template-columns:repeat(var(--visible-tab-count,5),minmax(0,1fr));gap:2px;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-width:1px 0 0;border-radius:0;background:var(--bg);}
@@ -63,5 +80,8 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
   .has-help{flex-wrap:wrap;}
   .welcome-actions{grid-template-columns:1fr;}
   .export-dialog{padding:16px;}
+  .fermentation-entry-toolbar{align-items:stretch;flex-direction:column;}
+  .fermentation-entry-toolbar .add-row-btn,.fermentation-sort-field{width:100%;}
+  .workflow-device-hint{margin-top:-6px;}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;}}
