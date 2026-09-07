@@ -27,7 +27,7 @@ test('demo includes one clearly labelled end-to-end completed brewing record',()
   assert.ok(batch.otherCosts.length>=5);
   assert.ok(batch.otherCostHistory.length>=1);
   assert.ok(batch.gravityLog.length>=7);
-  assert.ok(batch.gravityLog.every(row=>row.gravity&&row.ph&&row.temp&&row.co2));
+  assert.ok(batch.gravityLog.every(row=>row.gravity&&row.ph&&row.temp&&row.volume&&row.co2));
   assert.ok(batch.packages.length>=2);
   assert.ok(batch.packages.every(row=>row.shipments?.length));
   assert.ok(batch.packages.flatMap(row=>row.shipments).some(row=>row.status==='shipped'));

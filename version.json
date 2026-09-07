@@ -1,5 +1,5 @@
 {
-"version": 96,
+"version": 97,
   "releasedAt": "2026-09-07",
-  "summary": "PCの一覧表示と仕込み計画Excelの導線を改善"
+  "summary": "パッケージング一覧と発酵中の液量記録を追加"
 }

@@ -61,12 +61,15 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
 });
-test('desktop fermentation measurements fit date, four values and delete on one row',()=>{
+test('desktop fermentation measurements fit date, five values and delete on one row',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes('.gravity-entry{grid-template-columns:minmax(150px,1.15fr) repeat(4,minmax(0,1fr)) 44px;align-items:end;}'));
+  assert.ok(html.includes('.gravity-entry{grid-template-columns:minmax(145px,1.1fr) repeat(5,minmax(0,1fr)) 44px;align-items:end;}'));
   assert.ok(html.includes('.gravity-entry .gravity-date-field{display:contents;}'));
-  assert.ok(html.includes('.gravity-entry .gravity-date-field>.icon-btn{grid-column:6;grid-row:1;'));
+  assert.ok(html.includes('.gravity-entry .gravity-date-field>.icon-btn{grid-column:7;grid-row:1;'));
   assert.ok(html.includes('class="fermentation-table-head"'));
+  assert.ok(html.includes('class="rg-volume"'));
+  assert.ok(html.includes("volume:r.querySelector('.rg-volume')?.value||''"));
+  assert.ok(html.includes("g.volume?' ・ '+g.volume+' L':''"));
   assert.ok(html.includes('#ferm_content.desktop-workspace:not([hidden]){display:block;}'));
 });
 test('fermentation combines daily measurements and finishing values without a separate info panel',()=>{
@@ -95,6 +98,10 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
   assert.ok(html.includes('id="viewPackaging" hidden'));
   assert.ok(html.includes('id="packagingEntryPanel"'));
+  assert.ok(html.includes('class="packaging-table"'));
+  assert.ok(html.includes("row.className = 'package-entry'"));
+  assert.ok(html.includes('class="rp-row-total"'));
+  assert.ok(html.includes('#pkg_content.desktop-workspace:not([hidden]){display:block;}'));
   assert.ok(!html.includes('仕込み後に追記する情報'));
   assert.ok(!html.includes('data-entry-mode='));
   assert.ok(!html.includes('id="entryModeDetail"'));
