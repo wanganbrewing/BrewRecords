@@ -10,7 +10,7 @@ test('startup login offers a masked demo account and opens isolated demo data',(
   assert.match(html,/id="appLoginId"[^>]+value="デモ"/);
   assert.match(html,/type="password" id="appLoginPassword"[^>]+value="password"/);
   assert.ok(cloud.includes("id==='デモ'&&password==='password'"));
-  assert.ok(cloud.includes('demo=1&uat=v110'));
+  assert.ok(cloud.includes('demo=1&uat=v111'));
 });
 
 test('brewery account authentication uses password auth without persisting passwords',()=>{
