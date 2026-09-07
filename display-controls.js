@@ -33,7 +33,7 @@ function setOptionalNavigation(name,enabled,remember=true){
   tab.hidden=!enabled;
   const checkbox=$('showPackagingTab');if(checkbox)checkbox.checked=!!enabled;
   const settings={packaging:!document.querySelector('.tab[data-tab="packaging"]').hidden};
-  document.documentElement.style.setProperty('--visible-tab-count',String(5+Number(settings.packaging)));
+  document.documentElement.style.setProperty('--visible-tab-count',String(6+Number(settings.packaging)));
   if(remember)try{localStorage.setItem('ferment-optional-navigation-v1',JSON.stringify(settings));}catch(error){}
   if(!enabled&&typeof currentTab!=='undefined'&&currentTab===name)showView('inventory',false);
 }

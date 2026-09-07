@@ -89,9 +89,18 @@ test('fermentation combines daily measurements and finishing values without a se
   assert.ok(html.indexOf('onclick="addFermentationMeasurement()"')<html.indexOf('id="fm_gravityRows"'));
   assert.ok(html.includes('id="ferm_sortOrder"'));
   assert.ok(html.includes("localStorage.setItem('ferment-fermentation-sort-order'"));
+  const fermentationView=html.split('<div id="viewFermentation" hidden>')[1].split('<div id="viewTanks" hidden>')[0];
+  assert.ok(!fermentationView.includes('id="fermentationTankStatusPanel"'));
+});
+test('tank cleaning is a separate main menu and view',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('data-tab="tanks"'));
+  assert.ok(html.includes('id="viewTanks" hidden'));
   assert.ok(html.includes('id="fermentationTankStatusPanel"'));
   assert.ok(html.includes('id="tankStatusRows"'));
   assert.ok(html.includes('onclick="saveFermentationTankStatus()"'));
+  assert.ok(html.includes("else if(t.dataset.tab==='tanks'){ openTankManagementView(); }"));
+  assert.ok(html.includes("$('viewTanks').hidden = name!=='tanks';"));
 });
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -166,16 +175,16 @@ test('desktop process targets fit the notebook width without horizontal scrollin
   assert.ok(ui.includes("class=\"${fields?'':'target-empty-table-cell'}\""));
   assert.ok(css.includes('.target-process-table td.target-empty-table-cell{vertical-align:middle;text-align:center;}'));
 });
-test('brewing, schedule, fermentation and packaging use wide layout only in their own views',()=>{
+test('brewing, schedule, fermentation, tanks and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  for(const view of ['form','schedule','fermentation','packaging'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
-  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap,body.packaging-wide .wrap{max-width:1400px;}}'));
+  for(const view of ['form','schedule','fermentation','tanks','packaging'])assert.ok(html.includes(`document.body.classList.toggle('${view}-wide',name==='${view}');`));
+  assert.ok(html.includes('@media(min-width:1000px){body.inventory-wide .wrap,body.form-wide .wrap,body.schedule-wide .wrap,body.fermentation-wide .wrap,body.tanks-wide .wrap,body.packaging-wide .wrap{max-width:1400px;}}'));
 });
-test('five core navigation items stay visible and only packaging is optional',()=>{
+test('six core navigation items stay visible and only packaging is optional',()=>{
   const tabs={packaging:{hidden:true}},fields={},store=new Map();let count,redirect;
   const c=vm.createContext({localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},querySelector:s=>tabs[s.match(/data-tab="([^"]+)/)?.[1]],documentElement:{style:{setProperty:(k,v)=>count=v}}},$:id=>fields[id]||(fields[id]={}),currentTab:'inventory',showView:(...a)=>redirect=a});vm.runInContext(source,c);
   assert.equal(c.preferredOptionalNavigation().packaging,false);c.setOptionalNavigation('schedule',true);assert.equal(count,undefined);
-  c.setOptionalNavigation('packaging',true);assert.equal(count,'6');assert.equal(c.preferredOptionalNavigation().packaging,true);c.currentTab='packaging';c.setOptionalNavigation('packaging',false);assert.equal(redirect[0],'inventory');assert.equal(count,'5');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().packaging,false);
+  c.setOptionalNavigation('packaging',true);assert.equal(count,'7');assert.equal(c.preferredOptionalNavigation().packaging,true);c.currentTab='packaging';c.setOptionalNavigation('packaging',false);assert.equal(redirect[0],'inventory');assert.equal(count,'6');store.set('ferment-optional-navigation-v1','bad');assert.equal(c.preferredOptionalNavigation().packaging,false);
 });
 test('obsolete entry-mode preference and controls are removed',()=>{
   assert.ok(!source.includes('ferment-entry-mode-v2'));
