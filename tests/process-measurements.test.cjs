@@ -32,8 +32,9 @@ test('optional correction reasons retain automatic history and existing reasons'
 });
 test('reason field is hidden for new records and shown optionally for corrections',()=>{
   const c=harness();c.computeScheduleSteps=()=>[];c.enhanceNumberInputs=()=>{};c.$('processDialog').showModal=()=>{};c.$('processStage').focus=()=>{};
-  c.openProcessEditor('b');assert.equal(c.$('processReasonField').hidden,true);
-  c.run('batches[0].processMeasurements=[{id:"r",stage:"糖化終了",ph:5.2}]');c.openProcessEditor('b','r');assert.equal(c.$('processReasonField').hidden,false);assert.equal(c.$('processReason').value,'');
+  assert.deepEqual(c.currentProcessTimeValue(new Date(2026,8,7,9,5)),'09:05');
+  c.openProcessEditor('b');assert.equal(c.$('processReasonField').hidden,true);assert.match(c.$('processTime').value,/^\d{2}:\d{2}$/);
+  c.run('batches[0].processMeasurements=[{id:"r",stage:"糖化終了",date:"2026-09-04",time:"",ph:5.2}]');c.openProcessEditor('b','r');assert.equal(c.$('processReasonField').hidden,false);assert.equal(c.$('processReason').value,'');assert.equal(c.$('processTime').value,'');
 });
 test('save is guarded against cancellation, concurrency and storage failure',async()=>{
   for(const mode of ['save','cancel','stale','during','failure']){

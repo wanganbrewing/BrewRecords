@@ -1,4 +1,8 @@
 let processEditor=null,processSaving=false;
+function currentProcessTimeValue(date=new Date()){
+  const pad=value=>String(value).padStart(2,'0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 function processValuesText(row){
   return Object.entries(ProcessMeasurements.fields).filter(([key])=>row[key]!==''&&row[key]!=null).map(([key,f])=>`${f.label}：${row[key]}`).join(' ／ ')||'実測値なし';
 }
@@ -21,7 +25,7 @@ function openProcessEditor(batchId,recordId,presetStage,options={}){
   processEditor={batchId,recordId:recordId||null,before:JSON.stringify(window.fermentCloudData.getSnapshot()),fieldKeys:requested,lockStage:options.lockStage===true};
   $('processReasonField').hidden=!row;
   $('processBatch').textContent=batch.batchName||'名称未設定';$('processError').textContent='';
-  $('processStage').value=row?.stage||presetStage||'';$('processStage').readOnly=processEditor.lockStage;$('processStageLabel').textContent=processEditor.lockStage?'今回の工程':'工程名（選択または直接入力）';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
+  $('processStage').value=row?.stage||presetStage||'';$('processStage').readOnly=processEditor.lockStage;$('processStageLabel').textContent=processEditor.lockStage?'今回の工程':'工程名（選択または直接入力）';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?(row.time||''):currentProcessTimeValue();$('processNote').value=row?.note||'';$('processReason').value='';
   const labels=[...computeScheduleSteps(batch).map(s=>s.label),...(batch.customScheduleSteps||[]).map(s=>s.label),...rows.map(r=>r.stage)].filter(Boolean);
   $('processStages').innerHTML=[...new Set(labels)].map(s=>`<option value="${escapeHtml(s)}"></option>`).join('');
   const visibleFields=Object.entries(ProcessMeasurements.fields).filter(([key])=>row||requested===null||requested.includes(key));
