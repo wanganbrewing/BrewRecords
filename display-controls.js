@@ -25,16 +25,16 @@ function clearRecordFilters(){
 }
 document.addEventListener('DOMContentLoaded',()=>setInventoryMode(preferredInventoryMode(),false));
 function preferredOptionalNavigation(){
-  try{const value=JSON.parse(localStorage.getItem('ferment-optional-navigation-v1')||'{}');return {fermentation:value?.fermentation===true,packaging:value?.packaging===true};}catch(error){return {fermentation:false,packaging:false};}
+  try{const value=JSON.parse(localStorage.getItem('ferment-optional-navigation-v1')||'{}');return {packaging:value?.packaging===true};}catch(error){return {packaging:false};}
 }
 function setOptionalNavigation(name,enabled,remember=true){
-  if(!['fermentation','packaging'].includes(name))return;
+  if(name!=='packaging')return;
   const tab=document.querySelector(`.tab[data-tab="${name}"]`);if(!tab)return;
   tab.hidden=!enabled;
-  const checkbox=$(name==='fermentation'?'showFermentationTab':'showPackagingTab');if(checkbox)checkbox.checked=!!enabled;
-  const settings={fermentation:!document.querySelector('.tab[data-tab="fermentation"]').hidden,packaging:!document.querySelector('.tab[data-tab="packaging"]').hidden};
-  document.documentElement.style.setProperty('--visible-tab-count',String(3+Number(settings.fermentation)+Number(settings.packaging)));
+  const checkbox=$('showPackagingTab');if(checkbox)checkbox.checked=!!enabled;
+  const settings={packaging:!document.querySelector('.tab[data-tab="packaging"]').hidden};
+  document.documentElement.style.setProperty('--visible-tab-count',String(5+Number(settings.packaging)));
   if(remember)try{localStorage.setItem('ferment-optional-navigation-v1',JSON.stringify(settings));}catch(error){}
   if(!enabled&&typeof currentTab!=='undefined'&&currentTab===name)showView('inventory',false);
 }
-document.addEventListener('DOMContentLoaded',()=>{const settings=preferredOptionalNavigation();setOptionalNavigation('fermentation',settings.fermentation,false);setOptionalNavigation('packaging',settings.packaging,false);});
+document.addEventListener('DOMContentLoaded',()=>{const settings=preferredOptionalNavigation();setOptionalNavigation('packaging',settings.packaging,false);});

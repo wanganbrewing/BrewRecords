@@ -11,19 +11,21 @@ function processMeasurementsHtml(batch){
 function renderProcessMeasurements(batch){
   if($('sch_measurements'))$('sch_measurements').innerHTML=processMeasurementsHtml(batch);
 }
-function openProcessEditor(batchId,recordId,presetStage){
+function openProcessEditor(batchId,recordId,presetStage,options={}){
   if(processSaving||$('processDialog').open)return;
   const batch=batches.find(b=>b.id===batchId);if(!batch)return;
   const rows=batch.processMeasurements??[];
   if(!Array.isArray(rows)||rows.some(r=>!r||!r.id)){alert('保存済み実測記録の形式を確認してください。');return;}
   const row=recordId?rows.find(r=>r.id===recordId):null;if(recordId&&!row)return;
-  processEditor={batchId,recordId:recordId||null,before:JSON.stringify(window.fermentCloudData.getSnapshot())};
+  const requested=Array.isArray(options.fieldKeys)?options.fieldKeys.filter(key=>ProcessMeasurements.fields[key]):null;
+  processEditor={batchId,recordId:recordId||null,before:JSON.stringify(window.fermentCloudData.getSnapshot()),fieldKeys:requested,lockStage:options.lockStage===true};
   $('processReasonField').hidden=!row;
   $('processBatch').textContent=batch.batchName||'名称未設定';$('processError').textContent='';
-  $('processStage').value=row?.stage||presetStage||'';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
+  $('processStage').value=row?.stage||presetStage||'';$('processStage').readOnly=processEditor.lockStage;$('processStageLabel').textContent=processEditor.lockStage?'今回の工程':'工程名（選択または直接入力）';$('processDate').value=row?.date||todayDateValue();$('processDate').max=todayDateValue();$('processTime').value=row?.time||'';$('processNote').value=row?.note||'';$('processReason').value='';
   const labels=[...computeScheduleSteps(batch).map(s=>s.label),...(batch.customScheduleSteps||[]).map(s=>s.label),...rows.map(r=>r.stage)].filter(Boolean);
   $('processStages').innerHTML=[...new Set(labels)].map(s=>`<option value="${escapeHtml(s)}"></option>`).join('');
-  $('processFields').innerHTML=Object.entries(ProcessMeasurements.fields).map(([key,f])=>`<div class="field"><label for="pm_${key}">${f.label}（任意）</label><input id="pm_${key}" type="number" min="${f.min}" max="${f.max}" step="${f.step}" value="${escapeHtml(row?.[key]??'')}" placeholder="未入力"></div>`).join('');
+  const visibleFields=Object.entries(ProcessMeasurements.fields).filter(([key])=>row||requested===null||requested.includes(key));
+  $('processFields').innerHTML=visibleFields.length?visibleFields.map(([key,f])=>`<div class="field"><label for="pm_${key}">${f.label}（任意）</label><input id="pm_${key}" type="number" min="${f.min}" max="${f.max}" step="${f.step}" value="${escapeHtml(row?.[key]??'')}" placeholder="未入力"></div>`).join(''):'<p class="sched-note">この工程は測定日時とメモを記録します。</p>';
   enhanceNumberInputs($('processFields'));$('processDialog').showModal();$('processStage').focus();
 }
 function closeProcessEditor(){if(!processSaving)$('processDialog').close();}
@@ -34,7 +36,7 @@ async function saveProcessEditor(){
     const snapshot=()=>JSON.stringify(window.fermentCloudData.getSnapshot());
     if(snapshot()!==state.before)throw Error('入力中にデータが更新されました。閉じてから開き直してください。');
     const batch=batches.find(b=>b.id===state.batchId);if(!batch)throw Error('対象の仕込みが見つかりません。');
-    const input={stage:$('processStage').value,date:$('processDate').value,time:$('processTime').value,note:$('processNote').value,...Object.fromEntries(Object.keys(ProcessMeasurements.fields).map(k=>[k,$('pm_'+k).value]))};
+    const input={stage:$('processStage').value,date:$('processDate').value,time:$('processTime').value,note:$('processNote').value,...Object.fromEntries(Object.keys(ProcessMeasurements.fields).map(k=>[k,$('pm_'+k)?.value||'']))};
     const next=ProcessMeasurements.revise(batch,state.recordId,input,state.recordId?$('processReason').value:'',todayDateValue(),uid(),new Date().toISOString());
     processSaving=true;$('processSave').disabled=true;$('processCancel').disabled=true;
     if(!await confirmDataAction(`${batch.batchName||''}\n${input.stage}\n${input.date} ${input.time}\n${processValuesText(input)}\n\n実測記録を保存します。OG・発酵記録・在庫・タンク残量は自動変更しません。`,'実測記録を保存'))return;
@@ -44,7 +46,7 @@ async function saveProcessEditor(){
     maybeAutoBackup();if(window.fermentCloudSync)window.fermentCloudSync.queueSave();
     $('processDialog').close();
     // Update only the log, preserving unsaved custom schedule rows and timing fields.
-    if(currentScheduleBatch()?.id===next.id)renderProcessMeasurements(next);
+    if(currentScheduleBatch()?.id===next.id){renderProcessMeasurements(next);if(typeof renderBrewProcessView==='function'&&typeof currentTab!=='undefined'&&currentTab==='schedule')renderBrewProcessView(false);}
     if(!$('viewDetail').hidden&&$('viewDetail').dataset.id===next.id)openDetail(next.id);
   }catch(error){$('processError').textContent=error.message;}
   finally{processSaving=false;$('processSave').disabled=false;$('processCancel').disabled=false;}

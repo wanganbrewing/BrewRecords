@@ -113,12 +113,15 @@ test('planned quantity inputs display permanent units for both batches without c
   assert.match(c.targetRowsSection('hop',{}),/重さ（g）/);
   assert.match(c.targetRowsSection('hop',{}),/data-second-brew>2回目の重さ（g）/);
 });
-test('PC target entry uses a merged plan and a process sheet with one save action',()=>{
+test('brewing plan and brewing process are separate main-menu workflows',()=>{
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
-  for(const sheet of ['仕込み計画','仕込み工程・実績'])assert.ok(source.includes(sheet));
-  assert.ok(!source.includes('① 仕込み計画'));
-  assert.ok(!source.includes('② 仕込み工程'));
-  assert.ok(!source.includes('③ 仕込み工程'));
+  assert.ok(source.includes('大メニューの「仕込み工程」'));
+  assert.ok(!source.includes('<nav class="target-sheet-tabs"'));
+  assert.match(html,/data-tab="schedule"[^>]*>仕込み工程</);
+  assert.match(html,/id="brewProcessPlan"/);
+  assert.match(html,/id="brewProcessMobile"/);
+  assert.match(ui,/function saveBrewProcessPlan/);
+  assert.equal(JSON.stringify(c.brewProcessMeasurementKeys({slots:['time','temp','ph','note']})),JSON.stringify(['temperature','ph']));
   assert.match(html,/id="targetSheetApply">保存</);
   assert.doesNotMatch(source,/画面下部の「保存する」で確定/);
   assert.match(c.targetExtra('mashWater2',B.empty()),/data-second-brew/);

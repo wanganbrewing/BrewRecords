@@ -1,4 +1,5 @@
 let brewTargetDraft=null,targetSheetBefore='',targetSheetSnapshot='',targetSheetReadOnly=false,targetSheetDirty=false,targetSheetFocus=null,targetSheetBatchId='',pendingBrewTargetImport=null;
+let brewProcessBatchSnapshot='',brewProcessDirty=false,brewProcessSelectedStep='';
 const TARGET_BINDINGS=[
   ['style','スタイル','text'],['taxCategory','酒税法上の品目区分','text'],['brewDate','仕込み予定日','date'],['brewer','担当者','text'],['batchSize','予定仕込み量','number','L'],
   ['waterVolume','糖化用水 合計（仕込み水量へ連動）','number','L'],['targetOG','目標OG','number','SG'],['actualOG','実測OG（仕込み後）','number','SG'],['mashTemp','目標糖化温度','number','℃'],['mashTime','目標糖化時間','number','分'],['boilTime','目標煮沸時間','number','分'],
@@ -147,12 +148,12 @@ function targetActualSummary(step,b){
   const values=[latest.gravity!==''&&latest.gravity!=null?`比重 ${latest.gravity}`:'',latest.ph!==''&&latest.ph!=null?`pH ${latest.ph}`:'',latest.temperature!==''&&latest.temperature!=null?`温度 ${latest.temperature}℃`:'',latest.volume!==''&&latest.volume!=null?`液量 ${latest.volume}L`:''].filter(Boolean).join(' ／ ');
   return `${latest.date}${latest.time?' '+latest.time:''}　${values||'実測値なし'}`;
 }
-function targetStepActual(step,b){
-  const saved=targetSheetBatchId&&batches.some(batch=>batch.id===targetSheetBatchId);
-  return `<td class="target-mobile-actual" data-label="スマホ現場実績"><span>${targetEsc(saved?targetActualSummary(step,b):'仕込み計画を保存すると入力できます。')}</span>${saved?`<button type="button" class="btn btn-primary" data-target-process-actual="${targetEsc(targetSheetBatchId)}" data-target-process-stage="${targetEsc(step.name)}">この工程の実績を入力</button>`:''}</td>`;
+function targetStepActual(step,b,batchId=targetSheetBatchId){
+  const saved=batchId&&batches.some(batch=>batch.id===batchId);
+  return `<td class="target-mobile-actual" data-label="実績"><span>${targetEsc(saved?targetActualSummary(step,b):'仕込み計画を保存すると入力できます。')}</span>${saved?`<button type="button" class="btn btn-primary" data-target-process-actual="${targetEsc(batchId)}" data-target-process-stage="${targetEsc(step.name)}">この工程の実績を入力</button>`:''}</td>`;
 }
-function targetStepHtml(step,b,index=0){return `<tr class="target-step" data-step="${targetEsc(JSON.stringify(step))}"><td data-label="順番"><span class="target-step-number">${index+1}</span></td><td class="target-step-head" data-label="工程">${targetControl('data-step-name aria-label="工程名"',step.name)}</td>${targetStepGroup(step,['time'],b,'予定時刻')}${targetStepGroup(step,['duration','mashTime','boilTime'],b,'時間')}${targetStepGroup(step,['temp','mashTemp'],b,'温度')}${targetStepGroup(step,['volume'],b,'液量')}${targetStepGroup(step,['gravity','targetOG','plato'],b,'比重・糖度')}${targetStepGroup(step,['ph'],b,'pH')}${targetStepGroup(step,['flow','pressure','note'],b,'条件・備考')}${targetStepActual(step,b)}<td class="target-step-actions" data-label="操作"><button type="button" class="inv-action-btn" data-step-up aria-label="${targetEsc(step.name)}を上へ">↑</button><button type="button" class="inv-action-btn" data-step-down aria-label="${targetEsc(step.name)}を下へ">↓</button><button type="button" class="inv-action-btn" data-remove-target-step aria-label="${targetEsc(step.name)}を削除">削除</button></td></tr>`;}
-function targetProcessSection(p,b){const steps=BrewTargets.expandedSteps(p);return targetSection('工程ごとの目標と実績',`<p class="target-note">PCで目標を設定します。保存後はスマートフォンで各工程のカードから比重・pH・温度・液量の実績を入力できます。</p><div class="target-table-scroll target-process-scroll"><table class="target-process-table"><thead><tr><th>順</th><th>工程</th><th>予定時刻</th><th>時間（分）</th><th>温度（℃）</th><th>液量（L）</th><th>比重・糖度</th><th>pH</th><th>流量・圧力・条件</th><th class="target-mobile-actual">実績</th><th>操作</th></tr></thead><tbody id="targetSteps">${steps.map((s,i)=>targetStepHtml(s,b,i)).join('')}</tbody></table></div><button type="button" class="add-row-btn" data-add-target-step>＋ 工程を追加（デコクション等）</button>`);}
+function targetStepHtml(step,b,index=0,batchId=targetSheetBatchId){return `<tr class="target-step" data-step="${targetEsc(JSON.stringify(step))}"><td data-label="順番"><span class="target-step-number">${index+1}</span></td><td class="target-step-head" data-label="工程">${targetControl('data-step-name aria-label="工程名"',step.name)}</td>${targetStepGroup(step,['time'],b,'予定時刻')}${targetStepGroup(step,['duration','mashTime','boilTime'],b,'時間')}${targetStepGroup(step,['temp','mashTemp'],b,'温度')}${targetStepGroup(step,['volume'],b,'液量')}${targetStepGroup(step,['gravity','targetOG','plato'],b,'比重・糖度')}${targetStepGroup(step,['ph'],b,'pH')}${targetStepGroup(step,['flow','pressure','note'],b,'条件・備考')}${targetStepActual(step,b,batchId)}<td class="target-step-actions" data-label="操作"><button type="button" class="inv-action-btn" data-step-up aria-label="${targetEsc(step.name)}を上へ">↑</button><button type="button" class="inv-action-btn" data-step-down aria-label="${targetEsc(step.name)}を下へ">↓</button><button type="button" class="inv-action-btn" data-remove-target-step aria-label="${targetEsc(step.name)}を削除">削除</button></td></tr>`;}
+function targetProcessSection(p,b,options={}){const steps=BrewTargets.expandedSteps(p),containerId=options.containerId||'targetSteps',batchId=options.batchId??targetSheetBatchId;return targetSection('工程ごとの目標と実績',`<p class="target-note">PCで工程全体の目標を設定します。現場では「仕込み工程」メニューから今回の工程だけを選んで実績を入力できます。</p><div class="target-table-scroll target-process-scroll"><table class="target-process-table"><thead><tr><th>順</th><th>工程</th><th>予定時刻</th><th>時間（分）</th><th>温度（℃）</th><th>液量（L）</th><th>比重・糖度</th><th>pH</th><th>流量・圧力・条件</th><th class="target-mobile-actual">最新実績</th><th>操作</th></tr></thead><tbody id="${targetEsc(containerId)}">${steps.map((s,i)=>targetStepHtml(s,b,i,batchId)).join('')}</tbody></table></div><button type="button" class="add-row-btn" data-add-target-step>＋ 工程を追加（デコクション等）</button>`);}
 function renderBrewTargetSheet(b){
   const p=BrewTargets.waterPlan(b.brewTargets,b.waterVolume);
   const extra=keys=>`<div class="target-field-grid">${keys.map(k=>targetExtra(k,p)).join('')}</div>`;
@@ -162,14 +163,13 @@ function renderBrewTargetSheet(b){
   const actualAbv=computedAbv(b.actualOG,b.fg);
   const results=targetSection('スタイル・目標・実績',`${targetStyleField(b)}<p class="target-note">上の参考範囲を見ながら、今回の仕込み目標を設定します。参考値が入力欄へ自動転記されることはありません。</p><div class="target-goal-actual"><div class="target-result-card"><h4>今回の目標</h4><div class="target-field-grid">${targetBound('targetOG',b)}${targetExtra('targetFG',p)}${targetAbvField(p)}${targetIbuField(p)}${targetSrmField(p)}</div></div><div class="target-result-card"><h4>実績</h4><div class="target-field-grid">${targetBound('actualOG',b)}${targetActualReference('実測FG',b.fg,'発酵管理の最新値')}${targetActualReference('実績ABV（%・自動計算）',actualAbv,'実測OGと実測FGから算出')}</div><p class="target-note">仕込み前は空欄でかまいません。実測値は目標仕込み表のExcelには書き出しません。</p></div></div>`);
   const hasSecond=p.fields.doubleBrew===true||['mashWater2','spargeWater2'].some(k=>p.fields[k]!==''&&p.fields[k]!=null)||Object.values(BrewTargets.rowTypes).some(([key])=>(b[key]||[]).some(r=>r.targetMeta?.batch2!==''&&r.targetMeta?.batch2!=null));
-  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">基本情報・原材料・水量と、仕込み工程の目標／実績を1つの仕込み表で管理します。</p><nav class="target-sheet-tabs" role="tablist" aria-label="仕込み内容の切り替え"><button type="button" role="tab" data-target-sheet-tab="basic">仕込み計画</button><button type="button" role="tab" data-target-sheet-tab="process">仕込み工程・実績</button></nav><div class="target-plan-status" id="targetPlanSummary" role="status"></div><div class="target-sheet-panes"><div data-target-sheet-pane="basic"><div class="target-basic-grid"><div class="target-basic-wide">${results}</div><div>${identities}</div><div><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、1回分の重さだけ入力します。</span></div>${water}</div></div>${targetRowsSection('fermentable',b)}${targetRowsSection('hop',b)}${yeast}${targetRowsSection('adjunct',b)}</div><div data-target-sheet-pane="process">${targetProcessSection(p,b)}</div></div>`;
+  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">ここでは基本情報・原材料・水量を入力します。工程ごとの目標と実績は、保存後に大メニューの「仕込み工程」で管理します。</p><div class="target-plan-status" id="targetPlanSummary" role="status"></div><div class="target-basic-grid"><div class="target-basic-wide">${results}</div><div>${identities}</div><div><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、1回分の重さだけ入力します。</span></div>${water}</div></div>${targetRowsSection('fermentable',b)}${targetRowsSection('hop',b)}${yeast}${targetRowsSection('adjunct',b)}</div>`;
   document.getElementById('targetSheetTitle').textContent=targetSheetReadOnly?'仕込み計画（保存済み）':'仕込み計画';
   document.getElementById('targetSheetApply').hidden=targetSheetReadOnly;
-  document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの仕込み計画です。スマートフォンでは工程カードから実績を入力できます。':'2つのシートの入力内容をまとめて保存します。';
+  document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの仕込み計画です。工程は大メニューの「仕込み工程」で確認できます。':'入力した仕込み計画を保存します。';
   if(targetSheetReadOnly)document.querySelectorAll('#targetSheetBody input,#targetSheetBody select,#targetSheetBody button:not([data-target-sheet-tab]):not([data-target-process-actual])').forEach(e=>{e.disabled=true;if(e.tagName==='BUTTON')e.hidden=true;else if(e.tagName==='INPUT'&&!e.value)e.placeholder='未設定';});
   updateTargetSheetTotals();
   updateTargetStyleReference();
-  selectTargetSheet('basic',false);
   updateSecondBrewView();
   document.getElementById('targetSheetBody').scrollTop=0;
 }
@@ -242,15 +242,17 @@ function readTargetPlan(){
   const original=JSON.parse(targetSheetBefore),p=BrewTargets.normalize(original.brewTargets);
   document.querySelectorAll('#targetSheetBody [data-extra]').forEach(e=>p.fields[e.dataset.extra]=e.value);
   p.fields.doubleBrew=document.getElementById('targetDoubleBrew')?.checked===true;
-  p.steps=[...document.querySelectorAll('#targetSteps [data-step]')].map(el=>{
-    const s=JSON.parse(el.dataset.step);s.name=el.querySelector('[data-step-name]').value;
-    el.querySelectorAll('[data-metric]').forEach(e=>s.values[e.dataset.metric]=e.value);
-    el.querySelectorAll('[data-compare]').forEach(e=>s.comparisons[e.dataset.compare]=e.value);
-    const unit=el.querySelector('[data-gravity-unit]');if(unit)s.gravityUnit=unit.value;
-    return s;
-  });
+  const rows=[...document.querySelectorAll('#targetSteps [data-step]')];
+  if(rows.length)p.steps=readTargetStepRows(rows);
   return BrewTargets.normalize(p);
 }
+function readTargetStepRows(rows){return rows.map(el=>{
+  const s=JSON.parse(el.dataset.step);s.name=el.querySelector('[data-step-name]').value;
+  el.querySelectorAll('[data-metric]').forEach(e=>s.values[e.dataset.metric]=e.value);
+  el.querySelectorAll('[data-compare]').forEach(e=>s.comparisons[e.dataset.compare]=e.value);
+  const unit=el.querySelector('[data-gravity-unit]');if(unit)s.gravityUnit=unit.value;
+  return s;
+});}
 function readBrewTargetSheetBatch(){
   const original=JSON.parse(targetSheetBefore),p=readTargetPlan(),bounds={};
   document.querySelectorAll('#targetSheetBody [data-bound]').forEach(e=>{
@@ -373,8 +375,67 @@ function updateTargetSheetTotals(){
   const mashTotal=document.getElementById('target-bound-waterVolume');if(mashTotal)try{mashTotal.value=BrewTargets.sum(BrewTargets.numeric(water[0],'糖化用水'),BrewTargets.numeric(water[1],'糖化用水'));}catch(e){mashTotal.value='';}
   const out=document.getElementById('target-water-total');if(out)try{out.textContent=water.every(v=>v==='')?'予定総水量 未設定':'予定総水量 '+water.map(v=>Number(BrewTargets.numeric(v,'水量'))).reduce((a,b)=>a+b,0).toFixed(2)+' L（糖化用水＋スパージ水）';}catch(e){out.textContent='水量を確認してください。';}
   updateTargetIbu();
-  const summary=document.getElementById('targetPlanSummary');if(summary){const batch=document.getElementById('f_batchName')?.value.trim(),materials=[...document.querySelectorAll('[data-target-row] [data-row=name]')].filter(e=>e.value.trim()).length,goals=[...document.querySelectorAll('#targetSteps [data-metric]')].filter(e=>e.value!==''),filledSteps=new Set(goals.map(e=>e.closest('[data-step]'))).size;summary.textContent=`バッチ名：${batch?'入力済み':'未入力'}　原材料：${materials}品目　目標入力済み工程：${filledSteps}件`;}
+  const summary=document.getElementById('targetPlanSummary');if(summary){const batch=document.getElementById('f_batchName')?.value.trim(),materials=[...document.querySelectorAll('[data-target-row] [data-row=name]')].filter(e=>e.value.trim()).length;summary.textContent=`バッチ名：${batch?'入力済み':'未入力'}　原材料：${materials}品目　仕込み工程は保存後に大メニューで設定`;}
   updateTargetMineralSummary();
+}
+function brewProcessMeasurementKeys(step){
+  const map={gravity:'gravity',targetOG:'gravity',plato:'gravity',ph:'ph',temp:'temperature',mashTemp:'temperature',volume:'volume'};
+  return [...new Set((step?.slots||[]).map(key=>map[key]).filter(Boolean))];
+}
+function brewProcessTargetSummary(step,b){
+  const values=[];
+  for(const key of step.slots||[]){
+    const metric=BrewTargets.metrics[key];if(!metric)continue;
+    const raw=metric[2]==='bound'?b[key]:step.values?.[key];if(raw==null||raw==='')continue;
+    const compare=step.comparisons?.[key]&&step.comparisons[key]!=='='?step.comparisons[key]+' ':'';
+    values.push(`${metric[0]} ${compare}${raw}${metric[1]?metric[1]:''}`);
+  }
+  return values.join(' ／ ')||'目標値は未入力です。';
+}
+function selectedBrewProcessStep(b,p){
+  const steps=BrewTargets.expandedSteps(p),selected=steps.find(step=>step.id===brewProcessSelectedStep);
+  if(selected)return selected;
+  const incomplete=steps.find(step=>!(b.processMeasurements||[]).some(row=>row.stage===step.name));
+  return incomplete||steps[steps.length-1]||null;
+}
+function renderBrewProcessMobile(b,p){
+  const host=document.getElementById('brewProcessMobile');if(!host)return;
+  const steps=BrewTargets.expandedSteps(p),selected=selectedBrewProcessStep(b,p);
+  if(!selected){host.innerHTML='<p>工程がありません。</p>';return;}
+  brewProcessSelectedStep=selected.id;
+  const measured=new Set((b.processMeasurements||[]).map(row=>row.stage)),keys=brewProcessMeasurementKeys(selected);
+  host.innerHTML=`<div class="section-title" id="brewProcessMobileTitle">今回の工程を入力</div><div class="field"><label for="brewProcessStepSelect">今回入力する工程</label><select id="brewProcessStepSelect">${steps.map((step,index)=>`<option value="${targetEsc(step.id)}" ${step.id===selected.id?'selected':''}>${index+1}. ${targetEsc(step.name)}${measured.has(step.name)?'（実績あり）':''}</option>`).join('')}</select></div><article class="brew-process-current-card"><div class="brew-process-current-head"><span>今回の入力対象</span><strong>${targetEsc(selected.name)}</strong></div><dl><div><dt>目標</dt><dd>${targetEsc(brewProcessTargetSummary(selected,b))}</dd></div><div><dt>最新実績</dt><dd>${targetEsc(targetActualSummary(selected,b))}</dd></div></dl><p>${keys.length?keys.map(key=>ProcessMeasurements.fields[key].label).join('・')+'と測定日時だけを入力します。':'この工程は測定日時とメモだけを入力します。'}</p><button type="button" class="btn btn-primary" id="brewProcessActualButton">この工程の実績を入力</button></article>`;
+}
+function renderBrewProcessView(rememberSelection=false){
+  const b=typeof currentScheduleBatch==='function'?currentScheduleBatch():null;if(!b)return;
+  if(rememberSelection){brewProcessSelectedStep='';if(typeof rememberSelectedBatch==='function')rememberSelectedBatch(b.id);}
+  const p=BrewTargets.normalize(b.brewTargets||BrewTargets.empty()),host=document.getElementById('brewProcessPlan');
+  if(host){host.innerHTML=targetProcessSection(p,b,{containerId:'brewProcessSteps',batchId:b.id});enhanceNumberInputs(host);ensureAccessibleLabels(host);}
+  renderBrewProcessMobile(b,p);brewProcessBatchSnapshot=JSON.stringify(b);brewProcessDirty=false;
+  const status=document.getElementById('brewProcessStatus');if(status){status.textContent='';status.hidden=true;}
+}
+function markBrewProcessDirty(){
+  brewProcessDirty=true;const status=document.getElementById('brewProcessStatus');if(status){status.textContent='未保存の工程目標があります。';status.hidden=false;}
+}
+function openBrewProcessActual(stepId=brewProcessSelectedStep){
+  if(brewProcessDirty){alert('先に工程目標を保存してください。');return;}
+  const b=typeof currentScheduleBatch==='function'?currentScheduleBatch():null;if(!b)return;
+  const p=BrewTargets.normalize(b.brewTargets||BrewTargets.empty()),step=BrewTargets.expandedSteps(p).find(item=>item.id===stepId||item.name===stepId);if(!step)return;
+  brewProcessSelectedStep=step.id;
+  openProcessEditor(b.id,null,step.name,{fieldKeys:brewProcessMeasurementKeys(step),lockStage:true});
+}
+async function saveBrewProcessPlan(){
+  const b=typeof currentScheduleBatch==='function'?currentScheduleBatch():null,status=document.getElementById('brewProcessStatus'),button=document.getElementById('brewProcessSave');if(!b)return;
+  try{
+    if(JSON.stringify(b)!==brewProcessBatchSnapshot)throw Error('対象の仕込みが別の画面で更新されました。工程画面を開き直してください。');
+    const rows=[...document.querySelectorAll('#brewProcessSteps [data-step]')],p=BrewTargets.normalize(b.brewTargets||BrewTargets.empty());p.steps=readTargetStepRows(rows);
+    const bounds={};document.querySelectorAll('#brewProcessPlan [data-bound]').forEach(control=>{const def=TARGET_BINDINGS.find(item=>item[0]===control.dataset.bound);if(!def||def[2]!=='number'||control.disabled)return;const range=TARGET_RANGES[def[0]]||[0,1e9];bounds[def[0]]=BrewTargets.numeric(control.value,def[1],range[0],range[1]);});
+    const next={...b,...bounds,brewTargets:BrewTargets.normalize(p)},index=batches.findIndex(batch=>batch.id===b.id),previous=batches[index];
+    button.disabled=true;button.textContent='保存中…';batches[index]=next;
+    try{await persist();}catch(error){batches[index]=previous;throw error;}
+    renderList();renderGauge();renderBrewProcessView(false);if(status){status.textContent='工程目標を保存しました。';status.hidden=false;}
+  }catch(error){if(status){status.textContent=error.message;status.hidden=false;}else alert(error.message);}
+  finally{button.disabled=false;button.textContent='工程目標を保存';}
 }
 document.addEventListener('DOMContentLoaded',()=>{
   const dialog=document.getElementById('targetSheetDialog'),importDialog=document.getElementById('targetExcelImportDialog'),body=document.getElementById('targetSheetBody');
@@ -406,4 +467,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(button.hasAttribute('data-step-up')||button.hasAttribute('data-step-down')){const step=button.closest('[data-step]');if(button.hasAttribute('data-step-up')&&step.previousElementSibling)step.previousElementSibling.before(step);else if(button.hasAttribute('data-step-down')&&step.nextElementSibling)step.nextElementSibling.after(step);[...document.querySelectorAll('#targetSteps .target-step-number')].forEach((e,i)=>e.textContent=i+1);targetSheetDirty=true;button.focus();}
     updateTargetSheetTotals();
   });
+  const processPlan=document.getElementById('brewProcessPlan'),processMobile=document.getElementById('brewProcessMobile');
+  processPlan?.addEventListener('input',markBrewProcessDirty);
+  processPlan?.addEventListener('change',markBrewProcessDirty);
+  processPlan?.addEventListener('click',e=>{
+    const button=e.target.closest('button');if(!button)return;
+    if(button.hasAttribute('data-target-process-actual')){openBrewProcessActual(button.dataset.targetProcessStage);return;}
+    const container=document.getElementById('brewProcessSteps');
+    if(button.hasAttribute('data-add-target-step')){if(container.children.length>=100){alert('工程は100行以内です。');return;}container.insertAdjacentHTML('beforeend',targetStepHtml({id:uid(),name:'追加工程',slots:['time','duration','temp','gravity','ph','volume','note'],values:{},gravityUnit:'SG',comparisons:{}},container.children.length,currentScheduleBatch()?.id||''));markBrewProcessDirty();enhanceNumberInputs(container);return;}
+    if(button.hasAttribute('data-remove-target-step')){if(!confirm('この工程を仕込み計画から削除しますか？'))return;button.closest('[data-step]').remove();markBrewProcessDirty();return;}
+    if(button.hasAttribute('data-step-up')||button.hasAttribute('data-step-down')){const step=button.closest('[data-step]');if(button.hasAttribute('data-step-up')&&step.previousElementSibling)step.previousElementSibling.before(step);else if(button.hasAttribute('data-step-down')&&step.nextElementSibling)step.nextElementSibling.after(step);[...container.querySelectorAll('.target-step-number')].forEach((number,index)=>number.textContent=index+1);markBrewProcessDirty();button.focus();}
+  });
+  processMobile?.addEventListener('change',e=>{if(e.target.id==='brewProcessStepSelect'){brewProcessSelectedStep=e.target.value;const b=currentScheduleBatch();if(b)renderBrewProcessMobile(b,BrewTargets.normalize(b.brewTargets||BrewTargets.empty()));}});
+  processMobile?.addEventListener('click',e=>{if(e.target.closest('#brewProcessActualButton'))openBrewProcessActual();});
 });

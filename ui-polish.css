@@ -52,7 +52,7 @@ summary.section-title::after{min-width:56px;padding-left:12px;border-left:1px so
 .sync-status-badge{font-size:.8rem;}
 @media(max-width:700px){
   .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom));}
-  .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:100;display:grid;grid-template-columns:repeat(var(--visible-tab-count,3),minmax(0,1fr));gap:2px;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-width:1px 0 0;border-radius:0;background:var(--bg);}
+  .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:100;display:grid;grid-template-columns:repeat(var(--visible-tab-count,5),minmax(0,1fr));gap:2px;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-width:1px 0 0;border-radius:0;background:var(--bg);}
   .tab{min-height:60px;min-width:0;padding:6px 2px;font-size:.75rem;line-height:1.3;display:flex;flex-direction:column;gap:4px;white-space:normal;overflow-wrap:anywhere;}
   .tab::before{font-size:1.25rem;line-height:1;}
   .tab[data-tab="inventory"]::before{content:"▦";}.tab[data-tab="new"]::before{content:"＋";}.tab[data-tab="list"]::before{content:"▤";}.tab[data-tab="schedule"]::before{content:"◷";}.tab[data-tab="fermentation"]::before{content:"◉";}.tab[data-tab="packaging"]::before{content:"▣";}

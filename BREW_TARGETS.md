@@ -1,6 +1,6 @@
-# Unified brew plan — v97
+# Brew plan and process workflow — v98
 
-Entry: 仕込み → バッチ名 → 仕込み計画を入力. Desktop uses two spreadsheet-style views: a merged plan (identity, targets, yeast, materials and water volume) and process targets. Smaller screens expose the same plan fields as cards. Each saved process card offers a direct action to add actual gravity, pH, temperature and volume. The former 仕込み時間割 navigation is removed. The hamburger menu exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
+Entry: 仕込み → バッチ名 → 仕込み計画を入力. The plan contains identity, targets, yeast, materials and water volume. Process targets and process actuals live in a separate top-level 仕込み工程 screen. Desktop shows the full process table. Mobile selects one current step and exposes only the actual fields relevant to that step. The hamburger menu exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
 
 ## Data and boundaries
 
@@ -13,12 +13,12 @@ Entry: 仕込み → バッチ名 → 仕込み計画を入力. Desktop uses two
 - Actual OG is clearly separated as post-brew data and excluded from Excel export/import. Process actuals are stored in the existing measurement audit log. Fermentation, shipments and stock consumption are not changed by applying an imported plan.
 - Style is selectable or free-entry. A bundled copy of the Japan Craft Beer Association April 2024 guide shows reference OG, FG, ABV, IBU and SRM in a non-input reference band without repeating the selected name or overwriting targets. Tax category is selection-only; tanks offer FV1–FV8 plus free entry. Target ABV is always recalculated from target OG/FG. Target SRM offers SRM 1–40 plus free entry.
 - Yeast and yeast source are selectable or free-entry. Yeast quantity is fixed to grams in this surface. Batch icon, target cost/loss, pitch-rate controls, yeast generation, source-water/pH calculation and planned mineral-additive rows are not shown.
-- Saved record details offer a read-only plan whose two tabs remain navigable. Backup and cloud snapshots retain the current batch. Brewing CSV includes target-sheet and process-measurement JSON columns. All editing devices must use v97 or later.
+- Saved record details offer a read-only plan. Backup and cloud snapshots retain the current batch, process targets and audited process actuals. Brewing CSV includes target-sheet and process-measurement JSON columns. All editing devices must use v98 or later.
 - Excel import is preview-first and creates a new unsaved draft. It never imports actual measurements, fermentation logs, packages, expenses, inventory-consumption state or the source record ID. Inventory IDs in the workbook are informational; current inventory is linked only after an unambiguous category/name match (and unit match where required). Unmatched items remain unlinked and appear in the preview warning.
 
 ## Verification
 
-- Automated tests cover blank/zero, numeric bounds, invalid pH/SG, dates/times, schema and duplicates, optional second-brew quantities, custom steps, escaping, stale apply, actual-value preservation, the two-sheet UI, four-sheet XLSX round trips, safe new-draft imports, inventory reconciliation, the 181-style guide and offline assets.
-- Isolated browser UAT at desktop width covers the two sheets, official style references, automatic target ABV, tax/tank/SRM selection, three-column material cards, the 41 process targets and their latest-actual column.
-- Mobile-width 390×844 confirms that the same fields are presented as cards. Every saved process target provides a direct action that opens the actual SG, pH, temperature and volume editor with the process name prefilled. This is browser viewport testing, not physical iPhone testing.
+- Automated tests cover blank/zero, numeric bounds, invalid pH/SG, dates/times, schema and duplicates, optional second-brew quantities, custom steps, escaping, stale apply, actual-value preservation, the separate process screen, field-limited mobile actual entry, four-sheet XLSX round trips, safe new-draft imports, inventory reconciliation, the 181-style guide and offline assets.
+- Isolated browser UAT at desktop width covers the plan, official style references, the full process target table and its latest-actual column.
+- Mobile-width 390×844 confirms that the process screen shows one selected step, its targets and latest actual, then opens only the applicable actual fields with the stage locked. This is browser viewport testing, not physical iPhone testing.
 - Production user records were not used for write tests. Test entries were confined to local demo origins.

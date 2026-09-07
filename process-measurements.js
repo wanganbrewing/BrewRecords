@@ -16,7 +16,7 @@
       if(!Number.isFinite(value)||value<config.min||value>config.max||Math.abs(value*scale-Math.round(value*scale))>0.00001)throw Error(`${config.label}は${config.min}〜${config.max}、小数第${config.digits}位までで入力してください。`);
       result[key]=value;entered=true;
     }
-    if(!entered)throw Error('比重・pH・温度・液量のいずれかを入力してください。');
+    if(!entered&&!time&&!note)throw Error('実績時刻、比重、pH、温度、液量、メモのいずれかを入力してください。');
     return result;
   }
   function revise(batch,recordId,input,reason,today,id,recordedAt){

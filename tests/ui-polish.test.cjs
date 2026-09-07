@@ -68,7 +68,7 @@ test('home screen name matches app, version remains visible and safety notes rem
   const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),manifest=JSON.parse(fs.readFileSync(path.join(dir,'manifest.webmanifest'),'utf8'));
   assert.equal(manifest.name,manifest.short_name);assert.ok(html.includes(`name="apple-mobile-web-app-title" content="${manifest.name}"`));
   assert.match(html,/<span class="app-version" id="appVersion"/);assert.match(html,/id="menuReleaseNote"/);
-  assert.match(html,/予定（時刻）/);assert.match(html,/実測（比重・pH・温度・液量）/);
+  assert.match(html,/今回入力する工程/);assert.match(html,/工程目標を保存/);
   assert.match(html,/仕込みを保存するだけでは減りません/);assert.match(html,/会計・申告用の確定額ではありません/);
   const openDetails=html.match(/<details[^>]*\sopen(?:[\s>])/g)||[];
   assert.equal(openDetails.length,4);assert.ok(openDetails.every(tag=>tag.includes('class="inventory-group"')));

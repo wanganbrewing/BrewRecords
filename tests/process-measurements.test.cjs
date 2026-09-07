@@ -8,7 +8,8 @@ test('measurements distinguish empty fields from zero and accept independent obs
 });
 test('validates dates, time, precision and ranges without inventing missing measurements',()=>{
   for(const change of [{stage:''},{date:''},{date:'2026-02-30'},{date:'2026-09-05'},{time:'25:00'},{gravity:0},{gravity:1.999},{gravity:1.0001},{ph:14.01},{temperature:-11},{volume:-1},{volume:0.0001},{ph:'NaN'},{volume:Infinity},{note:'x'.repeat(301)}])assert.throws(()=>P.normalize({...sample(),...change},'2026-09-04'));
-  assert.throws(()=>P.normalize({...sample(),gravity:'',ph:'',temperature:'',volume:''},'2026-09-04'));
+  assert.throws(()=>P.normalize({...sample(),time:'',note:'',gravity:'',ph:'',temperature:'',volume:''},'2026-09-04'));
+  assert.equal(P.normalize({...sample(),note:'',gravity:'',ph:'',temperature:'',volume:''},'2026-09-04').time,'10:30');
   assert.equal(P.normalize({...sample(),time:''},'2026-09-04').time,'');
 });
 test('correction preserves ID and immutable before/after history; safeguards malformed and stale selections',()=>{
