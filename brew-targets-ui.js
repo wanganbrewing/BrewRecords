@@ -166,7 +166,7 @@ function targetMetricHtml(step,key,b){
   const compare=m[2]==='number'&&['gravity','ph','volume'].includes(key)?`<select data-compare="${key}" aria-label="${prefix}の条件">${['=','<','<=','>','>='].map(op=>`<option value="${targetEsc(op)}" ${op===(step.comparisons?.[key]||'=')?'selected':''}>${targetEsc(op)}</option>`).join('')}</select>`:'';
   return `<div class="target-field"><label>${label}</label><div class="target-metric-input">${compare}${targetControl(`data-metric="${key}" aria-label="${prefix}"`,val,m[2])}${key==='gravity'?`<select data-gravity-unit aria-label="${prefix}の単位"><option ${step.gravityUnit==='SG'?'selected':''}>SG</option><option ${step.gravityUnit==='°P'?'selected':''}>°P</option></select>`:''}</div></div>`;
 }
-function targetStepGroup(step,keys,b,label){const fields=keys.filter(k=>step.slots.includes(k)).map(k=>targetMetricHtml(step,k,b)).join('');return `<td data-label="${label}">${fields||'<span class="target-empty-cell">—</span>'}</td>`;}
+function targetStepGroup(step,keys,b,label){const fields=keys.filter(k=>step.slots.includes(k)).map(k=>targetMetricHtml(step,k,b)).join('');return `<td class="${fields?'':'target-empty-table-cell'}" data-label="${label}">${fields||'<span class="target-empty-cell">—</span>'}</td>`;}
 function targetActualSummary(step,b){
   const rows=(b.processMeasurements||[]).filter(row=>row.stage===step.name).sort((a,z)=>(a.date+' '+(a.time||'')).localeCompare(z.date+' '+(z.time||''))),latest=rows[rows.length-1];
   if(!latest)return 'まだ実績はありません。';
