@@ -155,6 +155,16 @@ test('selection helpers keep reference values separate and calculate target ABV'
   assert.match(c.targetRowHtml('hop',{name:'Cascade',targetMeta:{}},0),/data-label="α酸（%）"/);
   assert.match(ui,/スタイルガイド参考値（入力値ではありません）/);assert.doesNotMatch(ui,/\$\{targetEsc\(style\.id\)\} \$\{targetEsc\(style\.name\)\}/);
 });
+test('style selection retains entered targets and reset is a separate confirmed action',()=>{
+  const c=context(),styleInput={value:'自由入力',hidden:false},og={value:'1.050'},fg={value:'1.010'},srm={value:'8'},preset={value:'ピルスナー'},reference={};
+  c.document.querySelector=selector=>selector.includes('[data-bound="style"]')?styleInput:null;
+  c.syncTargetChoice({dataset:{targetChoice:'style'},value:'ピルスナー',options:[]});
+  assert.equal(styleInput.value,'ピルスナー');assert.equal(og.value,'1.050');assert.equal(fg.value,'1.010');assert.equal(srm.value,'8');
+  const elements={'target-bound-style-preset':preset,'target-bound-style':styleInput,'target-bound-targetOG':og,'target-extra-targetFG':fg,'target-extra-targetSRM':srm,targetStyleReference:reference};
+  c.document.getElementById=id=>elements[id];c.confirm=()=>true;c.updateTargetSheetTotals=()=>{};c.BEER_STYLE_GUIDE=[];
+  assert.equal(c.resetTargetStyleTargets(),true);assert.equal(preset.value,'');assert.equal(styleInput.value,'');assert.equal(styleInput.hidden,true);assert.equal(og.value,'');assert.equal(fg.value,'');assert.equal(srm.value,'');
+  assert.match(c.targetStyleField({style:''}),/data-reset-style-targets>スタイル・目標値をリセット/);
+});
 test('adjunct quantities use a fixed gram weight without a separate unit input',()=>{
   const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 重さ'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 2回目の重さ'},setAttribute(k,v){this[k]=v;}}];
   const row={querySelectorAll:s=>s==='[data-quantity-unit]'?badges:inputs};

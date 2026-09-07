@@ -55,7 +55,7 @@ function targetChoiceField(key,label,value,choices,scope='bound',type='text'){
   const id=`target-${scope}-${key}`,preset=`${id}-preset`,options=choices.filter(Boolean).map(choice=>Array.isArray(choice)?{value:String(choice[0]),label:String(choice[1])}:{value:String(choice),label:String(choice)}),hasPreset=options.some(option=>option.value===String(value??''));
   return `<div class="target-field target-choice-field"><label for="${preset}">${targetEsc(label)}（選択・自由入力）</label><select id="${preset}" data-target-choice="${key}"><option value="" ${!value?'selected':''}>一覧から選ぶ</option>${options.map(option=>`<option value="${targetEsc(option.value)}" ${option.value===String(value??'')?'selected':''}>${targetEsc(option.label)}</option>`).join('')}<option value="__custom__" ${value&&!hasPreset?'selected':''}>自由入力</option></select>${targetControl(`id="${id}" class="target-choice-custom" data-${scope}="${key}" aria-label="${targetEsc(label)}の自由入力" placeholder="一覧にない場合は入力" ${hasPreset||!value?'hidden':''}`,value,type)}</div>`;
 }
-function targetStyleField(b){return targetChoiceField('style','スタイル名',b.style||'',(globalThis.BEER_STYLE_GUIDE||[]).map(style=>style.name))+'<div class="style-reference" id="targetStyleReference" aria-live="polite"></div>';}
+function targetStyleField(b){return `<div class="target-style-controls">${targetChoiceField('style','スタイル名',b.style||'',(globalThis.BEER_STYLE_GUIDE||[]).map(style=>style.name))}<button type="button" class="inv-action-btn" data-reset-style-targets>スタイル・目標値をリセット</button></div><div class="style-reference" id="targetStyleReference" aria-live="polite"></div>`;}
 function targetYeastField(b){return targetChoiceField('yeast','酵母',b.yeast||'',TARGET_YEAST_CHOICES);}
 function targetTaxField(b){return targetSelectBound('taxCategory','酒税法上の品目区分',b.taxCategory||'',[['','選択してください'],...TARGET_TAX_CHOICES.map(value=>[value,value])]);}
 function targetTankField(p){return targetChoiceField('tank','使用予定タンク',p.fields.tank||'',TARGET_TANK_CHOICES,'extra');}
@@ -98,6 +98,13 @@ function updateTargetStyleReference(){
   const style=findStyleGuide(input.value);if(!style){output.innerHTML=input.value.trim()?'<strong>自由入力のスタイル</strong><span>公式参考値は表示されません。OG・FG・ABV・IBU・SRMは下の目標欄へ直接入力してください。</span>':'<strong>スタイルを選ぶと参考値を表示します</strong><span>日本地ビール協会の2024年4月ガイドラインを参照します。</span>';return;}
   const metric=(label,value)=>`<div><span>${label}</span><strong>${targetEsc(value||'規定なし')}</strong></div>`;
   output.innerHTML=`<p><strong>スタイルガイド参考値（入力値ではありません）</strong><a href="${targetEsc(style.url)}" target="_blank" rel="noopener">基準を見る ↗</a></p><div class="style-reference-grid">${metric('OG',style.og)}${metric('FG',style.fg)}${metric('ABV',style.abv)}${metric('IBU',style.ibu)}${metric('SRM',style.srm)}</div><small>入力枠とは連携せず、選んだスタイルの参考範囲だけを表示しています。</small>`;
+}
+function resetTargetStyleTargets(){
+  if(!confirm('スタイル名と目標OG・FG・SRMを空欄に戻しますか？ 原材料や実績など、ほかの入力内容は残ります。'))return false;
+  const preset=document.getElementById('target-bound-style-preset'),style=document.getElementById('target-bound-style');
+  if(preset)preset.value='';if(style){style.value='';style.hidden=true;}
+  for(const id of ['target-bound-targetOG','target-extra-targetFG','target-extra-targetSRM']){const input=document.getElementById(id);if(input)input.value='';}
+  targetSheetDirty=true;updateTargetStyleReference();updateTargetSheetTotals();return true;
 }
 function targetOptions(type,selected){
   const list=type==='mineral'?[]:inventory.filter(i=>i.category===type);
@@ -458,6 +465,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const button=e.target.closest('button');if(!button)return;
     if(button.hasAttribute('data-target-sheet-tab')){selectTargetSheet(button.dataset.targetSheetTab);return;}
     if(button.hasAttribute('data-auto-batch-number')){document.getElementById('target-extra-batchNumber').value=suggestedBatchNumber();targetSheetDirty=true;updateTargetSheetTotals();return;}
+    if(button.hasAttribute('data-reset-style-targets')){resetTargetStyleTargets();return;}
     if(button.hasAttribute('data-target-process-actual')){if(targetSheetDirty){alert('先に仕込み計画を保存してください。');return;}const batchId=button.dataset.targetProcessActual,stage=button.dataset.targetProcessStage;if(document.getElementById('targetSheetDialog').open)document.getElementById('targetSheetDialog').close();openProcessEditor(batchId,null,stage);return;}
     if(targetSheetReadOnly)return;
     if(button.hasAttribute('data-add-target-row')){const type=button.dataset.addTargetRow,tb=document.getElementById('target-rows-'+type);tb.insertAdjacentHTML('beforeend',targetRowHtml(type,{name:'',amount:'',timingType:'boil'},tb.children.length));targetSheetDirty=true;}

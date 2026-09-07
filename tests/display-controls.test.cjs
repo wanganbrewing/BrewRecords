@@ -148,6 +148,7 @@ test('desktop process targets fit the notebook width without horizontal scrollin
   assert.ok(css.includes('input[type="time"]::-webkit-calendar-picker-indicator{width:14px;height:14px'));
   assert.ok(css.includes('.target-process-table th:nth-child(11){width:9%;}'));
   assert.ok(css.includes('.target-process-table .target-metric-input{flex-wrap:wrap;gap:3px;}'));
+  assert.ok(css.includes('.target-process-table .target-step-head::before{content:"";display:block;height:.86rem;margin-bottom:6px;}'));
 });
 test('brewing, schedule, fermentation and packaging use wide layout only in their own views',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
