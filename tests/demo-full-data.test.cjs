@@ -66,3 +66,14 @@ test('full demo recipe is linked to matching inventory consumption and a saved v
   assert.equal(data.valuationBook.reports.length,1);
   assert.equal(data.valuationBook.reports[0].month,'2026-08');
 });
+
+test('demo yeast inventory and recipe quantities consistently use grams',()=>{
+  const data=demoData();
+  const yeastItems=data.inventory.filter(item=>item.category==='yeast');
+  assert.ok(yeastItems.length>=4);
+  assert.ok(yeastItems.every(item=>item.unit==='g'));
+  for(const batch of data.batches.filter(row=>row.yeast)){
+    assert.equal(batch.yeastUnit,'g');
+    assert.ok(Number(batch.yeastAmount)>0);
+  }
+});

@@ -115,7 +115,9 @@ test('planned quantity inputs display permanent units for both batches without c
 });
 test('PC target entry uses a merged plan and a process sheet with one save action',()=>{
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();
-  for(const sheet of ['① 仕込み計画','② 仕込み工程'])assert.ok(source.includes(sheet));
+  for(const sheet of ['仕込み計画','仕込み工程・実績'])assert.ok(source.includes(sheet));
+  assert.ok(!source.includes('① 仕込み計画'));
+  assert.ok(!source.includes('② 仕込み工程'));
   assert.ok(!source.includes('③ 仕込み工程'));
   assert.match(html,/id="targetSheetApply">保存</);
   assert.doesNotMatch(source,/画面下部の「保存する」で確定/);

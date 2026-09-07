@@ -61,6 +61,12 @@ test('narrow phones keep fermentation metrics readable with 44px step controls',
   const help=fs.readFileSync(path.join(__dirname,'../help.html'),'utf8');
   assert.ok(!help.includes('月末の棚卸金額の自動保存はまだ対象外'));
 });
+test('desktop fermentation measurements fit date, four values and delete on one row',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('.gravity-entry{grid-template-columns:minmax(150px,1.15fr) repeat(4,minmax(0,1fr)) 44px;align-items:end;}'));
+  assert.ok(html.includes('.gravity-entry .gravity-date-field{display:contents;}'));
+  assert.ok(html.includes('.gravity-entry .gravity-date-field>.icon-btn{grid-column:6;grid-row:1;}'));
+});
 test('fermentation combines daily measurements and finishing values without a separate info panel',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(!html.includes('id="fermentationInfoPanel"'));
@@ -89,6 +95,18 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   assert.ok(!html.includes('data-entry-mode='));
   assert.ok(!html.includes('id="entryModeDetail"'));
   assert.ok(!source.includes('setEntryMode'));
+});
+test('yeast inventory uses grams and the last selected batch is restored',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes("const INV_DEFAULT_UNIT = {fermentable:'kg', hop:'g', yeast:'g'};"));
+  assert.ok(html.includes("if(category==='adjunct'){"));
+  assert.ok(html.includes('value="g" readonly aria-label="酵母の在庫単位"'));
+  assert.ok(!html.includes('const yeastUnitOptions'));
+  assert.ok(html.includes("const LAST_SELECTED_BATCH_KEY = 'wangan-last-selected-batch';"));
+  assert.ok(html.includes('await restoreSelectedBatch();'));
+  assert.ok(html.includes('const preferredId = selectedId || lastViewedBatchId;'));
+  assert.ok(html.includes('const preferredId=selectedId||lastViewedBatchId;'));
+  assert.ok(html.includes('rememberSelectedBatch(id);'));
 });
 test('desktop parallel panels preserve hidden empty states and span timelines and save actions',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
