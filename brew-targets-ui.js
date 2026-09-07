@@ -85,9 +85,17 @@ function targetYeastSourceField(p){return targetChoiceField('yeastSource','é…µæ¯
 function suggestedBatchNumber(){
   const history=(typeof batches==='undefined'?[]:batches).map(batch=>({value:String(batch?.brewTargets?.fields?.batchNumber||'').trim(),date:batch?.brewDate||''})).filter(item=>item.value).sort((a,b)=>b.date.localeCompare(a.date));
   if(typeof appSettings!=='undefined'&&appSettings.updatedAt){
-    const settings=AppSettings.normalize(appSettings),escaped=settings.batchPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),pattern=new RegExp(`^${escaped}(\\d+)$`);
-    const numbers=history.map(item=>Number(item.value.match(pattern)?.[1])).filter(Number.isFinite),next=(numbers.length?Math.max(...numbers):0)+1;
-    return settings.batchPrefix+String(next).padStart(settings.batchDigits,'0');
+    const settings=AppSettings.normalize(appSettings),today=new Date().toISOString().slice(0,10),targetDate=document.getElementById('target-bound-brewDate')?.value||today,year=Number(targetDate.slice(0,4)),month=Number(targetDate.slice(5,7));
+    let scope='',scopedHistory=history;
+    if(settings.batchReset==='calendar'){
+      scope=`${year}-`;scopedHistory=history.filter(item=>item.date.startsWith(String(year)));
+    }else if(settings.batchReset==='fiscal'){
+      const fiscalYear=month>=settings.fiscalStartMonth?year:year-1,nextFiscalYear=fiscalYear+1;
+      scope=`FY${fiscalYear}-`;scopedHistory=history.filter(item=>{const itemYear=Number(item.date.slice(0,4)),itemMonth=Number(item.date.slice(5,7));return (itemMonth>=settings.fiscalStartMonth?itemYear:itemYear-1)===fiscalYear&&itemYear<=nextFiscalYear;});
+    }
+    const fullPrefix=settings.batchPrefix+scope,escaped=fullPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),pattern=new RegExp(`^${escaped}(\\d+)$`);
+    const numbers=scopedHistory.map(item=>Number(item.value.match(pattern)?.[1])).filter(Number.isFinite),next=(numbers.length?Math.max(...numbers):0)+1;
+    return fullPrefix+String(next).padStart(settings.batchDigits,'0');
   }
   const latest=history[0]?.value||'',match=latest.match(/^(.*?)(\d+)$/);
   if(match)return match[1]+String(Number(match[2])+1).padStart(match[2].length,'0');

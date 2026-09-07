@@ -1,16 +1,16 @@
-const CACHE_NAME = 'fermenters-ledger-v108';
+const CACHE_NAME = 'fermenters-ledger-v109';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
-APP_SHELL.push('./ui-polish.css?v=108','./ui-polish.js?v=108');
+APP_SHELL.push('./ui-polish.css?v=109','./ui-polish.js?v=109');
 
-APP_SHELL.push('./supabase-config.js?v=108', './cloud-sync.js?v=108', './help.html?embedded=1&v=108');
-APP_SHELL.push('./inventory-costing.js?v=108','./inventory-valuation-ui.js?v=108');
-APP_SHELL.push('./batch-expenses.js?v=108','./batch-expenses-ui.js?v=108');
-APP_SHELL.push('./cost-catalog.js?v=108','./cost-catalog-ui.js?v=108');
-APP_SHELL.push('./process-measurements.js?v=108','./process-measurements-ui.js?v=108');
-APP_SHELL.push('./app-settings.js?v=108');
-APP_SHELL.push('./fermentation-tanks.js?v=108');
-APP_SHELL.push('./display-controls.js?v=108');
-APP_SHELL.push('./beer-style-guide.js?v=108','./brew-targets.js?v=108','./brew-targets-ui.js?v=108','./brew-targets.css?v=108','./xlsx.full.min.js?v=108','./brew-targets-xlsx.js?v=108');
+APP_SHELL.push('./supabase-config.js?v=109', './cloud-sync.js?v=109', './help.html?embedded=1&v=109');
+APP_SHELL.push('./inventory-costing.js?v=109','./inventory-valuation-ui.js?v=109');
+APP_SHELL.push('./batch-expenses.js?v=109','./batch-expenses-ui.js?v=109');
+APP_SHELL.push('./cost-catalog.js?v=109','./cost-catalog-ui.js?v=109');
+APP_SHELL.push('./process-measurements.js?v=109','./process-measurements-ui.js?v=109');
+APP_SHELL.push('./app-settings.js?v=109');
+APP_SHELL.push('./fermentation-tanks.js?v=109');
+APP_SHELL.push('./display-controls.js?v=109');
+APP_SHELL.push('./beer-style-guide.js?v=109','./brew-targets.js?v=109','./brew-targets-ui.js?v=109','./brew-targets.css?v=109','./xlsx.full.min.js?v=109','./brew-targets-xlsx.js?v=109');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

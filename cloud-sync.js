@@ -17,6 +17,7 @@
   };
 
   const byId = id => document.getElementById(id);
+  const isDemoMode = ()=>/(?:^|[?&])demo=1(?:&|$)/.test(String(globalThis.location?.search||''));
   const deviceId = getOrCreateDeviceId();
   const pendingKey = 'ferment-cloud-pending-v1';
   const localOrganizationKey = 'ferment-cloud-local-organization';
@@ -67,17 +68,29 @@
     const signedIn = Boolean(state.session);
     const fields = byId('cloudLoginFields');
     const login = byId('cloudLoginButton');
+    const register = byId('cloudRegisterButton');
+    const reset = byId('cloudResetPasswordButton');
+    const passwordChangeFields=byId('cloudPasswordChangeFields');
+    const passwordChange=byId('cloudPasswordChangeButton');
     const sync = byId('cloudSyncNowButton');
     const logout = byId('cloudLogoutButton');
+    const account = byId('cloudAccountSummary');
     if(fields) fields.hidden = !state.enabled || signedIn;
     if(login) login.hidden = !state.enabled || signedIn;
+    if(register) register.hidden = !state.enabled || signedIn;
+    if(reset) reset.hidden = !state.enabled || signedIn;
+    if(passwordChangeFields)passwordChangeFields.hidden=!state.enabled||!signedIn;
+    if(passwordChange)passwordChange.hidden=!state.enabled||!signedIn;
     if(sync) sync.hidden = !state.enabled || !signedIn;
     if(logout) logout.hidden = !state.enabled || !signedIn;
+    if(account) account.textContent=signedIn?`ログイン中：${state.session.user.email||'醸造所アカウント'}`:'未ログインです。';
+    if(byId('appLoginGate'))byId('appLoginGate').hidden=signedIn||isDemoMode();
   }
 
   function configureUnavailableUi(){
-    if(new URLSearchParams(location.search).get('demo') === '1'){
+    if(isDemoMode()){
       setStatus('', 'デモ用', 'デモ版ではクラウド同期しません', 'サンプルデータは通常版の記録・クラウドとは分離されています。');
+      if(byId('appLoginGate'))byId('appLoginGate').hidden=true;
       refreshControls();
       return;
     }
@@ -266,7 +279,7 @@
     if(!state.session){
       state.organizationId = '';
       state.revision = 0;
-      setStatus('', '未接続', '端末内へ保存しています', 'メールアドレスを入力し、ログインリンクを送ってください。');
+      setStatus('', '未接続', 'ログインしてください', 'ログインID（メールアドレス）とパスワードを入力してください。');
       return;
     }
     setStatus('syncing', '接続中', 'アカウントを確認しています');
@@ -314,23 +327,89 @@
     if(window.syncModalState) window.syncModalState();
   };
 
-  window.requestCloudLogin = async function(){
+  async function signInWithPassword(email,password){
     if(!state.enabled || !state.client){
-      alert('クラウド接続先の準備後に利用できます。現在も端末内への保存は有効です。');
+      throw new Error('クラウド接続先を利用できません。通信状況を確認してください。');
+    }
+    if(!email || !email.includes('@'))throw new Error('ログインIDはメールアドレスで入力してください。');
+    if(!password || password.length<8)throw new Error('パスワードは8文字以上で入力してください。');
+    setStatus('syncing','接続中','ログインしています');
+    const {data,error}=await state.client.auth.signInWithPassword({email,password});
+    if(error)throw new Error('ログインIDまたはパスワードが正しくありません。');
+    await handleSession(data.session);
+    return data.session;
+  }
+
+  window.loginCloudWithPassword = async function(){
+    try{
+      await signInWithPassword((byId('cloudLoginEmail').value||'').trim(),byId('cloudLoginPassword').value||'');
+      byId('cloudLoginPassword').value='';
+    }catch(error){setStatus('error','ログイン失敗','ログインできませんでした',error.message);}
+  };
+
+  window.registerCloudAccount = async function(){
+    if(!state.enabled||!state.client){alert('クラウド接続先を利用できません。');return;}
+    const email=(byId('cloudLoginEmail').value||'').trim(),password=byId('cloudLoginPassword').value||'';
+    if(!email.includes('@')){alert('ログインIDはメールアドレスで入力してください。');return;}
+    if(password.length<8){alert('パスワードは8文字以上で入力してください。');return;}
+    if(!confirm(`${email}\n\nこのログインIDで醸造所アカウントを作成しますか？\n同じ醸造所の端末では、このIDとパスワードを使用してください。`))return;
+    const redirectTo=`${location.origin}${location.pathname}`;
+    const {data,error}=await state.client.auth.signUp({email,password,options:{emailRedirectTo:redirectTo}});
+    if(error){setStatus('error','登録失敗','アカウントを作成できませんでした',error.message);return;}
+    byId('cloudLoginPassword').value='';
+    if(data.session)await handleSession(data.session);
+    else setStatus('syncing','確認待ち','確認メールを送信しました',`${email}へ届いた確認メールを開いた後、IDとパスワードでログインしてください。`);
+  };
+
+  window.requestCloudPasswordReset = async function(){
+    if(!state.enabled||!state.client)return;
+    const email=(byId('cloudLoginEmail').value||'').trim();
+    if(!email.includes('@')){alert('再設定するログインID（メールアドレス）を入力してください。');return;}
+    const {error}=await state.client.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}${location.pathname}`});
+    if(error){setStatus('error','送信失敗','再設定メールを送信できませんでした');return;}
+    setStatus('syncing','メール送信済み','パスワード再設定メールを確認してください',`${email}へ再設定用リンクを送りました。`);
+  };
+
+  window.updateCloudPassword = async function(){
+    if(!state.session||!state.client)return;
+    const password=byId('cloudNewPassword').value||'';
+    if(password.length<8){alert('新しいパスワードは8文字以上で入力してください。');return;}
+    const {error}=await state.client.auth.updateUser({password});
+    if(error){setStatus('error','変更失敗','パスワードを変更できませんでした');return;}
+    byId('cloudNewPassword').value='';setStatus('connected','同期済み','パスワードを変更しました',`ログイン中：${state.session.user.email||'醸造所アカウント'}`);
+  };
+
+  window.loginFromEntryScreen = async function(){
+    const id=(byId('appLoginId').value||'').trim(),password=byId('appLoginPassword').value||'',errorEl=byId('appLoginError'),button=byId('appLoginSubmit');
+    errorEl.textContent='';
+    if(id==='デモ'&&password==='password'){
+      location.href=`${location.pathname}?demo=1&uat=v109`;
       return;
     }
-    const email = (byId('cloudLoginEmail').value || '').trim();
-    if(!email || !email.includes('@')){
-      alert('メールアドレスを入力してください');
-      return;
-    }
-    const redirectTo = `${location.origin}${location.pathname}`;
-    const {error} = await state.client.auth.signInWithOtp({email, options:{emailRedirectTo:redirectTo}});
-    if(error){
-      alert('ログインメールを送信できませんでした。しばらくしてから再度お試しください。');
-      return;
-    }
-    setStatus('syncing', 'メール送信済み', 'ログインメールを確認してください', `${email} へログインリンクを送りました。この端末でリンクを開いてください。`);
+    button.disabled=true;button.textContent='ログイン中…';
+    try{await signInWithPassword(id,password);byId('appLoginPassword').value='';}
+    catch(error){errorEl.textContent=error.message;}
+    finally{button.disabled=false;button.textContent='ログイン';}
+  };
+
+  window.registerFromEntryScreen = async function(){
+    const email=(byId('appLoginId').value||'').trim(),password=byId('appLoginPassword').value||'',errorEl=byId('appLoginError');errorEl.textContent='';
+    if(!state.client){errorEl.textContent='クラウド接続先を利用できません。';return;}
+    if(!email.includes('@')){errorEl.textContent='新規登録ではログインIDにメールアドレスを入力してください。';return;}
+    if(password.length<8){errorEl.textContent='パスワードは8文字以上で入力してください。';return;}
+    if(!confirm(`${email}\n\nこのログインIDで醸造所アカウントを作成しますか？`))return;
+    const {data,error}=await state.client.auth.signUp({email,password,options:{emailRedirectTo:`${location.origin}${location.pathname}`}});
+    if(error){errorEl.textContent='アカウントを作成できませんでした。別のIDを確認してください。';return;}
+    byId('appLoginPassword').value='';
+    if(data.session)await handleSession(data.session);else errorEl.textContent='確認メールを送信しました。メール内のリンクを開いた後、ログインしてください。';
+  };
+
+  window.resetPasswordFromEntryScreen = async function(){
+    const email=(byId('appLoginId').value||'').trim(),errorEl=byId('appLoginError');errorEl.textContent='';
+    if(!state.client){errorEl.textContent='クラウド接続先を利用できません。';return;}
+    if(!email.includes('@')){errorEl.textContent='登録したログインID（メールアドレス）を入力してください。';return;}
+    const {error}=await state.client.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}${location.pathname}`});
+    errorEl.textContent=error?'再設定メールを送信できませんでした。':'パスワード再設定メールを送信しました。';
   };
 
   window.syncCloudNow = async function(){
