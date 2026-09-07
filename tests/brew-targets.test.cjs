@@ -164,7 +164,7 @@ test('style selection retains entered targets and the target clear action can be
   c.document.getElementById=id=>elements[id];c.document.querySelectorAll=()=>[preset,styleInput,og,fg,srm,doubleBrew];c.document.querySelector=selector=>selector==='[data-undo-target-clear]'?undo:selector.includes('[data-bound="style"]')?styleInput:null;c.updateTargetSheetTotals=()=>{};c.updateSecondBrewView=()=>{};
   assert.equal(c.clearTargetInputs(),4);assert.equal(preset.value,'ピルスナー');assert.equal(styleInput.value,'ピルスナー');assert.equal(og.value,'');assert.equal(fg.value,'');assert.equal(srm.value,'');assert.equal(doubleBrew.checked,false);assert.equal(undo.hidden,false);
   assert.equal(c.undoTargetInputsClear(),true);assert.equal(og.value,'1.050');assert.equal(fg.value,'1.010');assert.equal(srm.value,'8');assert.equal(doubleBrew.checked,true);assert.equal(undo.hidden,true);
-  assert.match(c.targetStyleField({style:''}),/data-clear-target-inputs>今回の目標以下をクリア/);assert.match(c.targetStyleField({style:''}),/data-undo-target-clear hidden>クリアを取り消す/);
+  assert.doesNotMatch(c.targetStyleField({style:''}),/data-clear-target-inputs/);assert.match(c.targetStyleField({style:''}),/targetStyleReference/);
 });
 test('adjunct quantities use a fixed gram weight without a separate unit input',()=>{
   const c=context(),badges=[{},{}],inputs=[{value:'1000',dataset:{quantityLabel:'副原料1 重さ'},setAttribute(k,v){this[k]=v;}},{value:'111',dataset:{quantityLabel:'副原料1 2回目の重さ'},setAttribute(k,v){this[k]=v;}}];

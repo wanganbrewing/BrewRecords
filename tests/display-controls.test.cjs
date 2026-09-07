@@ -89,6 +89,9 @@ test('fermentation combines daily measurements and finishing values without a se
   assert.ok(html.indexOf('onclick="addFermentationMeasurement()"')<html.indexOf('id="fm_gravityRows"'));
   assert.ok(html.includes('id="ferm_sortOrder"'));
   assert.ok(html.includes("localStorage.setItem('ferment-fermentation-sort-order'"));
+  assert.ok(html.includes('id="fermentationTankStatusPanel"'));
+  assert.ok(html.includes('id="tankStatusRows"'));
+  assert.ok(html.includes('onclick="saveFermentationTankStatus()"'));
 });
 test('brewing plan replaces the basic/detail split and packaging is a separate screen',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -103,6 +106,8 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
   assert.ok(html.includes('id="viewPackaging" hidden'));
   assert.ok(html.includes('id="packagingEntryPanel"'));
+  assert.ok(html.includes('id="pkg_tankRef"'));
+  assert.ok(html.includes("FermentationTanks.findByName(fermentationTankBook,sourceTank)"));
   assert.ok(html.includes('class="packaging-table"'));
   assert.ok(html.includes("row.className = 'package-entry'"));
   assert.ok(html.includes('class="rp-row-total"'));
@@ -111,6 +116,9 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   assert.ok(!html.includes('data-entry-mode='));
   assert.ok(!html.includes('id="entryModeDetail"'));
   assert.ok(!source.includes('setEntryMode'));
+  const targetUi=fs.readFileSync(path.join(__dirname,'../brew-targets-ui.js'),'utf8');
+  const note='上の参考範囲を見ながら、今回の仕込み目標を設定します。参考値が入力欄へ自動転記されることはありません。';
+  assert.ok(targetUi.indexOf(note)<targetUi.indexOf('data-clear-target-inputs>クリア</button>'));
 });
 test('desktop fermentation and record history use full-width table-like rows',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');

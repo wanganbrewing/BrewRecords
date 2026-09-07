@@ -5,13 +5,14 @@ const path=require('node:path');
 const vm=require('node:vm');
 const BrewTargets=require('../brew-targets.js');
 const InventoryCosting=require('../inventory-costing.js');
+const FermentationTanks=require('../fermentation-tanks.js');
 
 function demoData(){
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   const start=html.indexOf('function buildDemoSampleData(){');
   const end=html.indexOf('\n\nasync function seedDemoDataIfNeeded()',start);
   assert.ok(start>=0&&end>start,'demo builder is present');
-  const context={BrewTargets,InventoryCosting,result:null};
+  const context={BrewTargets,InventoryCosting,FermentationTanks,result:null};
   vm.runInNewContext(`${html.slice(start,end)}\nresult=buildDemoSampleData();`,context);
   return context.result;
 }
@@ -28,6 +29,8 @@ test('demo includes one clearly labelled end-to-end completed brewing record',()
   assert.ok(batch.otherCostHistory.length>=1);
   assert.ok(batch.gravityLog.length>=7);
   assert.ok(batch.gravityLog.every(row=>row.gravity&&row.ph&&row.temp&&row.volume&&row.co2));
+  assert.ok(!batch.brewTargets.steps.some(step=>/筑波|Tsukuba|\bLT\b|\bKWT\b/.test(step.name)));
+  assert.ok(!batch.customScheduleSteps.some(step=>/筑波|Tsukuba|デコクション/.test(step.label)));
   assert.ok(batch.packages.length>=2);
   assert.ok(batch.packages.every(row=>row.shipments?.length));
   assert.ok(batch.packages.flatMap(row=>row.shipments).some(row=>row.status==='shipped'));
