@@ -143,6 +143,8 @@ test('desktop process targets fit the notebook width without horizontal scrollin
   assert.ok(ui.includes('class="target-table-scroll target-process-scroll"'));
   assert.ok(css.includes('.target-process-scroll{overflow-x:visible;}'));
   assert.ok(css.includes('.target-process-table{table-layout:fixed;min-width:0;}'));
+  assert.ok(css.includes('.target-process-table th:nth-child(3){width:10%;}'));
+  assert.ok(css.includes('input[type="time"]::-webkit-calendar-picker-indicator{width:14px;height:14px'));
   assert.ok(css.includes('.target-process-table th:nth-child(11){width:9%;}'));
   assert.ok(css.includes('.target-process-table .target-metric-input{flex-wrap:wrap;gap:3px;}'));
 });

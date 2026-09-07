@@ -1,4 +1,4 @@
-# Brew plan and process workflow — v99
+# Brew plan and process workflow — v100
 
 Entry: 仕込み → バッチ名 → 仕込み計画を入力. The plan contains identity, targets, yeast, materials and water volume. Process targets and process actuals live in a separate top-level 仕込み工程 screen. Desktop shows the full process table. Mobile selects one current step and exposes only the actual fields relevant to that step. The hamburger menu exports and imports an editable four-sheet Excel workbook (basic plan, materials/water, process, management metadata).
 
@@ -13,7 +13,7 @@ Entry: 仕込み → バッチ名 → 仕込み計画を入力. The plan contain
 - Actual OG is clearly separated as post-brew data and excluded from Excel export/import. Process actuals are stored in the existing measurement audit log. Fermentation, shipments and stock consumption are not changed by applying an imported plan.
 - Style is selectable or free-entry. A bundled copy of the Japan Craft Beer Association April 2024 guide shows reference OG, FG, ABV, IBU and SRM in a non-input reference band without repeating the selected name or overwriting targets. Tax category is selection-only; tanks offer FV1–FV8 plus free entry. Target ABV is always recalculated from target OG/FG. Target SRM offers SRM 1–40 plus free entry.
 - Yeast and yeast source are selectable or free-entry. Yeast quantity is fixed to grams in this surface. Batch icon, target cost/loss, pitch-rate controls, yeast generation, source-water/pH calculation and planned mineral-additive rows are not shown.
-- Saved record details offer a read-only plan. Backup and cloud snapshots retain the current batch, process targets and audited process actuals. Brewing CSV includes target-sheet and process-measurement JSON columns. New process actuals preset the current local date and time while keeping both fields editable. All editing devices must use v99 or later.
+- Saved record details offer a read-only plan. Backup and cloud snapshots retain the current batch, process targets and audited process actuals. Brewing CSV includes target-sheet and process-measurement JSON columns. New process actuals preset the current local date and time while keeping both fields editable. Desktop process tables reserve enough space for the complete planned time beside the native time-picker button. All editing devices must use v100 or later.
 - Excel import is preview-first and creates a new unsaved draft. It never imports actual measurements, fermentation logs, packages, expenses, inventory-consumption state or the source record ID. Inventory IDs in the workbook are informational; current inventory is linked only after an unambiguous category/name match (and unit match where required). Unmatched items remain unlinked and appear in the preview warning.
 
 ## Verification
