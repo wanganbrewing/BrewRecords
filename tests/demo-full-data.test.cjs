@@ -18,7 +18,7 @@ function demoData(){
 
 test('demo includes one clearly labelled end-to-end completed brewing record',()=>{
   const data=demoData();
-  const batch=data.batches.find(row=>row.id==='demo-full-tsukuba-lager-083');
+  const batch=data.batches.find(row=>row.id==='demo-full-pale-lager-083');
   assert.ok(batch);
   assert.match(batch.batchName,/全項目入力済みデモ/);
   assert.equal(batch.completed,true);
@@ -36,7 +36,7 @@ test('demo includes one clearly labelled end-to-end completed brewing record',()
 
 test('full demo fills every visible process target and representative actuals',()=>{
   const data=demoData();
-  const batch=data.batches.find(row=>row.id==='demo-full-tsukuba-lager-083');
+  const batch=data.batches.find(row=>row.id==='demo-full-pale-lager-083');
   const plan=BrewTargets.normalize(batch.brewTargets);
   assert.equal(plan.steps.length,BrewTargets.steps.length);
   const bound=new Set(['mashTemp','mashTime','boilTime','targetOG']);
@@ -54,7 +54,7 @@ test('full demo fills every visible process target and representative actuals',(
 
 test('full demo recipe is linked to matching inventory consumption and a saved valuation',()=>{
   const data=demoData();
-  const batch=data.batches.find(row=>row.id==='demo-full-tsukuba-lager-083');
+  const batch=data.batches.find(row=>row.id==='demo-full-pale-lager-083');
   const recipe=[...batch.fermentables,...batch.hops,...batch.adjuncts,{name:batch.yeast,amount:batch.yeastAmount,invId:batch.yeastInvId}];
   for(const row of recipe){
     const item=data.inventory.find(entry=>entry.id===row.invId);

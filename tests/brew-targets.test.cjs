@@ -112,6 +112,8 @@ test('planned quantity inputs display permanent units for both batches without c
   assert.match(c.targetRowsSection('hop',{}),/100 gなら「100」/);
   assert.match(c.targetRowsSection('hop',{}),/重さ（g）/);
   assert.match(c.targetRowsSection('hop',{}),/data-second-brew>2回目の重さ（g）/);
+  assert.match(c.targetRowsSection('hop',{}),/<table class="target-material-table" aria-label="ホップ">/);
+  assert.doesNotMatch(c.targetRowsSection('hop',{}),/<caption/);
 });
 test('brewing plan and brewing process are separate main-menu workflows',()=>{
   const c=context(),source=c.renderBrewTargetSheet.toString()+c.saveBrewTargetSheet.toString();

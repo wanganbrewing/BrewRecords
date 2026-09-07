@@ -6,6 +6,12 @@ test('save errors and validation keep status honest and unlock controls',async()
 test('save prevents double submission and hides status after completion',async()=>{const {c,els}=harness();let count=0,finish;c.markEditorDirty();c.saveBatch=()=>{count++;return new Promise(r=>finish=r);};const first=c.saveFromEditor();await c.saveFromEditor();assert.equal(count,1);assert.equal(els.editorStatus.hidden,false);c.formIsOpen=false;finish();await first;assert.equal(els.editorStatus.hidden,true);assert.equal(els.editorStatus.textContent,'');});
 test('cancel leaves dirty form intact when discard is declined',()=>{const {c}=harness();let calls=0;c.cancelForm=()=>calls++;vm.runInContext('uiFormDirty=true',c);c.cancelFromEditor();assert.equal(calls,0);c.confirm=()=>true;c.cancelFromEditor();assert.equal(calls,1);});
 test('UI assets are versioned and cached',()=>{const v=JSON.parse(fs.readFileSync(path.join(dir,'version.json'),'utf8')).version;for(const file of ['index.html','sw.js'])for(const asset of ['ui-polish.css','ui-polish.js'])assert.ok(fs.readFileSync(path.join(dir,file),'utf8').includes(`${asset}?v=${v}`));});
+test('process editor aligns its date and time controls and hides an empty error box',()=>{
+  const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
+  assert.match(html,/input\[type=text\], input\[type=email\], input\[type=date\], input\[type=time\]/);
+  assert.match(html,/\.action-dialog #processStage,.action-dialog #processDate,.action-dialog #processTime\{height:44px;min-height:44px;\}/);
+  assert.match(html,/\.inv-unlinked-warning:empty\{display:none;\}/);
+});
 
 test('unsaved status appears on edit, survives navigation and clears on form reset or cancel',()=>{
   const {c,els}=harness();c.markEditorDirty();assert.equal(els.editorStatus.hidden,false);assert.match(els.editorStatus.textContent,/下部の「保存」/);
