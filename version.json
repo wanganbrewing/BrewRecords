@@ -1,5 +1,5 @@
 {
-"version": 95,
+"version": 96,
   "releasedAt": "2026-09-07",
-  "summary": "発酵記録のPC一行表示・仕込み切替・選択復元を改善"
+  "summary": "PCの一覧表示と仕込み計画Excelの導線を改善"
 }

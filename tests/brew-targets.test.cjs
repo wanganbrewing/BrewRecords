@@ -134,6 +134,12 @@ test('unified plan exposes the requested current fields and omits retired input 
   assert.ok(html.includes('id="targetSheetInline" class="target-sheet-inline"'));
   assert.ok(html.includes('class="form-batch-name brew-batch-visible"'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
+  assert.match(ui,/target-material-section target-yeast-section/);
+  assert.match(ui,/<th>酵母名<\/th><th>在庫品目<\/th><th>使用量（g）<\/th>/);
+  const rendered=ui.slice(ui.indexOf('function renderBrewTargetSheet'));
+  assert.ok(rendered.indexOf("targetRowsSection('fermentable',b)")<rendered.indexOf("targetRowsSection('hop',b)"));
+  assert.ok(rendered.indexOf("targetRowsSection('hop',b)")<rendered.indexOf('${yeast}'));
+  assert.ok(rendered.indexOf('${yeast}')<rendered.indexOf("targetRowsSection('adjunct',b)"));
 });
 test('selection helpers keep reference values separate and calculate target ABV',()=>{
   const c=context();

@@ -65,7 +65,9 @@ test('desktop fermentation measurements fit date, four values and delete on one 
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.includes('.gravity-entry{grid-template-columns:minmax(150px,1.15fr) repeat(4,minmax(0,1fr)) 44px;align-items:end;}'));
   assert.ok(html.includes('.gravity-entry .gravity-date-field{display:contents;}'));
-  assert.ok(html.includes('.gravity-entry .gravity-date-field>.icon-btn{grid-column:6;grid-row:1;}'));
+  assert.ok(html.includes('.gravity-entry .gravity-date-field>.icon-btn{grid-column:6;grid-row:1;'));
+  assert.ok(html.includes('class="fermentation-table-head"'));
+  assert.ok(html.includes('#ferm_content.desktop-workspace:not([hidden]){display:block;}'));
 });
 test('fermentation combines daily measurements and finishing values without a separate info panel',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -85,9 +87,11 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   const css=fs.readFileSync(path.join(__dirname,'../brew-targets.css'),'utf8');
   assert.ok(html.includes('id="targetSheetInline" class="target-sheet-inline"'));
   assert.ok(!html.includes('id="brewPlanHubTitle"'));
-  assert.ok(css.includes('.target-material-table{display:table;min-width:1120px'));
+  assert.ok(css.includes('.target-material-table{display:table;width:100%;min-width:0;'));
   assert.ok(css.includes('.target-material-table tr{display:table-row'));
   assert.ok(css.includes('.target-material-table thead{display:table-header-group;}'));
+  assert.ok(css.includes('.target-material-section{margin-bottom:10px;padding:0;'));
+  assert.ok(css.includes('.target-yeast-table{table-layout:fixed;}'));
   assert.ok(html.includes('id="legacyBrewInputs" hidden aria-hidden="true"'));
   assert.ok(html.includes('id="viewPackaging" hidden'));
   assert.ok(html.includes('id="packagingEntryPanel"'));
@@ -95,6 +99,14 @@ test('brewing plan replaces the basic/detail split and packaging is a separate s
   assert.ok(!html.includes('data-entry-mode='));
   assert.ok(!html.includes('id="entryModeDetail"'));
   assert.ok(!source.includes('setEntryMode'));
+});
+test('desktop fermentation and record history use full-width table-like rows',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  assert.ok(html.includes('class="record-table-head"'));
+  assert.ok(html.includes('.record-table-head,.record-cards .batch-card{grid-template-columns:'));
+  assert.ok(html.includes('.record-cards{display:block;border:1px solid var(--border);'));
+  assert.ok(!html.includes('.record-cards{grid-template-columns:repeat(2,minmax(0,1fr));}'));
+  assert.ok(html.includes('grid-template-columns:repeat(6,minmax(0,1fr));gap:0;'));
 });
 test('yeast inventory uses grams and the last selected batch is restored',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');

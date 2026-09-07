@@ -125,7 +125,10 @@ function targetRowHeaders(type,unit){
 }
 function targetRowsSection(type,b){
   const rows=b[BrewTargets.rowTypes[type][0]]||[],title=TARGET_ROW_LABELS[type],unit=BrewTargets.rowTypes[type][1];
-  return targetSection(title, `<p class="target-note">数量は数字だけ入力してください${unit?`（例：100 ${unit}なら「100」）`:''}。</p><div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}</caption><thead><tr>${targetRowHeaders(type,unit)}</tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',unit:'g',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div>`);
+  return `<section class="target-section target-material-section"><h3>${title}</h3><p class="target-note">数量は数字だけ入力してください${unit?`（例：100 ${unit}なら「100」）`:''}。</p><div class="target-table-scroll"><table class="target-material-table"><caption class="sr-only">${title}</caption><thead><tr>${targetRowHeaders(type,unit)}</tr></thead><tbody id="target-rows-${type}">${(rows.length?rows:[{name:'',amount:'',unit:'g',timingType:'boil'}]).map((r,i)=>targetRowHtml(type,r,i)).join('')}</tbody></table></div><div class="target-row-footer"><button type="button" class="inv-action-btn" data-add-target-row="${type}">＋ ${title}を追加</button><output id="target-total-${type}"></output></div></section>`;
+}
+function targetYeastSection(b,p){
+  return `<section class="target-section target-material-section target-yeast-section"><h3>酵母</h3><div class="target-table-scroll"><table class="target-material-table target-yeast-table"><caption class="sr-only">酵母</caption><thead><tr><th>酵母名</th><th>在庫品目</th><th>使用量（g）</th><th>由来</th><th>回収日</th></tr></thead><tbody><tr><td data-label="酵母名" class="target-cell-wide">${targetYeastField(b)}</td><td data-label="在庫品目">${targetYeastInventoryField(b)}</td><td data-label="使用量（g）">${targetBound('yeastAmount',b)}</td><td data-label="由来">${targetYeastSourceField(p)}</td><td data-label="回収日">${targetExtra('yeastHarvestDate',p)}</td></tr></tbody></table></div><p class="target-note target-material-footnote">酵母の使用量はgで入力します。酵母名と由来は一覧から選ぶか、自由に入力できます。</p></section>`;
 }
 function targetMetricHtml(step,key,b){
   const m=BrewTargets.metrics[key];if(m[2]==='bound'){
@@ -155,11 +158,11 @@ function renderBrewTargetSheet(b){
   const extra=keys=>`<div class="target-field-grid">${keys.map(k=>targetExtra(k,p)).join('')}</div>`;
   const identities=targetSection('基本・設備',`<div class="target-field-grid">${['brewDate','brewer','batchSize'].map(k=>targetBound(k,b)).join('')}${targetTaxField(b)}${targetTankField(p)}${targetBatchNumberField(p)}${targetExtra('tradeName',p)}${targetExtra('productName',p)}</div><p class="target-note">酒税法上の品目区分は帳簿・課税移出CSVにも使用します。発酵タンクはFV1〜FV8から選ぶか、自由入力できます。</p>`);
   const water=targetSection('水量',`<div class="target-field-grid">${['mashWater1','mashWater2','spargeWater1','spargeWater2'].map(k=>targetSplitWaterField(k,p)).join('')}</div><p class="target-water-summary"><output id="target-water-total"></output></p>`);
-  const yeast=targetSection('酵母',`<div class="target-field-grid">${targetYeastField(b)}${targetBound('yeastAmount',b)}${targetYeastSourceField(p)}${targetYeastInventoryField(b)}</div>`+extra(['yeastHarvestDate'])+`<p class="target-note">酵母の使用量はgで入力します。酵母名と由来は一覧から選ぶか、自由に入力できます。</p>`);
+  const yeast=targetYeastSection(b,p);
   const actualAbv=computedAbv(b.actualOG,b.fg);
   const results=targetSection('スタイル・目標・実績',`${targetStyleField(b)}<p class="target-note">上の参考範囲を見ながら、今回の仕込み目標を設定します。参考値が入力欄へ自動転記されることはありません。</p><div class="target-goal-actual"><div class="target-result-card"><h4>今回の目標</h4><div class="target-field-grid">${targetBound('targetOG',b)}${targetExtra('targetFG',p)}${targetAbvField(p)}${targetIbuField(p)}${targetSrmField(p)}</div></div><div class="target-result-card"><h4>実績</h4><div class="target-field-grid">${targetBound('actualOG',b)}${targetActualReference('実測FG',b.fg,'発酵管理の最新値')}${targetActualReference('実績ABV（%・自動計算）',actualAbv,'実測OGと実測FGから算出')}</div><p class="target-note">仕込み前は空欄でかまいません。実測値は目標仕込み表のExcelには書き出しません。</p></div></div>`);
   const hasSecond=p.fields.doubleBrew===true||['mashWater2','spargeWater2'].some(k=>p.fields[k]!==''&&p.fields[k]!=null)||Object.values(BrewTargets.rowTypes).some(([key])=>(b[key]||[]).some(r=>r.targetMeta?.batch2!==''&&r.targetMeta?.batch2!=null));
-  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">基本情報・原材料・水量と、仕込み工程の目標／実績を1つの仕込み表で管理します。</p><nav class="target-sheet-tabs" role="tablist" aria-label="仕込み内容の切り替え"><button type="button" role="tab" data-target-sheet-tab="basic">仕込み計画</button><button type="button" role="tab" data-target-sheet-tab="process">仕込み工程・実績</button></nav><div class="target-plan-status" id="targetPlanSummary" role="status"></div><div class="target-sheet-panes"><div data-target-sheet-pane="basic"><div class="target-basic-grid"><div class="target-basic-wide">${results}</div><div>${identities}</div><div><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、1回分の重さだけ入力します。</span></div>${water}</div></div>${targetRowsSection('fermentable',b)}${targetRowsSection('hop',b)}${targetRowsSection('adjunct',b)}${yeast}</div><div data-target-sheet-pane="process">${targetProcessSection(p,b)}</div></div>`;
+  document.getElementById('targetSheetBody').innerHTML=`<p class="operational-note">基本情報・原材料・水量と、仕込み工程の目標／実績を1つの仕込み表で管理します。</p><nav class="target-sheet-tabs" role="tablist" aria-label="仕込み内容の切り替え"><button type="button" role="tab" data-target-sheet-tab="basic">仕込み計画</button><button type="button" role="tab" data-target-sheet-tab="process">仕込み工程・実績</button></nav><div class="target-plan-status" id="targetPlanSummary" role="status"></div><div class="target-sheet-panes"><div data-target-sheet-pane="basic"><div class="target-basic-grid"><div class="target-basic-wide">${results}</div><div>${identities}</div><div><div class="target-double-brew"><label><input type="checkbox" id="targetDoubleBrew" ${hasSecond?'checked':''}>2回に分けて仕込み、同じ発酵タンクへまとめる</label><span>通常はオフのまま、1回分の重さだけ入力します。</span></div>${water}</div></div>${targetRowsSection('fermentable',b)}${targetRowsSection('hop',b)}${yeast}${targetRowsSection('adjunct',b)}</div><div data-target-sheet-pane="process">${targetProcessSection(p,b)}</div></div>`;
   document.getElementById('targetSheetTitle').textContent=targetSheetReadOnly?'仕込み計画（保存済み）':'仕込み計画';
   document.getElementById('targetSheetApply').hidden=targetSheetReadOnly;
   document.getElementById('targetSheetFooterNote').textContent=targetSheetReadOnly?'保存済みの仕込み計画です。スマートフォンでは工程カードから実績を入力できます。':'2つのシートの入力内容をまとめて保存します。';
@@ -281,25 +284,36 @@ function applyBrewTargetSheet(event){
     return true;
   }catch(e){error.textContent=e.message;error.focus();return false;}
 }
+function targetExcelMenuStatus(message,isError=false){
+  const status=document.getElementById('targetExcelMenuStatus');if(!status)return;
+  status.textContent=message;status.dataset.error=String(isError);
+}
+function brewTargetExportCandidate(){
+  if(formIsOpen&&targetSheetBefore&&!targetSheetReadOnly)return readBrewTargetSheetBatch();
+  const selected=batches.find(batch=>batch.id===lastViewedBatchId)||currentActiveBatch()||[...batches].sort((a,b)=>(b.brewDate||'').localeCompare(a.brewDate||''))[0];
+  if(selected)return JSON.parse(JSON.stringify(selected));
+  if(formIsOpen)return targetCurrentForm();
+  throw Error('書き出す仕込みがありません。先に仕込み計画を入力するか、記録一覧で仕込みを選択してください。');
+}
 function exportBrewTargetWorkbook(){
-  const error=document.getElementById('targetSheetError');error.textContent='';
-  try{const filename=BrewTargetWorkbook.exportWorkbook(readBrewTargetSheetBatch(),inventory,{appVersion:APP_VERSION});document.getElementById('targetSheetFooterNote').textContent=`「${filename}」を書き出しました。`;}
-  catch(e){error.textContent=e.message;error.focus();}
+  targetExcelMenuStatus('書き出しを準備しています。');
+  try{const batch=brewTargetExportCandidate(),filename=BrewTargetWorkbook.exportWorkbook(batch,inventory,{appVersion:APP_VERSION});targetExcelMenuStatus(`「${filename}」を書き出しました。`);toggleDataMenu(false);}
+  catch(e){targetExcelMenuStatus(e.message,true);}
 }
 function renderBrewTargetImportPreview(result){
   pendingBrewTargetImport=result;const s=result.summary,preview=document.getElementById('targetExcelImportPreview');
   document.getElementById('targetExcelImportSummary').innerHTML=`<div class="target-import-summary"><span>バッチ：${targetEsc(s.batchName)}</span><span>予定日：${targetEsc(s.brewDate)}</span><span>原材料：${s.materialCount}品目</span><span>目標工程：${s.targetStepCount}件</span><span>${s.doubleBrew?'2回仕込み':'1回仕込み'}</span></div>`;
   document.getElementById('targetExcelImportWarnings').innerHTML=result.warnings.length?`<strong>確認してください</strong><ul>${result.warnings.map(message=>`<li>${targetEsc(message)}</li>`).join('')}</ul>`:'<p>現在の在庫と照合できた品目は連携済みで読み込みます。</p>';
-  preview.hidden=false;preview.scrollIntoView({block:'nearest'});document.getElementById('targetExcelImportApply').focus();
+  toggleDataMenu(false);preview.hidden=false;const dialog=document.getElementById('targetExcelImportDialog');if(!dialog.open)dialog.showModal();syncModalState();preview.scrollIntoView({block:'nearest'});document.getElementById('targetExcelImportApply').focus();
 }
 async function importBrewTargetWorkbookFile(file){
-  const error=document.getElementById('targetSheetError');error.textContent='';pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;
+  targetExcelMenuStatus('Excelファイルを確認しています。');pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;
   try{if(!file)return;if(file.size>5*1024*1024)throw Error('Excelファイルは5MB以内にしてください。');const result=BrewTargetWorkbook.parseWorkbook(await file.arrayBuffer(),inventory);renderBrewTargetImportPreview(result);}
-  catch(e){error.textContent=`Excelを読み込めませんでした。${e.message}`;error.focus();}
+  catch(e){targetExcelMenuStatus(`Excelを読み込めませんでした。${e.message}`,true);}
 }
-function cancelBrewTargetImport(){pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;document.getElementById('targetExcelImport').focus();}
+function cancelBrewTargetImport(){pendingBrewTargetImport=null;document.getElementById('targetExcelImportPreview').hidden=true;const dialog=document.getElementById('targetExcelImportDialog');if(dialog.open)dialog.close();syncModalState();toggleDataMenu(true);document.getElementById('targetExcelImport').focus();}
 function applyBrewTargetImport(){
-  if(!pendingBrewTargetImport)return;const imported=JSON.parse(JSON.stringify(pendingBrewTargetImport.batch));pendingBrewTargetImport=null;targetSheetDirty=false;targetSheetFocus=null;if(document.getElementById('targetSheetDialog').open)document.getElementById('targetSheetDialog').close();
+  if(!pendingBrewTargetImport)return;const imported=JSON.parse(JSON.stringify(pendingBrewTargetImport.batch));pendingBrewTargetImport=null;targetSheetDirty=false;targetSheetFocus=null;const importDialog=document.getElementById('targetExcelImportDialog');if(importDialog.open)importDialog.close();if(document.getElementById('targetSheetDialog').open)document.getElementById('targetSheetDialog').close();syncModalState();
   openNewForm();populateFormFields(imported);renderFormInvDeductArea(null);markEditorDirty();document.getElementById('targetPlanStatus').textContent='Excelから新しい仕込み計画を読み込みました。内容を確認して保存してください。';showView('form',false);document.getElementById('targetSheetTitle').focus({preventScroll:true});
 }
 async function saveBrewTargetSheet(event){
@@ -363,7 +377,7 @@ function updateTargetSheetTotals(){
   updateTargetMineralSummary();
 }
 document.addEventListener('DOMContentLoaded',()=>{
-  const dialog=document.getElementById('targetSheetDialog'),body=document.getElementById('targetSheetBody');
+  const dialog=document.getElementById('targetSheetDialog'),importDialog=document.getElementById('targetExcelImportDialog'),body=document.getElementById('targetSheetBody');
   document.getElementById('targetSheetForm').addEventListener('submit',saveBrewTargetSheet);
   document.getElementById('targetExcelExport').addEventListener('click',exportBrewTargetWorkbook);
   document.getElementById('targetExcelImport').addEventListener('click',()=>document.getElementById('targetExcelFile').click());
@@ -373,6 +387,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',e=>{const button=e.target.closest('[data-view-brew-targets]');if(button)openBrewTargetSheet(button.dataset.viewBrewTargets);});
   dialog.addEventListener('cancel',e=>{e.preventDefault();closeBrewTargetSheet();});
   dialog.addEventListener('close',()=>{syncModalState();targetSheetFocus?.focus();});
+  importDialog.addEventListener('cancel',e=>{e.preventDefault();cancelBrewTargetImport();});
   body.addEventListener('input',e=>{targetSheetDirty=true;if(e.target.id==='target-bound-style')updateTargetStyleReference();if(e.target.id==='target-bound-yeast'){const linked=document.getElementById('targetYeastInventory'),item=inventory.find(i=>i.id===linked?.value);if(item&&item.name!==e.target.value)linked.value='';}updateTargetSheetTotals();});
   body.addEventListener('change',e=>{
     targetSheetDirty=true;const select=e.target;if(select.matches('[data-target-choice]')){syncTargetChoice(select,true);if(select.dataset.targetChoice==='style')updateTargetStyleReference();}if(select.id==='targetYeastInventory'&&select.value){const item=inventory.find(i=>i.id===select.value);if(item)setTargetChoiceValue('yeast',item.name);}if(select.id==='targetDoubleBrew'&&!select.checked){const second=[...body.querySelectorAll('[data-meta=batch2],[data-extra=mashWater2],[data-extra=spargeWater2]')].filter(i=>i.value!=='');if(second.length&&!confirm('仕込み2回目に入力済みの値があります。値を消して1回仕込みへ戻しますか？')){select.checked=true;}else second.forEach(i=>i.value='');updateSecondBrewView();}else if(select.id==='targetDoubleBrew')updateSecondBrewView();if(select.matches('[data-row=invId]')&&select.value){const item=inventory.find(i=>i.id===select.value),tr=select.closest('tr');if(item)tr.querySelector('[data-row=name]').value=item.name;}

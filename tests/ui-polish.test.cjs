@@ -13,15 +13,17 @@ test('unsaved status appears on edit, survives navigation and clears on form res
   c.resetEditorState();assert.equal(els.editorStatus.hidden,true);assert.equal(vm.runInContext('uiFormDirty',c),false);
   c.markEditorDirty();c.confirm=()=>true;c.cancelFromEditor();assert.equal(els.editorStatus.hidden,true);
 });
-test('form uses the inline plan footer actions and no separate toolbar',()=>{
+test('form uses inline save actions while Excel transfer lives in the hamburger menu',()=>{
   const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),form=html.slice(html.indexOf('<div id="viewForm"'),html.indexOf('<div id="viewDetail"'));
   assert.ok(!html.includes('editorToolbar'));assert.ok(!form.includes('editor-toolbar'));
   assert.ok(form.includes('id="targetSheetInline"'));
   assert.equal((form.match(/onclick="saveFromEditor\(\)"/g)||[]).length,0);
   assert.ok(html.includes('id="targetSheetCancel" onclick="cancelBrewTargetSheet()"'));
   assert.ok(html.includes('id="targetSheetApply">保存'));
-  assert.ok(html.indexOf('class="target-excel-toolbar"')>html.indexOf('id="targetSheetBody"'));
-  assert.ok(html.indexOf('class="target-excel-toolbar"')<html.indexOf('class="target-sheet-footer"'));
+  assert.ok(!html.includes('class="target-excel-toolbar"'));
+  assert.ok(html.includes('id="menuBrewExcelTitle">仕込み計画（Excel）'));
+  assert.ok(html.indexOf('id="targetExcelExport"')<html.indexOf('id="targetSheetDialog"'));
+  assert.ok(html.includes('id="targetExcelImportDialog"'));
   assert.match(form,/id="editorStatus" role="status" hidden><\/p>/);
   assert.match(html,/function resetForm\(\)\{\s*resetEditorState\(\)/);
 });

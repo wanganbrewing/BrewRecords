@@ -1,14 +1,14 @@
-const CACHE_NAME = 'fermenters-ledger-v95';
+const CACHE_NAME = 'fermenters-ledger-v96';
 const APP_SHELL = ['./', './index.html', './demo.html', './help.html', './manifest.webmanifest', './app-icon.svg', './supabase-config.js', './cloud-sync.js'];
-APP_SHELL.push('./ui-polish.css?v=95','./ui-polish.js?v=95');
+APP_SHELL.push('./ui-polish.css?v=96','./ui-polish.js?v=96');
 
-APP_SHELL.push('./supabase-config.js?v=95', './cloud-sync.js?v=95', './help.html?embedded=1&v=95');
-APP_SHELL.push('./inventory-costing.js?v=95','./inventory-valuation-ui.js?v=95');
-APP_SHELL.push('./batch-expenses.js?v=95','./batch-expenses-ui.js?v=95');
-APP_SHELL.push('./cost-catalog.js?v=95','./cost-catalog-ui.js?v=95');
-APP_SHELL.push('./process-measurements.js?v=95','./process-measurements-ui.js?v=95');
-APP_SHELL.push('./display-controls.js?v=95');
-APP_SHELL.push('./beer-style-guide.js?v=95','./brew-targets.js?v=95','./brew-targets-ui.js?v=95','./brew-targets.css?v=95','./xlsx.full.min.js?v=95','./brew-targets-xlsx.js?v=95');
+APP_SHELL.push('./supabase-config.js?v=96', './cloud-sync.js?v=96', './help.html?embedded=1&v=96');
+APP_SHELL.push('./inventory-costing.js?v=96','./inventory-valuation-ui.js?v=96');
+APP_SHELL.push('./batch-expenses.js?v=96','./batch-expenses-ui.js?v=96');
+APP_SHELL.push('./cost-catalog.js?v=96','./cost-catalog-ui.js?v=96');
+APP_SHELL.push('./process-measurements.js?v=96','./process-measurements-ui.js?v=96');
+APP_SHELL.push('./display-controls.js?v=96');
+APP_SHELL.push('./beer-style-guide.js?v=96','./brew-targets.js?v=96','./brew-targets-ui.js?v=96','./brew-targets.css?v=96','./xlsx.full.min.js?v=96','./brew-targets-xlsx.js?v=96');
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
