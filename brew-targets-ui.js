@@ -45,7 +45,8 @@ function targetControl(attrs,value,type='text'){
 function targetField(def,value,scope='extra'){
   const [key,label,type,unit]=def,id=`target-${scope}-${key}`;
   const second=scope==='extra'&&['mashWater2','spargeWater2'].includes(key)?' data-second-brew':'';
-  return `<div class="target-field"${second}><label for="${id}">${targetEsc(label)}${unit?'（'+targetEsc(unit)+'）':''}</label>${targetControl(`id="${id}" data-${scope}="${key}"`,value,type)}</div>`;
+  const list=key==='brewer'?' list="brewerList"':'';
+  return `<div class="target-field"${second}><label for="${id}">${targetEsc(label)}${unit?'（'+targetEsc(unit)+'）':''}</label>${targetControl(`id="${id}" data-${scope}="${key}"${list}`,value,type)}</div>`;
 }
 function targetBound(key,b){return targetField(TARGET_BINDINGS.find(x=>x[0]===key),b[key]??'','bound');}
 function targetSelectBound(key,label,value,options){const id=`target-bound-${key}`;return `<div class="target-field"><label for="${id}">${targetEsc(label)}</label><select id="${id}" data-bound="${key}">${options.map(([v,t])=>`<option value="${targetEsc(v)}" ${v===(value??'')?'selected':''}>${targetEsc(t)}</option>`).join('')}</select></div>`;}
@@ -58,7 +59,12 @@ function targetChoiceField(key,label,value,choices,scope='bound',type='text'){
 function targetStyleField(b){return `<div class="target-style-controls">${targetChoiceField('style','スタイル名',b.style||'',(globalThis.BEER_STYLE_GUIDE||[]).map(style=>style.name))}</div><div class="style-reference" id="targetStyleReference" aria-live="polite"></div>`;}
 function targetYeastField(b){return targetChoiceField('yeast','酵母',b.yeast||'',TARGET_YEAST_CHOICES);}
 function targetTaxField(b){return targetSelectBound('taxCategory','酒税法上の品目区分',b.taxCategory||'',[['','選択してください'],...TARGET_TAX_CHOICES.map(value=>[value,value])]);}
-function targetTankField(p){return targetChoiceField('tank','使用予定タンク',p.fields.tank||'',TARGET_TANK_CHOICES,'extra');}
+function targetTankChoices(){
+  if(typeof visibleConfiguredTanks==='function')return visibleConfiguredTanks().map(tank=>tank.name);
+  if(typeof appSettings!=='undefined'&&typeof AppSettings!=='undefined')return AppSettings.tankNames(appSettings);
+  return TARGET_TANK_CHOICES;
+}
+function targetTankField(p){return targetChoiceField('tank','使用予定タンク',p.fields.tank||'',targetTankChoices(),'extra');}
 function targetSrmField(p){return targetChoiceField('targetSRM','目標SRM',p.fields.targetSRM??'',TARGET_SRM_CHOICES,'extra','number');}
 function computedAbv(og,fg){const start=Number(og),finish=Number(fg);return Number.isFinite(start)&&Number.isFinite(finish)&&start>=1&&finish>=1&&start>=finish?((start-finish)*131.25).toFixed(1):'';}
 function targetAbvField(p){return `<div class="target-field"><label for="target-extra-targetABV">目標ABV（%・自動計算）</label>${targetControl('id="target-extra-targetABV" data-extra="targetABV" readonly aria-readonly="true"',p.fields.targetABV??'','number')}<small class="target-inline-note">目標OGと目標FGから自動計算します。</small></div>`;}
@@ -78,6 +84,11 @@ function targetYeastInventoryField(b){
 function targetYeastSourceField(p){return targetChoiceField('yeastSource','酵母の由来',p.fields.yeastSource||'',TARGET_YEAST_SOURCES,'extra');}
 function suggestedBatchNumber(){
   const history=(typeof batches==='undefined'?[]:batches).map(batch=>({value:String(batch?.brewTargets?.fields?.batchNumber||'').trim(),date:batch?.brewDate||''})).filter(item=>item.value).sort((a,b)=>b.date.localeCompare(a.date));
+  if(typeof appSettings!=='undefined'&&appSettings.updatedAt){
+    const settings=AppSettings.normalize(appSettings),escaped=settings.batchPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),pattern=new RegExp(`^${escaped}(\\d+)$`);
+    const numbers=history.map(item=>Number(item.value.match(pattern)?.[1])).filter(Number.isFinite),next=(numbers.length?Math.max(...numbers):0)+1;
+    return settings.batchPrefix+String(next).padStart(settings.batchDigits,'0');
+  }
   const latest=history[0]?.value||'',match=latest.match(/^(.*?)(\d+)$/);
   if(match)return match[1]+String(Number(match[2])+1).padStart(match[2].length,'0');
   const numbers=history.map(item=>Number(item.value.match(/(\d+)$/)?.[1])).filter(Number.isFinite);
@@ -183,7 +194,7 @@ function renderBrewTargetSheet(b){
   targetClearUndo=null;
   const p=BrewTargets.waterPlan(b.brewTargets,b.waterVolume);
   const extra=keys=>`<div class="target-field-grid">${keys.map(k=>targetExtra(k,p)).join('')}</div>`;
-  const identities=targetSection('基本・設備',`<div class="target-field-grid">${['brewDate','brewer','batchSize'].map(k=>targetBound(k,b)).join('')}${targetTaxField(b)}${targetTankField(p)}${targetBatchNumberField(p)}${targetExtra('tradeName',p)}${targetExtra('productName',p)}</div><p class="target-note">酒税法上の品目区分は帳簿・課税移出CSVにも使用します。発酵タンクはFV1〜FV8から選ぶか、自由入力できます。</p>`);
+  const identities=targetSection('基本・設備',`<div class="target-field-grid">${['brewDate','brewer','batchSize'].map(k=>targetBound(k,b)).join('')}${targetTaxField(b)}${targetTankField(p)}${targetBatchNumberField(p)}${targetExtra('tradeName',p)}${targetExtra('productName',p)}</div><p class="target-note">酒税法上の品目区分は帳簿・課税移出CSVにも使用します。発酵タンクと担当者の候補は、☰メニューの「初期設定」で変更できます。</p>`);
   const water=targetSection('水量',`<div class="target-field-grid">${['mashWater1','mashWater2','spargeWater1','spargeWater2'].map(k=>targetSplitWaterField(k,p)).join('')}</div><p class="target-water-summary"><output id="target-water-total"></output></p>`);
   const yeast=targetYeastSection(b,p);
   const actualAbv=computedAbv(b.actualOG,b.fg);

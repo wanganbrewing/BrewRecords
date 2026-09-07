@@ -134,7 +134,7 @@ test('unified plan exposes the requested current fields and omits retired input 
   assert.ok(ui.includes("'targetSRM'"));
   for(const key of ['batchIcon','waterSource','waterPh','waterAlkalinity','targetWaterPh','phAcidType','sCa','sMg','sNa','sCl','sSO4','sHCO3'])assert.doesNotMatch(ui,new RegExp("\\['"+key+"',"));
   assert.doesNotMatch(ui,/cellDensity|細胞密度/);
-  for(const text of ['スタイル・目標・実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','FV1〜FV8','目標IBU（自動計算）'])assert.ok(ui.includes(text));
+  for(const text of ['スタイル・目標・実績','スタイルを選ぶと参考値を表示します','酵母の使用量はgで入力します','この工程の実績を入力','酒税法上の品目区分','初期設定','目標IBU（自動計算）'])assert.ok(ui.includes(text));
   for(const text of ['原水とpH調整','酸の添加量を計算','水質調整剤の予定量'])assert.ok(!ui.includes(text));
   assert.ok(html.includes('id="targetSheetInline" class="target-sheet-inline"'));
   assert.ok(html.includes('class="form-batch-name brew-batch-visible"'));

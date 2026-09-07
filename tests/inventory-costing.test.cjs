@@ -1,6 +1,7 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const path=require('node:path');
 const engine=require('../inventory-costing.js');
 const FermentationTanks=require('../fermentation-tanks.js');
+const AppSettings=require('../app-settings.js');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const ui=fs.readFileSync(path.join(__dirname,'../inventory-valuation-ui.js'),'utf8');
 const receipt=(id,date,amount,price)=>({id,date,amount,price});
 const item=()=>({id:'i',name:'Malt',category:'fermentable',unit:'kg',receipts:[receipt('r1','2026-08-01',10,1000),receipt('r2','2026-08-20',10,2000)],consumptions:[{id:'c1',date:'2026-08-10',amount:5,batchId:'b'},{id:'c2',date:'2026-08-25',amount:3,batchId:'b2'}],adjustments:[]});
@@ -54,9 +55,9 @@ test('immutable monthly archive survives older cloud clients and merges without 
 });
 function harness(){
   const fields=new Map(),writes=[];let seq=0;
-  const c=vm.createContext({console,Date,InventoryCosting:engine,FermentationTanks,uid:()=>`report-${++seq}`,todayDateValue:()=> '2026-09-03',escapeHtml:s=>String(s??''),inventoryMetaHtml:()=>'',maybeAutoBackup(){},confirmDataAction:async()=>true,
+  const c=vm.createContext({console,Date,InventoryCosting:engine,FermentationTanks,AppSettings,ensureConfiguredTankBook:book=>book,renderConfiguredStaffOptions(){},uid:()=>`report-${++seq}`,todayDateValue:()=> '2026-09-03',escapeHtml:s=>String(s??''),inventoryMetaHtml:()=>'',maybeAutoBackup(){},confirmDataAction:async()=>true,
     $:id=>{if(!fields.has(id))fields.set(id,{value:'',open:false});return fields.get(id);},window:{storage:{async set(k,v){writes.push([k,v]);}},fermentCloudSync:{queueSave(){}}}});
-  c.seed=[item()];vm.runInContext('let inventory=seed,batches=[],valuationBook={reports:[],autoEnabled:false,startMonth:""},fermentationTankBook=FermentationTanks.defaultBook(),valuationBusy=false,valuationShown=null,valuationReadError="";',c);
+  c.seed=[item()];vm.runInContext('let inventory=seed,batches=[],valuationBook={reports:[],autoEnabled:false,startMonth:""},appSettings=AppSettings.normalize(),fermentationTankBook=FermentationTanks.defaultBook(),valuationBusy=false,valuationShown=null,valuationReadError="";',c);
   vm.runInContext('window.fermentCloudData={getSnapshot(){return JSON.parse(JSON.stringify({batches,inventory,valuationBook}));}};',c);vm.runInContext(ui,c);
   c.run=s=>vm.runInContext(s,c);c.read=()=>c.window.fermentCloudData.getSnapshot();c.writes=writes;
   c.$('valuationMonth').value='2026-08';c.$('valuationReason').value='UAT';c.renderValuation();return c;

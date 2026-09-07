@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');
-const C=require('../cost-catalog.js'),E=require('../batch-expenses.js'),T=require('../fermentation-tanks.js');
+const C=require('../cost-catalog.js'),E=require('../batch-expenses.js'),T=require('../fermentation-tanks.js'),A=require('../app-settings.js');
 const item=(over={})=>({id:'s',name:'殺菌剤A',category:'sanitizer',unit:'L',rate:2000,note:'税込の参考',...over});
 const book=()=>C.revise(null,item(),'初回','now','h');
 test('catalog validates prices, precision and units, blank is not free',()=>{
@@ -31,7 +31,7 @@ test('backup merge preserves existing prices with same IDs and adds missing item
   const merged=C.merge(a,b);assert.equal(merged.items.length,2);assert.equal(merged.items[0].rate,2000);assert.equal(merged.history.length,2);assert.deepEqual(C.normalize(JSON.parse(JSON.stringify(merged))),merged);
 });
 function harness(){
-  const fields=new Map(),writes=[];const c=vm.createContext({CostCatalog:C,BatchExpenses:E,FermentationTanks:T,console,Date,uid:()=> 'uid',todayDateValue:()=> '2026-09-03',escapeHtml:s=>String(s??'').replaceAll('<','&lt;'),maybeAutoBackup(){},confirmDataAction:async()=>true,
+  const fields=new Map(),writes=[];const c=vm.createContext({CostCatalog:C,BatchExpenses:E,FermentationTanks:T,AppSettings:A,ensureConfiguredTankBook:book=>book,renderConfiguredStaffOptions(){},console,Date,uid:()=> 'uid',todayDateValue:()=> '2026-09-03',escapeHtml:s=>String(s??'').replaceAll('<','&lt;'),maybeAutoBackup(){},confirmDataAction:async()=>true,
     $:id=>{if(!fields.has(id))fields.set(id,{value:'',checked:false,close(){}});return fields.get(id);},document:{addEventListener(){}},window:{storage:{async set(k,v){writes.push([k,v]);}},fermentCloudSync:{queueSave(){}}}});
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../cost-catalog-ui.js'),'utf8'),c);
   c.run=s=>vm.runInContext(s,c);c.run('window.fermentCloudData={getSnapshot(){return {batches:[],inventory:[],costCatalog:catalogSnapshot()};}}');c.read=()=>c.window.fermentCloudData.getSnapshot();c.writes=writes;
@@ -47,7 +47,7 @@ test('catalog save, cancellation, stale confirmation, storage failure and double
 });
 test('real cloud adapter retains catalog omitted by old clients and validates incoming catalogs',async()=>{
   const c=harness();await c.saveCatalogEditor();c.InventoryCosting=require('../inventory-costing.js');c.renderGauge=()=>{};c.renderList=()=>{};c.renderInventory=()=>{};c.refreshValuationControls=()=>{};c.renderValuation=()=>{};
-  c.run('let batches=[],inventory=[],valuationBook={reports:[],autoEnabled:false,startMonth:""},fermentationTankBook=FermentationTanks.defaultBook(),valuationReadError="",valuationShown=null;');
+  c.run('let batches=[],inventory=[],valuationBook={reports:[],autoEnabled:false,startMonth:""},appSettings=AppSettings.normalize(),fermentationTankBook=FermentationTanks.defaultBook(),valuationReadError="",valuationShown=null;');
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),start=html.indexOf('window.fermentCloudData = {'),end=html.indexOf('\n};',start)+3;vm.runInContext(html.slice(start,end),c);
   const prepared=c.window.fermentCloudData.prepareRemoteSnapshot({batches:[],inventory:[]});assert.equal(prepared.needsSave,true);assert.equal(prepared.payload.costCatalog.items[0].rate,2000);
   await c.window.fermentCloudData.applySnapshot(prepared.payload);assert.equal(c.read().costCatalog.items[0].rate,2000);
